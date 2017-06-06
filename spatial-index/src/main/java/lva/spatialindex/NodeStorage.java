@@ -5,8 +5,6 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 
 /**
  * @author vlitvinenko
@@ -17,13 +15,13 @@ class NodeStorage extends AbstractStorage<Node> {
 
     private class NodeSerializer implements Serializer<Node> {
         @Override
-        public byte[] serialize(Node node) throws IOException {
+        public byte[] serialize(Node node) {
             return node.serialize();
         }
 
         @Override
-        public Node deserialize(byte[] bytes) throws IOException {
-            return new Node(NodeStorage.this, -1)
+        public Node deserialize(byte[] bytes) {
+            return Node.newNode(NodeStorage.this)
                 .deserialize(bytes);
         }
     };
@@ -31,7 +29,7 @@ class NodeStorage extends AbstractStorage<Node> {
     private final NodeSerializer serializer;
     private final LoadingCache<Long, Node> cache;
 
-    public NodeStorage(String fileName, long initialSize) throws Exception {
+    public NodeStorage(String fileName, long initialSize) {
         super(fileName, initialSize, RECORD_SIZE);
         serializer = new NodeSerializer();
         cache = CacheBuilder.newBuilder()
@@ -41,7 +39,7 @@ class NodeStorage extends AbstractStorage<Node> {
             .build(
                 new CacheLoader<Long, Node>() {
                     @Override
-                    public Node load(@Nonnull Long offset) throws Exception {
+                    public Node load(@Nonnull Long offset) {
                         return read(offset);
                     }
                 });
@@ -53,7 +51,7 @@ class NodeStorage extends AbstractStorage<Node> {
     }
 
     @Override
-    public long add(Node node) throws Exception {
+    public long add(Node node) {
         long offset = super.add(node);
         node.setOffset(offset);
         cache.put(offset, node);
@@ -61,20 +59,14 @@ class NodeStorage extends AbstractStorage<Node> {
     }
 
     @Override
-    public Node read(long offset) throws Exception {
+    public Node read(long offset) {
         Node node = super.read(offset);
         node.setOffset(offset);
         return node;
     }
 
     @Override
-    public Node get(long offset) throws ExecutionException {
-        return cache.get(offset);
-    }
-
-    public Node newNode() throws Exception {
-        Node node = new Node(this, -1);
-        add(node);
-        return node;
+    public Node get(long offset) {
+        return cache.getUnchecked(offset);
     }
 }

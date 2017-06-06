@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.nio.channels.FileChannel;
 import java.util.function.Function;
 
+
 /**
  * @author vlitvinenko
  */
@@ -21,10 +22,10 @@ public class MemoryMappedFile implements AutoCloseable, Buffer {
     private static final Method unmmap;
     private static final int BYTE_ARRAY_OFFSET;
 
+    // TODO: think about
     volatile long addr, capacity;
     volatile long size;
     private final String loc;
-
 
 
     static {
@@ -42,98 +43,6 @@ public class MemoryMappedFile implements AutoCloseable, Buffer {
         }
     }
 
-    // TODO: think about to use stream
-    public static class DirectArray implements AutoCloseable {
-        // bounds are not checked for performance reasons
-        private final long startIndex;
-        private final long size;
-
-        public DirectArray(long size) {
-            startIndex = unsafe.allocateMemory(size);
-            // unsafe.setMemory(startIndex, size, (byte)0);
-            this.size = size;
-        }
-
-
-        public DirectArray(byte[] buff) {
-            startIndex = unsafe.allocateMemory(buff.length);
-            unsafe.copyMemory(buff, BYTE_ARRAY_OFFSET, null, startIndex, buff.length);
-            this.size = buff.length;
-        }
-
-
-        public void putInt(long index, int value) {
-            unsafe.putInt(index(index), value);
-        }
-
-        public int getInt(long index) {
-            return unsafe.getInt(index(index));
-        }
-
-        public void putLong(long index, long value) {
-            unsafe.putLong(index(index), value);
-        }
-
-        public long getLong(long index) {
-            return unsafe.getLong(index(index));
-        }
-
-        private long index(long offset) {
-            return startIndex + offset;
-        }
-
-        @Override
-        public void close() throws Exception {
-            unsafe.freeMemory(startIndex);
-        }
-
-        public long getAddr() {
-            return startIndex;
-        }
-
-        public long getSize() {
-            return size;
-        }
-    }
-
-    public static class DirectOutputStream {
-        private final DirectArray buff;
-        int pos = 0;
-        public DirectOutputStream(DirectArray buff) {
-            this.buff = buff;
-        }
-
-        public void writeInt(int value) {
-            buff.putInt(pos, value);
-            pos += 4;
-        }
-
-        public void writeLong(long value) {
-            buff.putLong(pos, value);
-            pos += 8;
-        }
-    }
-
-    public static class DirectInputStream {
-        private final DirectArray buff;
-        int pos = 0;
-        public DirectInputStream(DirectArray buff) {
-            this.buff = buff;
-        }
-
-        public int readInt() {
-            int value = buff.getInt(pos);
-            pos += 4;
-            return value;
-        }
-
-        public long readLong() {
-            long value = buff.getLong(pos);
-            pos += 8;
-            return value;
-        }
-    }
-
     //Bundle reflection calls to get access to the given method
     private static Method getMethod(Class<?> cls, String name, Class<?>... params) throws Exception {
         Method m = cls.getDeclaredMethod(name, params);
@@ -146,17 +55,19 @@ public class MemoryMappedFile implements AutoCloseable, Buffer {
         return (i + 0xfffL) & ~0xfffL;
     }
 
-    private void mapAndSetOffset() throws Exception {
-        // TODO: hold the files
-        try (RandomAccessFile backingFile = new RandomAccessFile(this.loc, "rw")) {
-            backingFile.setLength(this.capacity);
-            try (FileChannel ch = backingFile.getChannel()) {
-                this.addr = (long) mmap.invoke(ch, 1, 0L, this.capacity);
+    private void mapAndSetOffset() {
+        Exceptions.runtime(() -> {
+            // TODO: hold the files
+            try (RandomAccessFile backingFile = new RandomAccessFile(this.loc, "rw")) {
+                backingFile.setLength(this.capacity);
+                try (FileChannel ch = backingFile.getChannel()) {
+                    this.addr = (long) mmap.invoke(ch, 1, 0L, this.capacity);
+                }
             }
-        }
+        });
     }
 
-    public MemoryMappedFile(String loc, long len) throws Exception {
+    public MemoryMappedFile(String loc, long len) {
         this.loc = loc;
         this.capacity = roundTo4096(len);
         mapAndSetOffset();
@@ -164,15 +75,20 @@ public class MemoryMappedFile implements AutoCloseable, Buffer {
 
     //Callers should synchronize to avoid calls in the middle of this, but
     //it is undesirable to synchronize w/ all access methods.
-    private void remap(long nLen) throws Exception {
-        unmmap.invoke(null, addr, this.capacity);
-        this.capacity = roundTo4096(nLen);
-        mapAndSetOffset();
+    private void remap(long nLen) {
+        Exceptions.runtime(() -> {
+            unmmap.invoke(null, addr, this.capacity);
+            this.capacity = roundTo4096(nLen);
+            mapAndSetOffset();
+        });
     }
 
     @Override
-    public void close() throws Exception {
-        unmmap.invoke(null, addr, this.capacity);
+    public void close() {
+        Exceptions.runtime(() -> {
+            unmmap.invoke(null, addr, this.capacity);
+            return null;
+        });
     }
 
     //May want to have offset & length within data as well, for both of these
@@ -180,41 +96,17 @@ public class MemoryMappedFile implements AutoCloseable, Buffer {
         unsafe.copyMemory(null, pos + addr, data, BYTE_ARRAY_OFFSET, data.length);
     }
 
-    public void setBytes(long pos, byte[] data){
+    public void setBytes(long pos, byte[] data) {
         unsafe.copyMemory(data, BYTE_ARRAY_OFFSET, null, pos + addr, data.length);
     }
 
-    public void setArray(long pos, DirectArray array){
-        unsafe.copyMemory(array.getAddr(), pos + addr, array.getSize());
-    }
-
-    public DirectArray getArray(long pos, long size) {
-        DirectArray array = new DirectArray(size);
-        unsafe.copyMemory(pos + addr, array.getAddr(), array.getSize());
-        return array;
-    }
-
-    public void getArray(long pos, DirectArray array) {
-        unsafe.copyMemory(pos + addr, array.getAddr(), array.getSize());
-    }
-
     @Override
-    public long allocate(long sizeOf) throws Exception {
-//        long sizeOfRounded = roundTo4096(sizeOf);
-//        long offset = size;
-//
-//        while (offset + sizeOfRounded > capacity)  {
-//            remap(capacity * 2);
-//        }
-//
-//        size += sizeOfRounded;
-//        return offset;
+    public long allocate(long sizeOf) {
         return allocate(sizeOf, MemoryMappedFile::roundTo4096);
     }
 
 
-
-    public long allocate(long sizeOf, Function<Long, Long> roundBoundaryFunc) throws Exception {
+    public long allocate(long sizeOf, Function<Long, Long> roundBoundaryFunc) {
         long sizeOfRounded = roundBoundaryFunc.apply(sizeOf);
         long offset = size;
 

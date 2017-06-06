@@ -1,7 +1,10 @@
 package lva.spatialindex;
 
 import java.awt.*;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,16 +13,22 @@ import java.util.List;
  * @author vlitvinenko
  */
 class Node {
-    private final NodeStorage storage;
+    private final Storage<Node> storage;
     private long offset; // 0 ... n
     private long parentOffset = -1;
 
     private Rectangle mbr = null;
     private final List<Entry> entries = new ArrayList<>();
 
-    public Node(NodeStorage storage, long offset) {
+    private Node(Storage<Node> storage, long offset) {
         this.storage = storage; // TODO: rename to buffer
         this.offset = offset;
+    }
+
+    public static Node newNode(NodeStorage storage) {
+        Node node = new Node(storage, -1);
+        storage.add(node);
+        return node;
     }
 
     public Node save() throws Exception {
@@ -27,81 +36,51 @@ class Node {
         return this;
     }
 
-    byte[] serialize() throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream os = new DataOutputStream(baos);
+    byte[] serialize() {
+        return Exceptions.runtime(() -> {
 
-        os.writeLong(parentOffset);
-        os.writeInt(entries.size());
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            DataOutputStream os = new DataOutputStream(baos);
 
-        for (Entry entry: entries) {
-            os.writeInt(entry.mbr.x);
-            os.writeInt(entry.mbr.y);
-            os.writeInt(entry.mbr.width);
-            os.writeInt(entry.mbr.height);
-            os.writeLong(entry.childOffset);
-        }
+            os.writeLong(parentOffset);
+            os.writeInt(entries.size());
 
-        return baos.toByteArray();
+            for (Entry entry: entries) {
+                os.writeInt(entry.mbr.x);
+                os.writeInt(entry.mbr.y);
+                os.writeInt(entry.mbr.width);
+                os.writeInt(entry.mbr.height);
+                os.writeLong(entry.childOffset);
+            }
+
+            return baos.toByteArray();
+        });
     }
 
-//    DirectArray serialize() throws IOException {
-//        DirectArray buff = new DirectArray(SIZE);
-//        DirectOutputStream os = new DirectOutputStream(buff);
-//
-//        os.writeLong(parentOffset);
-//        os.writeInt(entries.size());
-//
-//        for (Entry entry: entries) {
-//            os.writeInt(entry.mbr.x);
-//            os.writeInt(entry.mbr.y);
-//            os.writeInt(entry.mbr.width);
-//            os.writeInt(entry.mbr.height);
-//            os.writeLong(entry.childOffset);
-//        }
-//
-//        return buff;
-//    }
 
-    Node deserialize(byte[] buff) throws IOException {
-        ByteArrayInputStream bais = new ByteArrayInputStream(buff);
-        DataInputStream is = new DataInputStream(bais);
+    Node deserialize(byte[] buff) {
+        return Exceptions.runtime(() -> {
 
-        parentOffset = is.readLong();
+            ByteArrayInputStream bais = new ByteArrayInputStream(buff);
+            DataInputStream is = new DataInputStream(bais);
 
-        int entriesSize = is.readInt();
-        entries.clear();
+            parentOffset = is.readLong();
 
-        for (int i = 0; i < entriesSize; i++) {
-            int x = is.readInt();
-            int y = is.readInt();
-            int width = is.readInt();
-            int height = is.readInt();
-            long childOffset = is.readLong();
-            entries.add(new Entry(storage, new Rectangle(x, y, width, height), childOffset));
-        }
+            int entriesSize = is.readInt();
+            entries.clear();
 
-        return this;
+            for (int i = 0; i < entriesSize; i++) {
+                int x = is.readInt();
+                int y = is.readInt();
+                int width = is.readInt();
+                int height = is.readInt();
+                long childOffset = is.readLong();
+                entries.add(new Entry(storage, new Rectangle(x, y, width, height), childOffset));
+            }
+
+            return this;
+        });
     }
-
-//    void deserialize(DirectArray buff) throws IOException {
-//        DirectInputStream is = new DirectInputStream(buff);
-//
-//        parentOffset = is.readLong();
-//
-//        int entriesSize = is.readInt();
-//        entries.clear();
-//
-//        for (int i = 0; i < entriesSize; i++) {
-//            int x = is.readInt();
-//            int y = is.readInt();
-//            int width = is.readInt();
-//            int height = is.readInt();
-//            long childOffset = is.readLong();
-//            entries.add(new Entry(storage, new Rectangle(x, y, width, height), childOffset));
-//        }
-//
-//    }
 
     boolean isRoot() {
         return parentOffset == -1;

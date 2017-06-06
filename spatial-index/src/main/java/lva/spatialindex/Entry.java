@@ -14,11 +14,11 @@ class Entry {
 
     static int SIZE = SIZE_OF_X + SIZE_OF_Y + SIZE_OF_WIDTH + SIZE_OF_HEIGHT + SIZE_OF_CHILD;
 
-    private final NodeStorage storage;
+    private final Storage<Node> storage;
     final long childOffset;
     Rectangle mbr; // TODO: think about to make final
 
-    Entry(NodeStorage storage, Rectangle mbr, long childOffset) {
+    Entry(Storage<Node> storage, Rectangle mbr, long childOffset) {
         this.storage = storage;
         this.mbr = mbr;
         this.childOffset = childOffset;
@@ -28,17 +28,11 @@ class Entry {
         return childOffset >= 0 ? storage.get(childOffset) : null;
     }
 
-
-    @Override
-    public String toString() {
-        return mbr.toString() + ", mbr arra: " + (mbr.width * mbr.height) + ", offsetAbsolute: " + String.valueOf(childOffset);
-    }
-
     long getChildOffset() {
         return childOffset;
     }
 
-    static Entry of(NodeStorage storage, Rectangle mbr, long nodeOffset) {
+    static Entry of(Storage<Node> storage, Rectangle mbr, long nodeOffset) {
         return new Entry(storage, mbr, nodeOffset);
     }
 }
