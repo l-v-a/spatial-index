@@ -1,0 +1,11 @@
+*~
+*.iw
+*.ipr
+*.iml
+*/target/*
+*.class
+*/.idea/*
+*/.gradle/*
+*/build/*
+*/classes/*
+.DS_Store
