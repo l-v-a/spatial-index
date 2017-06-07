@@ -4,6 +4,8 @@ import lva.spatialindex.Storage;
 
 import java.awt.*;
 import java.util.Comparator;
+import java.util.List;
+
 
 /**
  * @author vlitvinenko
@@ -16,21 +18,17 @@ class Entry {
     private static final int SIZE_OF_CHILD = 8;
     static final int SIZE = SIZE_OF_X + SIZE_OF_Y + SIZE_OF_WIDTH + SIZE_OF_HEIGHT + SIZE_OF_CHILD;
 
-    static final Comparator<Entry> LEFT_TO_RIGHT_BY_LEFT_COMPARATOR = (e1, e2) -> {
-        return Integer.compare(e1.mbr.x, e2.mbr.x);
-    };
+    static final Comparator<Entry> LEFT_TO_RIGHT_BY_LEFT_COMPARATOR = (e1, e2) ->
+        Integer.compare(e1.mbr.x, e2.mbr.x);
 
-    static final Comparator<Entry> TOP_TO_BOTTOM_BOTTOM_COMPARATOR = (e1, e2) -> {
-        return Integer.compare(e1.mbr.y + e1.mbr.height, e2.mbr.y + e2.mbr.height);
-    };
+    static final Comparator<Entry> LEFT_TO_RIGHT_BY_RIGHT_COMPARATOR = (e1, e2) ->
+        Integer.compare(e1.mbr.x + e1.mbr.width, e2.mbr.x + e2.mbr.width);
 
-    static final Comparator<Entry> TOP_TO_BOTTOM_TOP_COMPARATOR = (e1, e2) -> {
-        return Integer.compare(e1.mbr.y, e2.mbr.y);
-    };
+    static final Comparator<Entry> TOP_TO_BOTTOM_BY_BOTTOM_COMPARATOR = (e1, e2) ->
+        Integer.compare(e1.mbr.y + e1.mbr.height, e2.mbr.y + e2.mbr.height);
 
-    static final Comparator<Entry> LEFT_TO_RIGHT_BY_RIGHT_COMPARATOR = (e1, e2) -> {
-        return Integer.compare(e1.mbr.x + e1.mbr.width, e2.mbr.x + e2.mbr.width);
-    };
+    static final Comparator<Entry> TOP_TO_BOTTOM_BY_TOP_COMPARATOR = (e1, e2) ->
+        Integer.compare(e1.mbr.y, e2.mbr.y);
 
 
     private final Storage<Node> storage;
@@ -52,7 +50,20 @@ class Entry {
         return childOffset;
     }
 
-    static Entry of(Storage<Node> storage, Rectangle mbr, long nodeOffset) {
-        return new Entry(storage, mbr, nodeOffset);
+    static Rectangle union(java.util.List<Entry> entries) { // TODO: use Collection or stream
+        Rectangle r = entries.isEmpty() ? new Rectangle() : entries.get(0).mbr;
+        for (Entry e: entries) {
+            r = r.union(e.mbr);
+        }
+        return r;
     }
+
+    static int margin(List<Entry> entries) {
+        int margin = 0;
+        for (Entry e: entries) {
+            margin += Rectangles.margin(e.mbr);
+        }
+        return margin;
+    }
+
 }

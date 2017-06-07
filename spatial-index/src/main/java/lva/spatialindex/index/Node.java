@@ -17,7 +17,7 @@ import java.util.List;
  */
 class Node {
     private final Storage<Node> storage;
-    private long offset; // 0 ... n
+    private long offset;
     private long parentOffset = -1;
 
     private Rectangle mbr = null;
@@ -28,13 +28,13 @@ class Node {
         this.offset = offset;
     }
 
-    public static Node newNode(Storage<Node> storage) {
+    static Node newNode(Storage<Node> storage) {
         Node node = new Node(storage, -1);
         storage.add(node);
         return node;
     }
 
-    public Node save() {
+    Node save() {
         storage.write(offset, this);
         return this;
     }
@@ -102,7 +102,7 @@ class Node {
             throw new IllegalStateException("entries overflow");
         }
 
-        entries.add(Entry.of(storage, node.getMbr(), node.getOffset()));
+        entries.add(new Entry(storage, node.getMbr(), node.getOffset()));
         // putEntry(Entry.of(buffer, node.getMbr(), node.getOffset()));
 
         node.parentOffset = offset;
