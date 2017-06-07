@@ -9,6 +9,7 @@ import java.util.concurrent.Callable;
  * @author vlitvinenko
  */
 public class Exceptions {
+    private Exceptions() {}
 
     @FunctionalInterface
     interface VoidCallable {
@@ -49,5 +50,4 @@ public class Exceptions {
 
         return new RuntimeException(exception);
     }
-
 }

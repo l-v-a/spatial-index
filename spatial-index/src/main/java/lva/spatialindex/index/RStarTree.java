@@ -13,9 +13,9 @@ import java.util.List;
  * @author vlitvinenko
  */
 public class RStarTree implements AutoCloseable {
-    public static int PAGE_SIZE = 4096; // TODO: calculate
-    public static int MAX_ENTRIES = PAGE_SIZE / Entry.SIZE - 1;
-    public static int MIN_ENTRIES = MAX_ENTRIES * 2 / 5;
+    static final int PAGE_SIZE = 4096; // TODO: calculate
+    static final int MAX_ENTRIES = PAGE_SIZE / Entry.SIZE - 1;
+    static final int MIN_ENTRIES = MAX_ENTRIES * 2 / 5;
 
 //    public static int MAX_ENTRIES = 30;
 //    public static int MIN_ENTRIES = MAX_ENTRIES * 2 / 5;
@@ -127,15 +127,15 @@ public class RStarTree implements AutoCloseable {
 
         // sort by x axis
         List<Entry> sort1ByX = new ArrayList<>(allEntries);
-        sort1ByX.sort(Helpers.LEFT_TO_RIGHT_BY_LEFT_COMPARATOR);
+        sort1ByX.sort(Entry.LEFT_TO_RIGHT_BY_LEFT_COMPARATOR);
         List<Entry> sort2ByX = new ArrayList<>(allEntries);
-        sort2ByX.sort(Helpers.LEFT_TO_RIGHT_BY_RIGHT_COMPARATOR);
+        sort2ByX.sort(Entry.LEFT_TO_RIGHT_BY_RIGHT_COMPARATOR);
 
         // sort by y axis
         List<Entry> sort1ByY = new ArrayList<>(allEntries);
-        sort1ByY.sort(Helpers.TOP_TO_BOTTOM_TOP_COMPARATOR);
+        sort1ByY.sort(Entry.TOP_TO_BOTTOM_TOP_COMPARATOR);
         List<Entry> sort2ByY = new ArrayList<>(allEntries);
-        sort2ByY.sort(Helpers.TOP_TO_BOTTOM_BOTTOM_COMPARATOR);
+        sort2ByY.sort(Entry.TOP_TO_BOTTOM_BOTTOM_COMPARATOR);
 
         List<Helpers.GroupPair> groups1X = Helpers.getDistributions(sort1ByX);
         List<Helpers.GroupPair> groups2X = Helpers.getDistributions(sort2ByX);
