@@ -4,8 +4,8 @@ package lva.spatialindex;
  * @author vlitvinenko
  */
 
-abstract class AbstractStorage<T> implements Storage<T>{
-    interface Serializer<T> {
+public abstract class AbstractStorage<T> implements Storage<T>{
+    protected interface Serializer<T> {
         byte[] serialize(T t);
         T deserialize(byte[] bytes);
     }
@@ -22,7 +22,7 @@ abstract class AbstractStorage<T> implements Storage<T>{
         this.recordSize = recordSize;
     }
 
-    abstract Serializer<T> getSerializer();
+    protected abstract Serializer<T> getSerializer();
 
     @Override
     public long add(T t) {

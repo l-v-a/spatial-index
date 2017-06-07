@@ -1,4 +1,6 @@
-package lva.spatialindex;
+package lva.spatialindex.index;
+
+import lva.spatialindex.Storage;
 
 import java.awt.*;
 

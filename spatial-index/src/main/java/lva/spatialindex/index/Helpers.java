@@ -1,4 +1,4 @@
-package lva.spatialindex;
+package lva.spatialindex.index;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -91,7 +91,5 @@ class Helpers {
         }
 
         return candidates;
-
     }
-
 }

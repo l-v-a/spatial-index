@@ -1,4 +1,6 @@
-package lva.spatialindex;
+package lva.spatialindex.index;
+
+import lva.spatialindex.Storage;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -6,11 +8,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import static lva.spatialindex.Helpers.*;
 
-
-
-// TODO: rename to IndexTree
 /**
  * @author vlitvinenko
  */
@@ -25,15 +23,14 @@ public class RStarTree implements AutoCloseable {
 //    public static int MAX_ENTRIES = 3;
 //    public static int MIN_ENTRIES = 1;
 
-    private NodeStorage storage;
+    private final Storage<Node> storage;
     private Node root;
 
 
-    RStarTree(int maxNumberOfElements, String storageFileName) {
+    public RStarTree(int maxNumberOfElements, String storageFileName) {
         long size = 64 * 1024L * 1024L; // TODO: make it as func (maxNumberOfElements)
         this.storage = new NodeStorage(storageFileName, size);
         this.root = Node.newNode(this.storage);
-
     }
 
     public Collection<Long> search(Rectangle area) {
@@ -94,23 +91,23 @@ public class RStarTree implements AutoCloseable {
             // points to leafs
 
             // min overlap cost
-            candidates = minList(node.getEntries(), e -> area(e.mbr.intersection(newMbr)));
+            candidates = Helpers.minList(node.getEntries(), e -> Helpers.area(e.mbr.intersection(newMbr)));
 
             // by min enlarged
-            candidates = minList(candidates, e -> area(e.mbr.union(newMbr)));
+            candidates = Helpers.minList(candidates, e -> Helpers.area(e.mbr.union(newMbr)));
 
             // by size
-            candidates = minList(candidates, e -> area(e.mbr));
+            candidates = Helpers.minList(candidates, e -> Helpers.area(e.mbr));
 
 
         } else {
             // not points to leaf
 
             // by min enlarged
-            candidates = minList(node.getEntries(), e -> area(e.mbr.union(newMbr)));
+            candidates = Helpers.minList(node.getEntries(), e -> Helpers.area(e.mbr.union(newMbr)));
 
             // by size
-            candidates = minList(candidates, e -> area(e.mbr));
+            candidates = Helpers.minList(candidates, e -> Helpers.area(e.mbr));
         }
 
         node = candidates.isEmpty() ? null : candidates.get(0).loadNode();
@@ -130,40 +127,40 @@ public class RStarTree implements AutoCloseable {
 
         // sort by x axis
         List<Entry> sort1ByX = new ArrayList<>(allEntries);
-        sort1ByX.sort(LEFT_TO_RIGHT_BY_LEFT_COMPARATOR);
+        sort1ByX.sort(Helpers.LEFT_TO_RIGHT_BY_LEFT_COMPARATOR);
         List<Entry> sort2ByX = new ArrayList<>(allEntries);
-        sort2ByX.sort(LEFT_TO_RIGHT_BY_RIGHT_COMPARATOR);
+        sort2ByX.sort(Helpers.LEFT_TO_RIGHT_BY_RIGHT_COMPARATOR);
 
         // sort by y axis
         List<Entry> sort1ByY = new ArrayList<>(allEntries);
-        sort1ByY.sort(TOP_TO_BOTTOM_TOP_COMPARATOR);
+        sort1ByY.sort(Helpers.TOP_TO_BOTTOM_TOP_COMPARATOR);
         List<Entry> sort2ByY = new ArrayList<>(allEntries);
-        sort2ByY.sort(TOP_TO_BOTTOM_BOTTOM_COMPARATOR);
+        sort2ByY.sort(Helpers.TOP_TO_BOTTOM_BOTTOM_COMPARATOR);
 
-        List<GroupPair> groups1X = getDistributions(sort1ByX);
-        List<GroupPair> groups2X = getDistributions(sort2ByX);
-        List<GroupPair> groups1Y = getDistributions(sort1ByY);
-        List<GroupPair> groups2Y = getDistributions(sort2ByY);
+        List<Helpers.GroupPair> groups1X = Helpers.getDistributions(sort1ByX);
+        List<Helpers.GroupPair> groups2X = Helpers.getDistributions(sort2ByX);
+        List<Helpers.GroupPair> groups1Y = Helpers.getDistributions(sort1ByY);
+        List<Helpers.GroupPair> groups2Y = Helpers.getDistributions(sort2ByY);
 
-        int marginX = marginGroups(groups1X) + marginGroups(groups2X);
-        int marginY = marginGroups(groups1Y) + marginGroups(groups2Y);
+        int marginX = Helpers.marginGroups(groups1X) + Helpers.marginGroups(groups2X);
+        int marginY = Helpers.marginGroups(groups1Y) + Helpers.marginGroups(groups2Y);
 
-        List<GroupPair> axisGroups = new ArrayList<>();
+        List<Helpers.GroupPair> axisGroups = new ArrayList<>();
         axisGroups.addAll(marginX < marginY ? groups1X : groups1Y);
         axisGroups.addAll(marginX < marginY ? groups2X : groups2Y);
 
 
         // find min overlapped values distribution
-        List<GroupPair> candidatesOverlapped = minList(axisGroups, g -> {
-            Rectangle gr1 = union(g.group1);
-            Rectangle gr2 = union(g.group2);
-            return area(gr1.intersection(gr2));
+        List<Helpers.GroupPair> candidatesOverlapped = Helpers.minList(axisGroups, g -> {
+            Rectangle gr1 = Helpers.union(g.group1);
+            Rectangle gr2 = Helpers.union(g.group2);
+            return Helpers.area(gr1.intersection(gr2));
         });
 
-        candidatesOverlapped = minList(candidatesOverlapped,
-            g -> area(union(g.group1)) + area(union(g.group2)));
+        candidatesOverlapped = Helpers.minList(candidatesOverlapped,
+            g -> Helpers.area(Helpers.union(g.group1)) + Helpers.area(Helpers.union(g.group2)));
 
-        GroupPair pair = candidatesOverlapped.isEmpty() ? new GroupPair()
+        Helpers.GroupPair pair = candidatesOverlapped.isEmpty() ? new Helpers.GroupPair()
             : candidatesOverlapped.get(0);
 
         node.setEntries(pair.group1);

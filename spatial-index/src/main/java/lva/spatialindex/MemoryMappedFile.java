@@ -21,9 +21,9 @@ public class MemoryMappedFile implements StorageSpace {
     private static final int BYTE_ARRAY_OFFSET;
 
     // TODO: think about
-    volatile long baseAddress;
-    volatile long capacity;
-    volatile long size;
+    private volatile long baseAddress;
+    private volatile long capacity;
+    private volatile long size;
 
     private final String filePath;
 

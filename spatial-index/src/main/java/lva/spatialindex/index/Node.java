@@ -1,4 +1,7 @@
-package lva.spatialindex;
+package lva.spatialindex.index;
+
+import lva.spatialindex.Exceptions;
+import lva.spatialindex.Storage;
 
 import java.awt.*;
 import java.io.ByteArrayInputStream;
@@ -25,7 +28,7 @@ class Node {
         this.offset = offset;
     }
 
-    public static Node newNode(NodeStorage storage) {
+    public static Node newNode(Storage<Node> storage) {
         Node node = new Node(storage, -1);
         storage.add(node);
         return node;

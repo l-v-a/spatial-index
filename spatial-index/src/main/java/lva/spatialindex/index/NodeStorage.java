@@ -1,8 +1,9 @@
-package lva.spatialindex;
+package lva.spatialindex.index;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import lva.spatialindex.AbstractStorage;
 
 import javax.annotation.Nonnull;
 
@@ -46,7 +47,7 @@ class NodeStorage extends AbstractStorage<Node> {
     }
 
     @Override
-    Serializer<Node> getSerializer() {
+    protected Serializer<Node> getSerializer() {
         return serializer;
     }
 
