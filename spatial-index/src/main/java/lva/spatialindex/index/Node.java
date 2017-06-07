@@ -3,13 +3,15 @@ package lva.spatialindex.index;
 import lva.spatialindex.Exceptions;
 import lva.spatialindex.Storage;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import static lva.spatialindex.index.Entry.union;
 
 
 /**
@@ -49,11 +51,13 @@ class Node {
             os.writeInt(entries.size());
 
             for (Entry entry: entries) {
-                os.writeInt(entry.mbr.x);
-                os.writeInt(entry.mbr.y);
-                os.writeInt(entry.mbr.width);
-                os.writeInt(entry.mbr.height);
-                os.writeLong(entry.childOffset);
+                Rectangle mbr = entry.getMbr();
+
+                os.writeInt(mbr.x);
+                os.writeInt(mbr.y);
+                os.writeInt(mbr.width);
+                os.writeInt(mbr.height);
+                os.writeLong(entry.getChildOffset());
             }
 
             return baos.toByteArray();
@@ -90,7 +94,7 @@ class Node {
     }
 
     boolean isLeaf() {
-        return entries.isEmpty() || entries.get(0).childOffset < 0;
+        return entries.isEmpty() || entries.get(0).getChildOffset()< 0;
     }
 
     boolean isFull() {
@@ -106,7 +110,7 @@ class Node {
         // putEntry(Entry.of(buffer, node.getMbr(), node.getOffset()));
 
         node.parentOffset = offset;
-        mbr = null;
+        resetMbr();
 
         node.save();
         save();
@@ -116,13 +120,9 @@ class Node {
 
     Rectangle getMbr() {
         if (mbr == null) {
-
-            mbr = entries.isEmpty() ? new Rectangle() : entries.get(0).mbr;
-            for (Entry e : entries) {
-                mbr = mbr.union(e.mbr);
-            }
+            mbr = union(entries);
         }
-        return mbr;
+        return mbr; // TODO: add defensive copy
     }
 
     void resetMbr() {
@@ -142,7 +142,7 @@ class Node {
     }
 
     List<Entry> getEntries() {
-        return entries;
+        return entries; // TODO: add defensive copy
     }
 
     Node addEntry(Entry entry) {
@@ -157,7 +157,7 @@ class Node {
         }
 
         entries.add(entry);
-        mbr = null;
+        resetMbr();
 
         Node node = entry.loadNode();
         if (node != null) {
@@ -173,9 +173,9 @@ class Node {
         for (Entry e: entries) {
             putEntry(e);
         }
-        // TODO: recalc MBR
-        mbr = null;
-        save(); // TODO:
+
+        resetMbr();
+        save();
         return this;
     }
 

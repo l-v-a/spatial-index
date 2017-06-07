@@ -2,7 +2,7 @@ package lva.spatialindex.index;
 
 import lva.spatialindex.Storage;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.util.Comparator;
 import java.util.List;
 
@@ -32,8 +32,8 @@ class Entry {
 
 
     private final Storage<Node> storage;
-    final long childOffset;
-    Rectangle mbr; // TODO: think about to make final
+    private final long childOffset;
+    private Rectangle mbr; // TODO: think about to make final
 
 
     Entry(Storage<Node> storage, Rectangle mbr, long childOffset) {
@@ -50,7 +50,15 @@ class Entry {
         return childOffset;
     }
 
-    static Rectangle union(java.util.List<Entry> entries) { // TODO: use Collection or stream
+    Rectangle getMbr() {
+        return mbr; // TODO: think about defensive copy
+    }
+
+    void setMbr(Rectangle mbr) {
+        this.mbr = mbr;
+    }
+
+    static Rectangle union(List<Entry> entries) { // TODO: use Collection or stream
         Rectangle r = entries.isEmpty() ? new Rectangle() : entries.get(0).mbr;
         for (Entry e: entries) {
             r = r.union(e.mbr);

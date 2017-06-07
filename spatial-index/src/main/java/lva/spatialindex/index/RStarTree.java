@@ -3,7 +3,7 @@ package lva.spatialindex.index;
 import lva.spatialindex.Storage;
 import lva.spatialindex.index.Distributions.GroupPair;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -49,13 +49,13 @@ public class RStarTree implements AutoCloseable {
         Collection<Long> res = new HashSet<>();
         if (node.isLeaf()) {
             for (Entry e: node.getEntries()) {
-                if (area.intersects(e.mbr)) {
+                if (area.intersects(e.getMbr())) {
                     res.add(-(e.getChildOffset() + 1));
                 }
             }
         } else {
             for (Entry e: node.getEntries()) {
-                if (area.intersects(e.mbr)) {
+                if (area.intersects(e.getMbr())) {
                     res.addAll(search(e.loadNode(), area));
                 }
             }
@@ -99,23 +99,23 @@ public class RStarTree implements AutoCloseable {
             // points to leafs
 
             // min overlap cost
-            candidates = minList(node.getEntries(), e -> area(e.mbr.intersection(newMbr)));
+            candidates = minList(node.getEntries(), e -> area(e.getMbr().intersection(newMbr)));
 
             // by min enlarged
-            candidates = minList(candidates, e -> area(e.mbr.union(newMbr)));
+            candidates = minList(candidates, e -> area(e.getMbr().union(newMbr)));
 
             // by size
-            candidates = minList(candidates, e -> area(e.mbr));
+            candidates = minList(candidates, e -> area(e.getMbr()));
 
 
         } else {
             // not points to leaf
 
             // by min enlarged
-            candidates = minList(node.getEntries(), e -> area(e.mbr.union(newMbr)));
+            candidates = minList(node.getEntries(), e -> area(e.getMbr().union(newMbr)));
 
             // by size
-            candidates = minList(candidates, e -> area(e.mbr));
+            candidates = minList(candidates, e -> area(e.getMbr()));
         }
 
         node = candidates.isEmpty() ? null : candidates.get(0).loadNode();
@@ -199,7 +199,7 @@ public class RStarTree implements AutoCloseable {
         }
 
         if (parentEntry != null) {
-            parentEntry.mbr = node1.getMbr();
+            parentEntry.setMbr(node1.getMbr());
             parent.resetMbr();
             parent.save();
         }
