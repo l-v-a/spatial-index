@@ -15,5 +15,6 @@ public interface StorageSpace extends AutoCloseable {
 
     long allocate(long sizeOf, Function<Long, Long> roundBoundaryFunc);
     long getSize();
+    long getCapacity();
     void close();
 }
