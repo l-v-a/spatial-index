@@ -24,7 +24,7 @@ class Entry {
         this.childOffset = childOffset;
     }
 
-    public Node loadNode() throws Exception {
+    public Node loadNode() {
         return childOffset >= 0 ? storage.get(childOffset) : null;
     }
 

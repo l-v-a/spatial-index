@@ -28,7 +28,7 @@ abstract class AbstractStorage<T> implements Storage<T>{
         }
 
         long offset = storage.allocate(buff.length, (x) -> (x + (recordSize - 1)) & ~(recordSize - 1));
-        storage.setBytes(offset, buff);
+        storage.putBytes(offset, buff);
         return offset;
 
     }
@@ -44,7 +44,7 @@ abstract class AbstractStorage<T> implements Storage<T>{
             throw new IllegalArgumentException("record was not allocated");
         }
 
-        storage.setBytes(offset, buff);
+        storage.putBytes(offset, buff);
     }
 
     @Override

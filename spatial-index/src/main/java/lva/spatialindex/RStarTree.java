@@ -9,138 +9,11 @@ import java.util.List;
 import static lva.spatialindex.Helpers.*;
 
 
-// TODO: rename, think about Closeable
-/*class NodeStorage implements AutoCloseable {
-    private static final int RECORD_SIZE = 4096;
-    private final MemoryMappedFile storage;
-    private final LoadingCache<Long, Node> cache;
-
-    NodeStorage(String fileName, long initialSize) throws Exception {
-        this.storage = new MemoryMappedFile(fileName, initialSize);
-
-        cache = CacheBuilder.newBuilder()
-            .softValues()
-            //.maximumSize(10000)
-            //.expireAfterWrite(10, TimeUnit.MINUTES)
-            .build(
-                new CacheLoader<Long, Node>() {
-                    @Override
-                    public Node load(@Nonnull Long offset) throws Exception {
-                        return read(offset);
-                    }
-                });
-    }
-
-//    public long add(Node node) throws Exception {
-//        try(DirectArray buff = node.serialize()) {
-//            if (buff.getSize() > RECORD_SIZE) {
-//                throw new IllegalArgumentException("record max size exceeds");
-//            }
-//
-//            long offset = storage.allocate(buff.getSize(), (x) -> (x + 0xFFFL) & ~0xFFFL);
-//            storage.setArray(offset, buff);
-//
-//            node.setOffset(offset);
-//            cache.put(node.getOffset(), node);
-//
-//            return offset;
-//        }
-//    }
-
-    public long add(Node node) throws Exception {
-        byte[] buff = node.serialize();
-        if (buff.length > RECORD_SIZE) {
-            throw new IllegalArgumentException("record max size exceeds");
-        }
-
-        long offset = storage.allocate(buff.length, (x) -> (x + 0xFFFL) & ~0xFFFL);
-        storage.setBytes(offset, buff);
-
-        node.setOffset(offset);
-        cache.put(node.getOffset(), node);
-
-        return offset;
-
-    }
-
-//    public void write(Node node) throws Exception {
-//        try(DirectArray buff = node.serialize()) {
-//            if (buff.getSize() > RECORD_SIZE) {
-//                throw new IllegalArgumentException("record max size exceeds");
-//            }
-//
-//            if (node.getOffset() < 0) {
-//                throw new IllegalArgumentException("record was not allocated");
-//            }
-//
-//            storage.setArray(node.getOffset(), buff);
-//        }
-//    }
-
-    public void write(Node node) throws Exception {
-        byte[] buff = node.serialize();
-        if (buff.length > RECORD_SIZE) {
-            throw new IllegalArgumentException("record max size exceeds");
-        }
-
-        if (node.getOffset() < 0) {
-            throw new IllegalArgumentException("record was not allocated");
-        }
-
-        storage.setBytes(node.getOffset(), buff);
-
-    }
-
-//    public Node read(long offset) throws Exception {
-//        try(DirectArray buff = new DirectArray(RECORD_SIZE)) {
-//            if (offset + buff.getSize() > storage.getSize()) {
-//                throw new IllegalArgumentException("out of bounds");
-//            }
-//
-//            storage.getArray(offset, buff);
-//            Node node = new Node(this, offset);
-//            node.deserialize(buff);
-//
-//            return node;
-//        }
-//    }
-
-    public Node read(long offset) throws Exception {
-        byte[] buff = new byte[RECORD_SIZE];
-        if (offset + buff.length > storage.getSize()) {
-            throw new IllegalArgumentException("out of bounds");
-        }
-
-        storage.getBytes(offset, buff);
-        Node node = new Node(this, offset);
-        node.deserialize(buff);
-
-        return node;
-    }
-
-    // TODO: remove
-    Node newNode() throws Exception {
-        Node node = new Node(this, -1);
-        add(node);
-        return node;
-    }
-
-    Node get(long offset) {
-        try {
-            return cache.get(offset);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void close() throws Exception {
-        this.storage.close();
-    }
-}
-*/
 
 // TODO: rename to IndexTree
+/**
+ * @author vlitvinenko
+ */
 public class RStarTree implements AutoCloseable {
     public static int PAGE_SIZE = 4096; // TODO: calculate
     public static int MAX_ENTRIES = PAGE_SIZE / Entry.SIZE - 1;
@@ -156,18 +29,18 @@ public class RStarTree implements AutoCloseable {
     private Node root;
 
 
-    RStarTree(int maxNumberOfElements, String storageFileName) throws Exception {
+    RStarTree(int maxNumberOfElements, String storageFileName) {
         long size = 64 * 1024L * 1024L; // TODO: make it as func (maxNumberOfElements)
         this.storage = new NodeStorage(storageFileName, size);
-        this.root = storage.newNode();
+        this.root = Node.newNode(this.storage);
 
     }
 
-    public Collection<Long> search(Rectangle area) throws Exception {
+    public Collection<Long> search(Rectangle area) {
         return search(root, area);
     }
 
-    Collection<Long> search(Node node, Rectangle area) throws Exception {
+    Collection<Long> search(Node node, Rectangle area) {
         Collection<Long> res = new HashSet<>();
         if (node.isLeaf()) {
             for (Entry e: node.getEntries()) {
@@ -187,13 +60,13 @@ public class RStarTree implements AutoCloseable {
     }
 
     // TODO: think about common interface with DB
-    public void insert(long offset, Rectangle newMbr) throws Exception {
+    public void insert(long offset, Rectangle newMbr) {
         if (!newMbr.isEmpty()) {
             insert(root, offset, newMbr);
         }
     }
 
-    void insert(Node node, long offset, Rectangle newMbr) throws Exception {
+    void insert(Node node, long offset, Rectangle newMbr) {
         Node leafNode = chooseLeaf(node, newMbr);
         Node newNode = null;
 
@@ -201,13 +74,13 @@ public class RStarTree implements AutoCloseable {
         if (!leafNode.isFull()) {
             leafNode.addEntry(entry);
         } else {
-            newNode = splitNode(leafNode, storage.newNode().addEntry(entry));
+            newNode = splitNode(leafNode, Node.newNode(storage).addEntry(entry));
         }
 
         adjust(leafNode, newNode);
     }
 
-    Node chooseLeaf(Node node, Rectangle newMbr) throws Exception {
+    Node chooseLeaf(Node node, Rectangle newMbr) {
         if (node.isLeaf()) {
             return node;
         }
@@ -244,7 +117,7 @@ public class RStarTree implements AutoCloseable {
         return chooseLeaf(node, newMbr);
     }
 
-    Node splitNode(Node node, Node newNode) throws Exception {
+    Node splitNode(Node node, Node newNode) {
         if (node.isLeaf() != newNode.isLeaf()) {
             return newNode;
         }
@@ -299,11 +172,11 @@ public class RStarTree implements AutoCloseable {
         return newNode;
     }
 
-    void adjust(Node node1, Node node2) throws Exception {
+    void adjust(Node node1, Node node2) {
 
         if (node1.getOffset() == root.getOffset()) {
             if (node2 != null) {
-                root = storage.newNode()
+                root = Node.newNode(storage)
                     .addNode(node1)
                     .addNode(node2);
             }
@@ -331,7 +204,7 @@ public class RStarTree implements AutoCloseable {
             if (!parent.isFull()) {
                 parent.addNode(node2);
             } else {
-                newNode = splitNode(parent, storage.newNode().addNode(node2));
+                newNode = splitNode(parent, Node.newNode(storage).addNode(node2));
             }
         }
 
@@ -341,63 +214,8 @@ public class RStarTree implements AutoCloseable {
         adjust(node1, node2);
     }
 
-    void dump() throws Exception {
-        dump(root, "");
-    }
-    static void dump(Node node, String indent) throws Exception {
-        System.out.printf("%s[node: %s]%n", indent, node.getOffset());
-        System.out.printf("%s[entries:]", indent);
-        for (Entry e: node.getEntries()) {
-
-            System.out.printf("%s[e: %s, mbr: %s]", indent, e.childOffset, e.mbr);
-            // System.out.printf("%s%n", indent);
-        }
-        System.out.printf("%s%n", indent);
-
-        for (Entry e: node.getEntries()) {
-            Node child = e.loadNode();
-            if (child != null) {
-                dump(child, indent + "\t");
-            }
-        }
-
-
-    }
-    void dump(Graphics g) throws Exception {
-        g.setColor(Color.BLUE);
-        drawNode(root, g, 0);
-    }
-
-
-    private static Color COLORS[] = {Color.BLACK, Color.BLUE, Color.RED, Color.GRAY, Color.YELLOW};
-    void drawNode(Node node, Graphics g, int level) throws Exception {
-        for (Entry entry : node.getEntries()) {
-            if (node.isLeaf()) {
-                g.setColor(Color.RED);
-                g.fillRect(entry.mbr.x, entry.mbr.y, entry.mbr.width, entry.mbr.height);
-                g.setColor(Color.RED);
-                g.drawRect(entry.mbr.x, entry.mbr.y, entry.mbr.width, entry.mbr.height);
-            } else {
-                //g.setColor(Color.RED);
-                //g.drawRect(entry.mbr.x, entry.mbr.y, entry.mbr.width, entry.mbr.height);
-            }
-            if (entry.loadNode() != null) {
-                drawNode(entry.loadNode(), g, level + 1);
-            }
-            //g.setColor(c);
-            //g.drawRect(entry.mbr.x, entry.mbr.y, entry.mbr.width, entry.mbr.height);
-        }
-
-        Rectangle mbr = node.getMbr();
-
-        g.setColor(Color.BLACK);
-        g.drawRect(mbr.x, mbr.y, mbr.width, mbr.height);
-        g.drawRect(mbr.x + 1 , mbr.y + 1, mbr.width - 2, mbr.height - 2);
-
-    }
-
     @Override
-    public void close() throws Exception {
+    public void close() {
         storage.close();
     }
 }

@@ -13,7 +13,6 @@ import java.util.function.Function;
 /**
  * @author vlitvinenko
  */
-
 // TODO: think about to implement Buffer
 public class MemoryMappedFile implements AutoCloseable, Buffer {
 
@@ -39,18 +38,23 @@ public class MemoryMappedFile implements AutoCloseable, Buffer {
 
             BYTE_ARRAY_OFFSET = unsafe.arrayBaseOffset(byte[].class);
         } catch (Exception e){
-            throw new RuntimeException(e);
+            throw Exceptions.toRuntime(e);
         }
+
     }
 
-    //Bundle reflection calls to get access to the given method
+    public MemoryMappedFile(String loc, long len) {
+        this.loc = loc;
+        this.capacity = roundTo4096(len);
+        mapAndSetOffset();
+    }
+
     private static Method getMethod(Class<?> cls, String name, Class<?>... params) throws Exception {
         Method m = cls.getDeclaredMethod(name, params);
         m.setAccessible(true);
         return m;
     }
 
-    //Round to next 4096 bytes
     private static long roundTo4096(long i) {
         return (i + 0xfffL) & ~0xfffL;
     }
@@ -67,14 +71,6 @@ public class MemoryMappedFile implements AutoCloseable, Buffer {
         });
     }
 
-    public MemoryMappedFile(String loc, long len) {
-        this.loc = loc;
-        this.capacity = roundTo4096(len);
-        mapAndSetOffset();
-    }
-
-    //Callers should synchronize to avoid calls in the middle of this, but
-    //it is undesirable to synchronize w/ all access methods.
     private void remap(long nLen) {
         Exceptions.runtime(() -> {
             unmmap.invoke(null, addr, this.capacity);
@@ -87,25 +83,20 @@ public class MemoryMappedFile implements AutoCloseable, Buffer {
     public void close() {
         Exceptions.runtime(() -> {
             unmmap.invoke(null, addr, this.capacity);
-            return null;
         });
     }
 
-    //May want to have offset & length within data as well, for both of these
-    public void getBytes(long pos, byte[] data){
+    @Override
+    public void getBytes(long pos, byte[] data) {
         unsafe.copyMemory(null, pos + addr, data, BYTE_ARRAY_OFFSET, data.length);
     }
 
-    public void setBytes(long pos, byte[] data) {
+    @Override
+    public void putBytes(long pos, byte[] data) {
         unsafe.copyMemory(data, BYTE_ARRAY_OFFSET, null, pos + addr, data.length);
     }
 
     @Override
-    public long allocate(long sizeOf) {
-        return allocate(sizeOf, MemoryMappedFile::roundTo4096);
-    }
-
-
     public long allocate(long sizeOf, Function<Long, Long> roundBoundaryFunc) {
         long sizeOfRounded = roundBoundaryFunc.apply(sizeOf);
         long offset = size;
@@ -116,14 +107,6 @@ public class MemoryMappedFile implements AutoCloseable, Buffer {
 
         size += sizeOfRounded;
         return offset;
-    }
-
-    public long getCapacity() {
-        return capacity;
-    }
-
-    public long getSize() {
-        return size;
     }
 
     @Override
@@ -145,5 +128,14 @@ public class MemoryMappedFile implements AutoCloseable, Buffer {
     public void putLong(long pos, long val) {
         unsafe.putLong(addr + pos, val);
     }
+
+    public long getCapacity() {
+        return capacity;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
 }
 

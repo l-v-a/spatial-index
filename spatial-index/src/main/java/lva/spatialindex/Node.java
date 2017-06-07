@@ -31,7 +31,7 @@ class Node {
         return node;
     }
 
-    public Node save() throws Exception {
+    public Node save() {
         storage.write(offset, this);
         return this;
     }
@@ -94,7 +94,7 @@ class Node {
         return entries.size() >= RStarTree.MAX_ENTRIES;
     }
 
-    Node addNode(Node node) throws Exception {
+    Node addNode(Node node) {
         if (isFull()) {
             throw new IllegalStateException("entries overflow");
         }
@@ -142,13 +142,13 @@ class Node {
         return entries;
     }
 
-    Node addEntry(Entry entry) throws Exception {
+    Node addEntry(Entry entry) {
         putEntry(entry);
         save();
         return this;
     }
 
-    private Node putEntry(Entry entry) throws Exception {
+    private Node putEntry(Entry entry) {
         if (entries.size() >= RStarTree.MAX_ENTRIES) {
             throw new IllegalStateException("entries overflow");
         }
@@ -165,7 +165,7 @@ class Node {
         return this;
     }
 
-    Node setEntries(List<Entry> entries) throws Exception {
+    Node setEntries(List<Entry> entries) {
         this.entries.clear();
         for (Entry e: entries) {
             putEntry(e);
