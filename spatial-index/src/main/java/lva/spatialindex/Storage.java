@@ -8,4 +8,5 @@ public interface Storage<T> extends AutoCloseable {
     void write(long offset, T t);
     T read(long offset);
     T get(long offset);
+    void close();
 }

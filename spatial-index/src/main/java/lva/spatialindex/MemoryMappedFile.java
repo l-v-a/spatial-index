@@ -13,8 +13,7 @@ import java.util.function.Function;
 /**
  * @author vlitvinenko
  */
-// TODO: think about to implement Buffer
-public class MemoryMappedFile implements AutoCloseable, Buffer {
+public class MemoryMappedFile implements StorageSpace {
 
     private static final Unsafe unsafe;
     private static final Method mmap;
@@ -129,13 +128,15 @@ public class MemoryMappedFile implements AutoCloseable, Buffer {
         unsafe.putLong(addr + pos, val);
     }
 
+    @Override
+    public long getSize() {
+        return size;
+    }
+
     public long getCapacity() {
         return capacity;
     }
 
-    public long getSize() {
-        return size;
-    }
 
 }
 

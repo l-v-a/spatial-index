@@ -5,9 +5,7 @@ import java.util.function.Function;
 /**
  * @author vlitvinenko
  */
-
-// TODO: rename to Region
-public interface Buffer {
+public interface StorageSpace extends AutoCloseable {
     int getInt(long pos);
     long getLong(long pos);
     void putInt(long pos, int val);
@@ -15,5 +13,7 @@ public interface Buffer {
     void getBytes(long pos, byte[] data);
     void putBytes(long pos, byte[] data);
 
-    long allocate(long sizeOf, Function<Long, Long> roundBoundaryFunc) ;
+    long allocate(long sizeOf, Function<Long, Long> roundBoundaryFunc);
+    long getSize();
+    void close();
 }
