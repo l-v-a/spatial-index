@@ -107,7 +107,6 @@ class Node {
         }
 
         entries.add(new Entry(storage, node.getMbr(), node.getOffset()));
-        // putEntry(Entry.of(buffer, node.getMbr(), node.getOffset()));
 
         node.parentOffset = offset;
         resetMbr();
@@ -125,12 +124,14 @@ class Node {
         return mbr; // TODO: add defensive copy
     }
 
-    void resetMbr() {
+    Node resetMbr() {
         mbr = null;
+        return this;
     }
 
-    void setOffset(long offset) {
+    Node setOffset(long offset) {
         this.offset = offset;
+        return this;
     }
 
     long getOffset() {

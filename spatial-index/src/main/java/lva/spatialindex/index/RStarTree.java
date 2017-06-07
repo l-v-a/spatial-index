@@ -46,6 +46,7 @@ public class RStarTree implements AutoCloseable {
     }
 
     Collection<Long> search(Node node, Rectangle area) {
+        // TODO: refactor
         Collection<Long> res = new HashSet<>();
         if (node.isLeaf()) {
             for (Entry e: node.getEntries()) {
@@ -90,11 +91,9 @@ public class RStarTree implements AutoCloseable {
             return node;
         }
 
-        // check that points to leaf node
-        // TODO: checks may be omitted beacause its not lead node
-
         List<Entry> candidates = new ArrayList<>();
 
+        // check that points to leaf node
         if (!node.getEntries().isEmpty() && node.getEntries().get(0).loadNode().isLeaf()) {
             // points to leafs
 
@@ -107,7 +106,6 @@ public class RStarTree implements AutoCloseable {
             // by size
             candidates = minList(candidates, e -> area(e.getMbr()));
 
-
         } else {
             // not points to leaf
 
@@ -119,6 +117,12 @@ public class RStarTree implements AutoCloseable {
         }
 
         node = candidates.isEmpty() ? null : candidates.get(0).loadNode();
+// TODO: replace with
+//        node = candidates.stream()
+//            .findFirst()
+//            .map(Entry::loadNode)
+//            .orElse(null);
+
         return chooseLeaf(node, newMbr);
     }
 
@@ -200,8 +204,8 @@ public class RStarTree implements AutoCloseable {
 
         if (parentEntry != null) {
             parentEntry.setMbr(node1.getMbr());
-            parent.resetMbr();
-            parent.save();
+            parent.resetMbr()
+                .save();
         }
 
         Node newNode = null;
