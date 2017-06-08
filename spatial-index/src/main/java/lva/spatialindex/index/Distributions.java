@@ -26,10 +26,10 @@ class Distributions {
 
     static List<GroupPair> getDistributions(List<Entry> entries) {
         List<GroupPair> groups = new ArrayList<>();
-        for (int k = 0; k < (RStarTree.MAX_ENTRIES - 2* RStarTree.MIN_ENTRIES + 2); k++) {
+        for (int k = 0; k < (Node.MAX_ENTRIES - 2* Node.MIN_ENTRIES + 2); k++) {
             GroupPair pair = new GroupPair();
-            pair.group1 = entries.subList(0, RStarTree.MIN_ENTRIES + k);
-            pair.group2 = entries.subList(RStarTree.MIN_ENTRIES + k, entries.size());
+            pair.group1 = entries.subList(0, Node.MIN_ENTRIES + k);
+            pair.group2 = entries.subList(Node.MIN_ENTRIES + k, entries.size());
             groups.add(pair);
         }
         return groups;

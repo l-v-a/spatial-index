@@ -1,5 +1,6 @@
 package lva.spatialindex.index;
 
+import lombok.EqualsAndHashCode;
 import lva.spatialindex.Exceptions;
 import lva.spatialindex.Storage;
 
@@ -17,13 +18,18 @@ import static lva.spatialindex.index.Entry.union;
 /**
  * @author vlitvinenko
  */
+@EqualsAndHashCode(exclude = {"storage", "mbr"})
 class Node {
+    static final int PAGE_SIZE = 4096; // TODO: calculate
+    static final int MAX_ENTRIES = PAGE_SIZE / Entry.SIZE - 1;
+    static final int MIN_ENTRIES = MAX_ENTRIES * 2 / 5;
+
     private final Storage<Node> storage;
     private long offset;
     private long parentOffset = -1;
 
     private Rectangle mbr = null;
-    private final List<Entry> entries = new ArrayList<>();
+    private final List<Entry> entries = new ArrayList<>(); // TODO: test perf. with ArrayList<>(MAX_ENTRIES)
 
     private Node(Storage<Node> storage, long offset) {
         this.storage = storage; // TODO: rename to buffer
@@ -89,16 +95,12 @@ class Node {
         });
     }
 
-    boolean isRoot() {
-        return parentOffset == -1;
-    }
-
     boolean isLeaf() {
-        return entries.isEmpty() || entries.get(0).getChildOffset()< 0;
+        return entries.isEmpty() || entries.get(0).isLeaf();
     }
 
     boolean isFull() {
-        return entries.size() >= RStarTree.MAX_ENTRIES;
+        return entries.size() >= MAX_ENTRIES;
     }
 
     Node addNode(Node node) {
@@ -152,8 +154,20 @@ class Node {
         return this;
     }
 
+    Node setEntries(List<Entry> entries) {
+        this.entries.clear();
+        for (Entry e: entries) {
+            putEntry(e);
+        }
+
+        resetMbr();
+        save();
+        return this;
+    }
+
     private Node putEntry(Entry entry) {
-        if (entries.size() >= RStarTree.MAX_ENTRIES) {
+        // TODO: think about to refactor this addNode(Node node)
+        if (isFull()) {
             throw new IllegalStateException("entries overflow");
         }
 
@@ -168,16 +182,4 @@ class Node {
 
         return this;
     }
-
-    Node setEntries(List<Entry> entries) {
-        this.entries.clear();
-        for (Entry e: entries) {
-            putEntry(e);
-        }
-
-        resetMbr();
-        save();
-        return this;
-    }
-
 }

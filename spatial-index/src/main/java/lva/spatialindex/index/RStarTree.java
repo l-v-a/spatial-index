@@ -21,19 +21,8 @@ import static lva.spatialindex.index.Rectangles.area;
  * @author vlitvinenko
  */
 public class RStarTree implements AutoCloseable {
-    static final int PAGE_SIZE = 4096; // TODO: calculate
-    static final int MAX_ENTRIES = PAGE_SIZE / Entry.SIZE - 1;
-    static final int MIN_ENTRIES = MAX_ENTRIES * 2 / 5;
-
-//    public static int MAX_ENTRIES = 30;
-//    public static int MIN_ENTRIES = MAX_ENTRIES * 2 / 5;
-
-//    public static int MAX_ENTRIES = 3;
-//    public static int MIN_ENTRIES = 1;
-
     private final Storage<Node> storage;
     private Node root;
-
 
     public RStarTree(int maxNumberOfElements, String storageFileName) {
         long size = 64 * 1024L * 1024L; // TODO: make it as func (maxNumberOfElements)
@@ -51,7 +40,7 @@ public class RStarTree implements AutoCloseable {
         if (node.isLeaf()) {
             for (Entry e: node.getEntries()) {
                 if (area.intersects(e.getMbr())) {
-                    res.add(-(e.getChildOffset() + 1));
+                    res.add(-(e.getChildOffset() + 1)); // TODO: move logic to entry
                 }
             }
         } else {
@@ -76,7 +65,7 @@ public class RStarTree implements AutoCloseable {
         Node leafNode = chooseLeaf(node, newMbr);
         Node newNode = null;
 
-        Entry entry = new Entry(storage, newMbr, -(offset + 1));
+        Entry entry = new Entry(storage, newMbr, -(offset + 1)); // TODO: move logic to entry
         if (!leafNode.isFull()) {
             leafNode.addEntry(entry);
         } else {
@@ -184,6 +173,7 @@ public class RStarTree implements AutoCloseable {
     void adjust(Node node1, Node node2) {
 
         if (node1.getOffset() == root.getOffset()) {
+            // node1 is root node
             if (node2 != null) {
                 root = Node.newNode(storage)
                     .addNode(node1)

@@ -1,5 +1,6 @@
 package lva.spatialindex.index;
 
+import lombok.EqualsAndHashCode;
 import lva.spatialindex.Storage;
 
 import java.awt.Rectangle;
@@ -10,6 +11,7 @@ import java.util.List;
 /**
  * @author vlitvinenko
  */
+@EqualsAndHashCode(exclude = {"storage"})
 class Entry {
     private static final int SIZE_OF_X = 4;
     private static final int SIZE_OF_Y = 4;
@@ -56,6 +58,10 @@ class Entry {
 
     void setMbr(Rectangle mbr) {
         this.mbr = mbr;
+    }
+
+    boolean isLeaf() {
+        return childOffset < 0;
     }
 
     static Rectangle union(List<Entry> entries) { // TODO: use Collection or stream
