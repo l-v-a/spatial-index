@@ -23,11 +23,6 @@ public class NodeTest {
     @Mock
     private Storage<Node> storage;
 
-//    @Before
-//    public void setUp() {
-//        reset(storage);
-//    }
-
     @Test
     public void should_serialize_deserialize() {
         Node node = Node.newNode(storage)

@@ -44,7 +44,7 @@ class Entry {
         this.childOffset = childOffset;
     }
 
-    Node loadNode() {
+    Node getChildNode() {
         return childOffset >= 0 ? storage.get(childOffset) : null;
     }
 

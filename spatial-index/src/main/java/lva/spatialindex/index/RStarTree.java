@@ -46,7 +46,7 @@ public class RStarTree implements AutoCloseable {
         } else {
             for (Entry e: node.getEntries()) {
                 if (area.intersects(e.getMbr())) {
-                    res.addAll(search(e.loadNode(), area));
+                    res.addAll(search(e.getChildNode(), area));
                 }
             }
         }
@@ -83,7 +83,7 @@ public class RStarTree implements AutoCloseable {
         List<Entry> candidates = new ArrayList<>();
 
         // check that points to leaf node
-        if (!node.getEntries().isEmpty() && node.getEntries().get(0).loadNode().isLeaf()) {
+        if (!node.getEntries().isEmpty() && node.getEntries().get(0).getChildNode().isLeaf()) {
             // points to leafs
 
             // min overlap cost
@@ -105,11 +105,11 @@ public class RStarTree implements AutoCloseable {
             candidates = minList(candidates, e -> area(e.getMbr()));
         }
 
-        node = candidates.isEmpty() ? null : candidates.get(0).loadNode();
+        node = candidates.isEmpty() ? null : candidates.get(0).getChildNode();
 // TODO: replace with
 //        node = candidates.stream()
 //            .findFirst()
-//            .map(Entry::loadNode)
+//            .map(Entry::getChildNode)
 //            .orElse(null);
 
         return chooseLeaf(node, newMbr);
@@ -186,7 +186,7 @@ public class RStarTree implements AutoCloseable {
         Entry parentEntry = null;
 
         for (Entry e : parent.getEntries()) {
-            if (e.loadNode().getOffset() == node1.getOffset()) {
+            if (e.getChildNode().getOffset() == node1.getOffset()) {
                 parentEntry = e;
                 break;
             }

@@ -174,7 +174,7 @@ class Node {
         entries.add(entry);
         resetMbr();
 
-        Node node = entry.loadNode();
+        Node node = entry.getChildNode();
         if (node != null) {
             node.parentOffset = offset;
             node.save();
