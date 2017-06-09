@@ -7,7 +7,6 @@ import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.channels.FileChannel;
-import java.util.function.Function;
 
 
 /**
@@ -88,8 +87,10 @@ public class MemoryMappedFile implements StorageSpace {
     }
 
     @Override
-    public void getBytes(long pos, byte[] data) {
+    public byte[] getBytes(long pos, int size) {
+        byte [] data = new byte[size];
         unsafe.copyMemory(null, baseAddress + pos, data, BYTE_ARRAY_OFFSET, data.length);
+        return data;
     }
 
     @Override
@@ -98,15 +99,13 @@ public class MemoryMappedFile implements StorageSpace {
     }
 
     @Override
-    public long allocate(long sizeOf, Function<Long, Long> roundBoundaryFunc) {
-        long sizeOfRounded = roundBoundaryFunc.apply(sizeOf);
+    public long allocate(long sizeOf) {
         long offset = size;
-
-        while (offset + sizeOfRounded > capacity)  {
-            remap(capacity * 2);
+        while (offset + sizeOf > getCapacity())  {
+            remap(getCapacity() * 2);
         }
 
-        size += sizeOfRounded;
+        size += sizeOf;
         return offset;
     }
 

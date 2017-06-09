@@ -31,7 +31,7 @@ public class EntryTest {
         long childNodeOffset = 123;
         Node childNode = Node.newNode(storage)
             .setOffset(childNodeOffset);
-        Mockito.when(storage.get(childNodeOffset))
+        Mockito.when(storage.read(childNodeOffset))
             .thenReturn(childNode);
 
         Entry entry = new Entry(storage, new Rectangle(), childNodeOffset);
@@ -109,5 +109,4 @@ public class EntryTest {
         assertEquals(1, Entry.TOP_TO_BOTTOM_BY_TOP_COMPARATOR.compare(entry2, entry1));
         assertEquals(0, Entry.TOP_TO_BOTTOM_BY_TOP_COMPARATOR.compare(entry1, entry1));
     }
-
 }

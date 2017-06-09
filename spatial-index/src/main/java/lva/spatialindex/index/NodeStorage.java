@@ -4,6 +4,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import lva.spatialindex.AbstractStorage;
+import lva.spatialindex.MemoryMappedFile;
+import lva.spatialindex.StorageSpace;
 
 import javax.annotation.Nonnull;
 
@@ -12,7 +14,7 @@ import javax.annotation.Nonnull;
  */
 // TODO: rename to IndexStorage
 class NodeStorage extends AbstractStorage<Node> {
-    private static final int RECORD_SIZE = 4096;
+    static final int RECORD_SIZE = 4096;
 
     private class NodeSerializer implements Serializer<Node> {
         @Override
@@ -25,25 +27,32 @@ class NodeStorage extends AbstractStorage<Node> {
             return Node.newNode(NodeStorage.this)
                 .deserialize(bytes);
         }
-    };
+    }
 
     private final NodeSerializer serializer;
     private final LoadingCache<Long, Node> cache;
 
     public NodeStorage(String fileName, long initialSize) {
-        super(fileName, initialSize, RECORD_SIZE);
+        this(new MemoryMappedFile(fileName, initialSize), RECORD_SIZE);
+    }
+
+    NodeStorage(StorageSpace storageSpace) {
+        this(storageSpace, RECORD_SIZE);
+    }
+
+    private NodeStorage(StorageSpace storageSpace, int recordSize) {
+        super(storageSpace, recordSize);
         serializer = new NodeSerializer();
         cache = CacheBuilder.newBuilder()
             .softValues()
             //.maximumSize(10000)
             //.expireAfterWrite(10, TimeUnit.MINUTES)
-            .build(
-                new CacheLoader<Long, Node>() {
-                    @Override
-                    public Node load(@Nonnull Long offset) {
-                        return read(offset);
-                    }
-                });
+            .build(new CacheLoader<Long, Node>() {
+                @Override
+                public Node load(@Nonnull Long offset) {
+                    return NodeStorage.this.load(offset);
+                }
+            });
     }
 
     @Override
@@ -60,14 +69,20 @@ class NodeStorage extends AbstractStorage<Node> {
     }
 
     @Override
-    public Node read(long offset) {
-        Node node = super.read(offset);
-        node.setOffset(offset);
-        return node;
+    public void write(long offset, Node node) {
+        super.write(offset, node);
+        // TODO: perf. think about to reload node from cache
+        // cache.refresh(offset);
     }
 
     @Override
-    public Node get(long offset) {
+    public Node read(long offset) {
         return cache.getUnchecked(offset);
+    }
+
+    private Node load(long offset) {
+        Node node = super.read(offset);
+        node.setOffset(offset);
+        return node;
     }
 }

@@ -45,7 +45,7 @@ class Entry {
     }
 
     Node getChildNode() {
-        return childOffset >= 0 ? storage.get(childOffset) : null;
+        return childOffset >= 0 ? storage.read(childOffset) : null;
     }
 
     long getChildOffset() {
@@ -79,5 +79,4 @@ class Entry {
         }
         return margin;
     }
-
 }

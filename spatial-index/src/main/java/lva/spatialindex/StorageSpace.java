@@ -1,7 +1,5 @@
 package lva.spatialindex;
 
-import java.util.function.Function;
-
 /**
  * @author vlitvinenko
  */
@@ -10,10 +8,10 @@ public interface StorageSpace extends AutoCloseable {
     long getLong(long pos);
     void putInt(long pos, int val);
     void putLong(long pos, long val);
-    void getBytes(long pos, byte[] data);
+    byte[] getBytes(long pos, int size);
     void putBytes(long pos, byte[] data);
 
-    long allocate(long sizeOf, Function<Long, Long> roundBoundaryFunc);
+    long allocate(long sizeOf);
     long getSize();
     long getCapacity();
     void close();

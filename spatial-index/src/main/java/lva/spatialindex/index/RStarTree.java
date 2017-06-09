@@ -182,7 +182,7 @@ public class RStarTree implements AutoCloseable {
             return;
         }
 
-        Node parent = storage.get(node1.getParentOffset());
+        Node parent = storage.read(node1.getParentOffset());
         Entry parentEntry = null;
 
         for (Entry e : parent.getEntries()) {

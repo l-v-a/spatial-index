@@ -158,7 +158,7 @@ public class NodeTest {
         Node node = Node.newNode(storage)
             .setOffset(thisOffset);
         Node childNode = Node.newNode(storage);
-        when(storage.get(eq(childOffset))).thenReturn(childNode);
+        when(storage.read(eq(childOffset))).thenReturn(childNode);
 
         node.addEntry(new Entry(storage, new Rectangle(3, 4, 7, 6), childOffset));
 
@@ -173,7 +173,7 @@ public class NodeTest {
         Node childNode = Node.newNode(storage)
             .setOffset(childNodeOffset);
 
-        when(storage.get(eq(childOffset))).thenReturn(childNode);
+        when(storage.read(eq(childOffset))).thenReturn(childNode);
 
         node.addEntry(new Entry(storage, new Rectangle(3, 4, 7, 6), childOffset));
 
@@ -269,5 +269,4 @@ public class NodeTest {
 
         verify(storage).write(thisOffset, node);
     }
-
 }

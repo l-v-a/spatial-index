@@ -21,5 +21,4 @@ public class RectanglesTest {
         assertEquals(0, Rectangles.margin(new Rectangle()));
         assertEquals(12, Rectangles.margin(new Rectangle(0, 0, 2, 4)));
     }
-
 }

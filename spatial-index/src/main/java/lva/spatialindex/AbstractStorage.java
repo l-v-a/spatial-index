@@ -13,11 +13,7 @@ public abstract class AbstractStorage<T> implements Storage<T>{
     private final int recordSize;
     private final StorageSpace storageSpace;
 
-    public AbstractStorage(String fileName, long initialSize, int recordSize) {
-        this(new MemoryMappedFile(fileName, initialSize), recordSize);
-    }
-
-    AbstractStorage(StorageSpace storageSpace, int recordSize) {
+    public AbstractStorage(StorageSpace storageSpace, int recordSize) {
         this.storageSpace = storageSpace;
         this.recordSize = recordSize;
     }
@@ -31,7 +27,7 @@ public abstract class AbstractStorage<T> implements Storage<T>{
             throw new IllegalArgumentException("record max size exceeds");
         }
 
-        long offset = storageSpace.allocate(buff.length, (x) -> (x + (recordSize - 1)) & ~(recordSize - 1));
+        long offset = storageSpace.allocate(roundToRecordSize(buff.length));
         storageSpace.putBytes(offset, buff);
         return offset;
 
@@ -44,8 +40,8 @@ public abstract class AbstractStorage<T> implements Storage<T>{
             throw new IllegalArgumentException("record max size exceeds");
         }
 
-        if (offset < 0) {
-            throw new IllegalArgumentException("record was not allocated");
+        if (offset < 0 || offset + buff.length > storageSpace.getSize()) {
+            throw new IllegalArgumentException("out of bounds");
         }
 
         storageSpace.putBytes(offset, buff);
@@ -53,17 +49,12 @@ public abstract class AbstractStorage<T> implements Storage<T>{
 
     @Override
     public T read(long offset) {
-        byte[] buff = new byte[recordSize];
-        if (offset + buff.length > storageSpace.getSize()) {
+        if (offset + recordSize > storageSpace.getSize()) {
             throw new IllegalArgumentException("out of bounds");
         }
-        storageSpace.getBytes(offset, buff);
-        return getSerializer().deserialize(buff);
-    }
 
-    @Override
-    public T get(long offset) {
-        return read(offset);
+        byte[] buff = storageSpace.getBytes(offset, recordSize);
+        return getSerializer().deserialize(buff);
     }
 
     @Override
@@ -71,5 +62,8 @@ public abstract class AbstractStorage<T> implements Storage<T>{
         this.storageSpace.close();
     }
 
+    private long roundToRecordSize(long size) {
+        return (size + (recordSize - 1)) & ~(recordSize - 1);
+    }
 }
 
