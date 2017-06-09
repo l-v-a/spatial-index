@@ -132,39 +132,48 @@ public class NodeStorageTest {
     @Test
     public void should_read_from_storage() {
         long offset = node.getOffset();
-        storage = new NodeStorage(storageSpace);
+        NodeStorage nodeStorage = new NodeStorage(storageSpace);
+
         when(storageSpace.getSize())
             .thenReturn((long) NodeStorage.RECORD_SIZE + offset);
         when(storageSpace.getBytes(eq(offset), eq(NodeStorage.RECORD_SIZE)))
             .thenReturn(serializedNode);
 
-        Node newNode  = storage.read(offset);
+        Node newNode  = nodeStorage.read(offset);
         assertEquals(newNode, node);
     }
 
     @Test(expected = UncheckedExecutionException.class)
     public void should_throw_if_out_of_bounds_when_reading() {
-        storage = new NodeStorage(storageSpace);
+        NodeStorage nodeStorage = new NodeStorage(storageSpace);
         when(storageSpace.getSize())
             .thenReturn((long) NodeStorage.RECORD_SIZE - 1);
 
-        storage.read(0L);
+        nodeStorage.read(0L);
 
         fail();
     }
 
     @Test
     public void should_use_cache_when_reading() {
-        storage = new NodeStorage(storageSpace);
+        NodeStorage nodeStorage = new NodeStorage(storageSpace);
         when(storageSpace.getSize())
             .thenReturn((long) NodeStorage.RECORD_SIZE);
 
-        storage.add(node);
-        Node newNode = storage.read(node.getOffset());
+        nodeStorage.add(node);
+        Node newNode = nodeStorage.read(node.getOffset());
 
         assertSame(newNode, node);
         verify(storageSpace, never()).getBytes(anyLong(), anyInt());
     }
+
+    @Test
+    public void should_close_storage_space_when_closing() {
+        NodeStorage nodeStorage = new NodeStorage(storageSpace);
+        nodeStorage.close();
+        verify(storageSpace, times(1)).close();
+    }
+
 
 
 }
