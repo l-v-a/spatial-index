@@ -14,25 +14,28 @@ public class Exceptions {
     @FunctionalInterface
     interface VoidCallable {
         void call() throws Exception;
+
+        default Callable<Void> toCallable() {
+            return () -> {
+                call();
+                return null;
+            };
+        }
     }
 
-    public static <T> T runtime(Callable<T> callable) {
+    public static <T> T toRuntime(Callable<T> callable) {
         try {
             return callable.call();
         } catch (Exception exc) {
-            throw toRuntime(exc);
+            throw runtime(exc);
         }
     }
 
-    public static void runtime(VoidCallable callable) {
-        try {
-            callable.call();
-        } catch (Exception exc) {
-            throw toRuntime(exc);
-        }
+    public static void toRuntime(VoidCallable voidCallable) {
+        toRuntime(voidCallable.toCallable());
     }
 
-    public static RuntimeException toRuntime(Exception exception) {
+    public static RuntimeException runtime(Exception exception) {
         if (exception instanceof RuntimeException) {
             return (RuntimeException)exception;
         }

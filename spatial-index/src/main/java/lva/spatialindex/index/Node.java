@@ -48,7 +48,7 @@ class Node {
     }
 
     byte[] serialize() {
-        return Exceptions.runtime(() -> {
+        return Exceptions.toRuntime(() -> {
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             DataOutputStream os = new DataOutputStream(baos);
@@ -72,7 +72,7 @@ class Node {
 
 
     Node deserialize(byte[] buff) {
-        return Exceptions.runtime(() -> {
+        return Exceptions.toRuntime(() -> {
 
             ByteArrayInputStream bais = new ByteArrayInputStream(buff);
             DataInputStream is = new DataInputStream(bais);

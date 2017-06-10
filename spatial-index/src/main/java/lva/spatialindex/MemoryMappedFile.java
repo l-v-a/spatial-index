@@ -38,7 +38,7 @@ public class MemoryMappedFile implements StorageSpace {
 
             BYTE_ARRAY_OFFSET = unsafe.arrayBaseOffset(byte[].class);
         } catch (Exception e){
-            throw Exceptions.toRuntime(e);
+            throw Exceptions.runtime(e);
         }
 
     }
@@ -60,7 +60,7 @@ public class MemoryMappedFile implements StorageSpace {
     }
 
     private void mapAndSetOffset() {
-        Exceptions.runtime(() -> {
+        Exceptions.toRuntime(() -> {
             // TODO: hold the files
             try (RandomAccessFile backingFile = new RandomAccessFile(this.filePath, "rw")) {
                 backingFile.setLength(this.capacity);
@@ -72,7 +72,7 @@ public class MemoryMappedFile implements StorageSpace {
     }
 
     private void remap(long nLen) {
-        Exceptions.runtime(() -> {
+        Exceptions.toRuntime(() -> {
             unmmapMethod.invoke(null, baseAddress, this.capacity);
             this.capacity = roundTo4096(nLen);
             mapAndSetOffset();
@@ -81,7 +81,7 @@ public class MemoryMappedFile implements StorageSpace {
 
     @Override
     public void close() {
-        Exceptions.runtime(() -> {
+        Exceptions.toRuntime(() -> {
             unmmapMethod.invoke(null, baseAddress, this.capacity);
         });
     }
