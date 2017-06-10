@@ -30,8 +30,13 @@ public class MemoryMappedFile implements StorageSpace {
     @Override
     public byte[] readBytes(long pos, int size) {
         byte [] data = new byte[size];
-        UNSAFE.copyMemory(null, baseAddress + pos, data, BYTE_ARRAY_OFFSET, data.length);
+        readBytes(pos, data);
         return data;
+    }
+
+    @Override
+    public void readBytes(long pos, byte[] buff) {
+        UNSAFE.copyMemory(null, baseAddress + pos, buff, BYTE_ARRAY_OFFSET, buff.length);
     }
 
     @Override
