@@ -28,7 +28,7 @@ public abstract class AbstractStorage<T> implements Storage<T>{
         }
 
         long offset = storageSpace.allocate(roundToRecordSize(buff.length));
-        storageSpace.putBytes(offset, buff);
+        storageSpace.writeBytes(offset, buff);
         return offset;
 
     }
@@ -44,7 +44,7 @@ public abstract class AbstractStorage<T> implements Storage<T>{
             throw new IllegalArgumentException("out of bounds");
         }
 
-        storageSpace.putBytes(offset, buff);
+        storageSpace.writeBytes(offset, buff);
     }
 
     @Override
@@ -53,7 +53,7 @@ public abstract class AbstractStorage<T> implements Storage<T>{
             throw new IllegalArgumentException("out of bounds");
         }
 
-        byte[] buff = storageSpace.getBytes(offset, recordSize);
+        byte[] buff = storageSpace.readBytes(offset, recordSize);
         return getSerializer().deserialize(buff);
     }
 

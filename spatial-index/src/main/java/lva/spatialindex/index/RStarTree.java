@@ -75,7 +75,7 @@ public class RStarTree implements AutoCloseable {
         adjust(leafNode, newNode);
     }
 
-    Node chooseLeaf(Node node, Rectangle newMbr) {
+    static Node chooseLeaf(Node node, Rectangle newMbr) {
         if (node.isLeaf()) {
             return node;
         }
@@ -115,7 +115,7 @@ public class RStarTree implements AutoCloseable {
         return chooseLeaf(node, newMbr);
     }
 
-    Node splitNode(Node node, Node newNode) {
+    static Node splitNode(Node node, Node newNode) {
         if (node.isLeaf() != newNode.isLeaf()) {
             return newNode;
         }

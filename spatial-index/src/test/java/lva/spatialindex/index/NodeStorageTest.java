@@ -44,7 +44,7 @@ public class NodeStorageTest {
     @Test
     public void should_add_to_storage() {
         storage.add(node);
-        verify(storageSpace).putBytes(anyLong(), eq(serializedNode));
+        verify(storageSpace).writeBytes(anyLong(), eq(serializedNode));
     }
 
     @Test
@@ -94,7 +94,7 @@ public class NodeStorageTest {
 
         storage.write(0, node);
 
-        verify(storageSpace).putBytes(anyLong(), eq(serializedNode));
+        verify(storageSpace).writeBytes(anyLong(), eq(serializedNode));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -136,7 +136,7 @@ public class NodeStorageTest {
 
         when(storageSpace.getSize())
             .thenReturn((long) NodeStorage.RECORD_SIZE + offset);
-        when(storageSpace.getBytes(eq(offset), eq(NodeStorage.RECORD_SIZE)))
+        when(storageSpace.readBytes(eq(offset), eq(NodeStorage.RECORD_SIZE)))
             .thenReturn(serializedNode);
 
         Node newNode  = nodeStorage.read(offset);
@@ -164,7 +164,7 @@ public class NodeStorageTest {
         Node newNode = nodeStorage.read(node.getOffset());
 
         assertSame(newNode, node);
-        verify(storageSpace, never()).getBytes(anyLong(), anyInt());
+        verify(storageSpace, never()).readBytes(anyLong(), anyInt());
     }
 
     @Test
