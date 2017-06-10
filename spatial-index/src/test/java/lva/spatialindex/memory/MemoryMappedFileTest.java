@@ -72,7 +72,7 @@ public class MemoryMappedFileTest {
         }
 
         try (RandomAccessFile raf = new RandomAccessFile(FILE_PATH.toString(), "r")) {
-            assertEquals(MemoryMappedFile.PAGE_SIZE, raf.length());
+            assertEquals(0, raf.length() % MemoryMappedFile.PAGE_SIZE);
         }
     }
 
@@ -84,7 +84,7 @@ public class MemoryMappedFileTest {
         }
 
         try (RandomAccessFile raf = new RandomAccessFile(FILE_PATH.toString(), "r")) {
-            assertEquals(MemoryMappedFile.PAGE_SIZE * 2, raf.length());
+            assertEquals(0, raf.length() % MemoryMappedFile.PAGE_SIZE);
         }
     }
 
@@ -124,5 +124,4 @@ public class MemoryMappedFileTest {
             assertEquals(10, mmf.getSize());
         }
     }
-
 }

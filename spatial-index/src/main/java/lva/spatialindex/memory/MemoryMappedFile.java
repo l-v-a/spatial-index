@@ -43,7 +43,7 @@ public class MemoryMappedFile implements StorageSpace {
     public long allocate(long sizeOf) {
         long offset = size;
         while (offset + sizeOf > getCapacity())  {
-            remap(getCapacity() * 2);
+            remap(capacity + (capacity >> 1));
         }
 
         size += sizeOf;
@@ -78,10 +78,10 @@ public class MemoryMappedFile implements StorageSpace {
         });
     }
 
-    private void remap(long nLen) {
+    private void remap(long length) {
         Exceptions.toRuntime(() -> {
             unmap(baseAddress, capacity);
-            capacity = roundToPage(nLen);
+            capacity = roundToPage(length);
             mapBackingFile();
         });
     }
