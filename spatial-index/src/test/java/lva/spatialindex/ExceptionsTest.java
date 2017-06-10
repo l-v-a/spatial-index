@@ -35,6 +35,7 @@ public class ExceptionsTest {
         try {
             Exceptions.toRuntime(() -> { throw new InvocationTargetException(new IOException()); });
         } catch (UncheckedIOException exc) {
+            assertTrue(true);
             return;
         }
         fail();
@@ -45,6 +46,7 @@ public class ExceptionsTest {
         try {
             Exceptions.toRuntime(() -> { throw new IOException(); });
         } catch (UncheckedIOException exc) {
+            assertTrue(true);
             return;
         }
         fail();

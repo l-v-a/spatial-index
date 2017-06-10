@@ -12,7 +12,7 @@ public class Exceptions {
     private Exceptions() {}
 
     @FunctionalInterface
-    interface VoidCallable {
+    public interface VoidCallable {
         void call() throws Exception;
 
         default Callable<Void> toCallable() {
@@ -23,16 +23,16 @@ public class Exceptions {
         }
     }
 
+    public static void toRuntime(VoidCallable voidCallable) {
+        toRuntime(voidCallable.toCallable());
+    }
+
     public static <T> T toRuntime(Callable<T> callable) {
         try {
             return callable.call();
         } catch (Exception exc) {
             throw runtime(exc);
         }
-    }
-
-    public static void toRuntime(VoidCallable voidCallable) {
-        toRuntime(voidCallable.toCallable());
     }
 
     public static RuntimeException runtime(Exception exception) {
