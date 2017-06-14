@@ -20,7 +20,7 @@ import static lva.spatialindex.index.Rectangles.area;
 /**
  * @author vlitvinenko
  */
-public class RStarTree implements AutoCloseable {
+public class RStarTree implements Index {
     private final Storage<Node> storage;
     private Node root;
 
@@ -30,6 +30,7 @@ public class RStarTree implements AutoCloseable {
         this.root = Node.newNode(this.storage);
     }
 
+    @Override
     public Collection<Long> search(Rectangle area) {
         return search(root, area);
     }
