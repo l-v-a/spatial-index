@@ -1,5 +1,6 @@
 package lva.shapeviewer;
 
+import lombok.SneakyThrows;
 import lva.spatialindex.Exceptions;
 import lva.spatialindex.index.Index;
 
@@ -20,26 +21,20 @@ public class MultiIndex implements Index {
     }
 
     @Override
+    @SneakyThrows
     public Collection<Long> search(Rectangle area) {
-        return Exceptions.toRuntime(() -> {
-            try {
-                List<Future<Collection<Long>>> searchResults = new ArrayList<>(indexes.size());
-                for (Index index : indexes) {
-                    searchResults.add(ExecutorUtils.EXECUTOR_SERVICE.submit(() -> index.search(area)));
-                }
+        List<Future<Collection<Long>>> searchResults = new ArrayList<>(indexes.size());
+        for (Index index : indexes) {
+            searchResults.add(ExecutorUtils.EXECUTOR_SERVICE.submit(() -> index.search(area)));
+        }
 
-                Collection<Long> result = new ArrayList<>();
-                for (Future<Collection<Long>> searchResult : searchResults) {
-                    result.addAll(searchResult.get());
-                }
+        Collection<Long> result = new ArrayList<>();
+        for (Future<Collection<Long>> searchResult : searchResults) {
+            result.addAll(searchResult.get());
+        }
 
-                return result;
+        return result;
 
-            } catch (InterruptedException ie) { // TODO: think about
-                Thread.currentThread().interrupt();
-                throw ie;
-            }
-        });
     }
 
     @Override

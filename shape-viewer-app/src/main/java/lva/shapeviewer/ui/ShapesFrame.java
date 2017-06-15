@@ -8,6 +8,7 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.*;
 import java.util.*;
 
@@ -71,6 +72,9 @@ public class ShapesFrame extends JFrame {
             }
         });
 
+
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        setLocation(dim.width / 2 - getSize().width / 2, dim.height / 2 - getSize().height / 2);
     }
 
     private static final Dimension PANE_SIZE = new Dimension(5000, 5000);
@@ -201,18 +205,12 @@ public class ShapesFrame extends JFrame {
 
     private void update() {
         Rectangle viewport = getViewport();
+        shapes = shapeRepository.search(viewport);
+        Collections.sort(shapes, Comparator.comparing(Shape::getOrder, Integer::compare));
 
-        try {
-            shapes = shapeRepository.search(viewport);
-            Collections.sort(shapes, Comparator.comparing(Shape::getOrder, Integer::compare));
-
-            canvas.setViewport(viewport);
-            canvas.setShapes(shapes);
-            canvas.repaint();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        canvas.setViewport(viewport);
+        canvas.setShapes(shapes);
+        canvas.repaint();
     }
 
     private void closeResources() {

@@ -3,10 +3,9 @@ package lva.shapeviewer;
 import lva.shapeviewer.ui.ProgressFrame;
 
 import javax.swing.*;
-import java.lang.reflect.InvocationTargetException;
 
 public class App {
-    public static void main(String[] args) throws InvocationTargetException, InterruptedException {
+    public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             ProgressFrame progressFrame = new ProgressFrame();
             progressFrame.setVisible(true);

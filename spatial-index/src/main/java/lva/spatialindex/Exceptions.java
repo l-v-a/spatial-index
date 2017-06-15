@@ -36,6 +36,10 @@ public class Exceptions {
     }
 
     public static RuntimeException runtime(Exception exception) {
+        if (exception instanceof InterruptedException) {
+            Thread.currentThread().interrupt();
+        }
+
         if (exception instanceof RuntimeException) {
             return (RuntimeException)exception;
         }
