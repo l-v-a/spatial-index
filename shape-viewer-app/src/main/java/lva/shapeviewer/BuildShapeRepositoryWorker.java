@@ -1,8 +1,8 @@
 package lva.shapeviewer;
 
 import com.google.common.util.concurrent.MoreExecutors;
+import lombok.NonNull;
 import lva.shapeviewer.ui.ProgressFrame;
-import lva.shapeviewer.ui.ShapesFrame;
 import lva.spatialindex.Storage;
 import lva.spatialindex.index.Index;
 
@@ -17,6 +17,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 
 import static java.util.Arrays.asList;
 import static lva.shapeviewer.AutoCloseables.close;
@@ -28,9 +29,12 @@ import static lva.shapeviewer.BuildIndexTask.NULL_INDEX_DATA;
 public class BuildShapeRepositoryWorker extends SwingWorker<ShapeRepository, Void> implements PropertyChangeListener{
     private static final int MAX_ELEMENTS_IN_TREE = 1000 * 1000;
     private final ProgressFrame progressView;
+    private final Consumer<ShapeRepository> doneConsumer;
 
-    public BuildShapeRepositoryWorker(ProgressFrame progressView) {
+    public BuildShapeRepositoryWorker(@NonNull ProgressFrame progressView, @NonNull Consumer<ShapeRepository> doneConsumer) {
         this.progressView = progressView;
+        this.doneConsumer = doneConsumer;
+
         this.progressView.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -143,26 +147,12 @@ public class BuildShapeRepositoryWorker extends SwingWorker<ShapeRepository, Voi
             System.out.println("cancelled");
         } else {
             try {
-                ShapeRepository repository = get();
                 System.out.println("ok");
-                ShapesFrame shapesFrame = new ShapesFrame(repository);
-                shapesFrame.setVisible(true);
+                doneConsumer.accept(get());
+
             } catch (Exception e) {
                 // TODO: add exception handling / rethrowing
             }
-//            try {
-//                get();
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            } catch (ExecutionException e) {
-//                e.printStackTrace();
-//            }
-//            // 1 get result
-//            // 2 pass it to search controller
-//            JFrame frame = new JFrame();
-//            frame.setBounds(0, 0, 100, 100);
-//            frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-//            frame.setVisible(true);
         }
     }
 
