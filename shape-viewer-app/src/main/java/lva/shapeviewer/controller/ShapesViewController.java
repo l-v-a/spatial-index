@@ -1,6 +1,7 @@
 package lva.shapeviewer.controller;
 
 import com.google.common.collect.Lists;
+import lombok.NonNull;
 import lva.shapeviewer.Shape;
 import lva.shapeviewer.ShapeRepository;
 import lva.shapeviewer.ui.ShapesFrame;
@@ -15,12 +16,12 @@ import java.util.List;
 /**
  * @author vlitvinenko
  */
-public class ShapesViewController implements ShapesFrame.ShapeViewListener {
+public class ShapesViewController implements ShapesFrame.ShapesViewListener {
     private final ShapesFrame view;
     private final ShapeRepository shapeRepository;
     private List<Shape> visibleShapes;
 
-    public ShapesViewController(ShapesFrame view, ShapeRepository shapeRepository) {
+    public ShapesViewController(@NonNull ShapesFrame view, @NonNull ShapeRepository shapeRepository) {
         this.view = view;
         this.view.setViewListener(this);
         this.shapeRepository = shapeRepository;
@@ -31,7 +32,7 @@ public class ShapesViewController implements ShapesFrame.ShapeViewListener {
     }
 
     @Override
-    public void clicked(MouseEvent event) {
+    public void clicked(@NonNull MouseEvent event) {
         Rectangle viewport = view.getViewport();
         // translate to viewport
         int x = event.getX() + viewport.x;

@@ -1,24 +1,23 @@
 package lva.shapeviewer.ui;
 
+import lombok.NonNull;
 import lombok.Setter;
 import lva.shapeviewer.Shape;
 
 import javax.swing.*;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class ShapesFrame extends JFrame {
-    public interface ShapeViewListener {
-        void clicked(MouseEvent event);
+    public interface ShapesViewListener {
+        void clicked(@NonNull MouseEvent event);
         void viewPortChanged();
         void closing();
     }
 
-    private static final ShapeViewListener NULL_LISTENER = new ShapeViewListener() {
+    private static final ShapesViewListener NULL_LISTENER = new ShapesViewListener() {
         @Override
         public void clicked(MouseEvent event) {}
 
@@ -32,7 +31,7 @@ public class ShapesFrame extends JFrame {
     private static final Dimension PANE_SIZE = new Dimension(5000, 5000);
 
     @Setter
-    private ShapeViewListener viewListener = NULL_LISTENER;
+    private ShapesViewListener viewListener = NULL_LISTENER;
 
     private final Canvas canvas;
     private final JScrollBar hbar;
@@ -93,12 +92,13 @@ public class ShapesFrame extends JFrame {
         setLocation(dim.width / 2 - getSize().width / 2, dim.height / 2 - getSize().height / 2);
     }
 
+    @NonNull
     public Rectangle getViewport() {
         return new Rectangle(hbar.getValue(), vbar.getValue(),
             hbar.getVisibleAmount(), vbar.getVisibleAmount());
     }
 
-    public void setShapes(Collection<Shape> shapes) {
+    public void setShapes(@NonNull Collection<Shape> shapes) {
         canvas.setShapes(shapes);
     }
 
@@ -137,6 +137,27 @@ public class ShapesFrame extends JFrame {
     private void viewportChanged() {
         canvas.setViewport(getViewport());
         viewListener.viewPortChanged();
+    }
+
+    private static class Canvas extends JComponent {
+        private Rectangle viewport = new Rectangle();
+        private Collection<Shape> shapes = new ArrayList<>();
+
+        @Override
+        public void paint(Graphics g) {
+            g.translate(-viewport.x, -viewport.y);
+            for (Shape shape : shapes) {
+                shape.draw(g);
+            }
+        }
+
+        void setViewport(Rectangle viewport) {
+            this.viewport = viewport;
+        }
+
+        void setShapes(Collection<Shape> shapes) {
+            this.shapes = shapes;
+        }
     }
 }
 
