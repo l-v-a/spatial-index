@@ -22,7 +22,7 @@ class BuildIndexTask implements Callable<Index> {
         private final Rectangle mbr;
     }
 
-    static final IndexData NULL_INDEX_DATA = new IndexData(0, null);
+    static final IndexData NULL_INDEX_DATA = new IndexData(0, new Rectangle());
 
     private final int maxNumberOfElements;
     private final BlockingQueue<IndexData> objectsQueue;
