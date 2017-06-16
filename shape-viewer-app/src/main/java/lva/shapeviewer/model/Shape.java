@@ -1,6 +1,8 @@
 package lva.shapeviewer.model;
 
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import lva.spatialindex.Exceptions;
 
 import java.awt.Color;
@@ -17,17 +19,24 @@ import java.io.DataOutputStream;
 public class Shape {
     // TODO: make interface
 
+    @NonNull
+    @Getter
     private final Rectangle mbr;
+
+    @Getter
+    @Setter
     private boolean isActive;
+
+    @Getter
+    @Setter
     private int order;
+
+    @Getter
+    @Setter
     private long offset;
 
     public Shape(@NonNull Rectangle mbr) {
         this.mbr = mbr;
-    }
-
-    public Rectangle getMbr() {
-        return mbr;
     }
 
     public void draw(@NonNull Graphics g) {
@@ -79,29 +88,5 @@ public class Shape {
 
     public boolean hitTest(int x, int y) {
         return getMbr().contains(x, y);
-    }
-
-    public long getOffset() {
-        return offset;
-    }
-
-    public void setOffset(long offset) {
-        this.offset = offset;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
-    public int getOrder() {
-        return order;
-    }
-
-    public void setOrder(int order) {
-        this.order = order;
     }
 }
