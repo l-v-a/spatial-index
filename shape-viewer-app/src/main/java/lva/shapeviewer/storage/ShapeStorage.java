@@ -1,8 +1,8 @@
-package lva.shapeviewer.model;
+package lva.shapeviewer.storage;
 
 import lombok.NonNull;
-import lva.spatialindex.AbstractStorage;
 import lva.spatialindex.memory.MemoryMappedFile;
+import lva.spatialindex.storage.AbstractStorage;
 
 /**
  * @author vlitvinenko

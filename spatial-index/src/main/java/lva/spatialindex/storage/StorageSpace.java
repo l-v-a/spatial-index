@@ -1,4 +1,4 @@
-package lva.spatialindex;
+package lva.spatialindex.storage;
 
 /**
  * @author vlitvinenko

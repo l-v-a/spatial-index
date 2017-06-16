@@ -1,5 +1,6 @@
 package lva.spatialindex;
 
+import lva.spatialindex.utils.Exceptions;
 import org.junit.Test;
 
 import java.io.IOException;

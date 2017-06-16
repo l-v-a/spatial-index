@@ -1,7 +1,7 @@
 package lva.spatialindex.index;
 
 import lombok.EqualsAndHashCode;
-import lva.spatialindex.Storage;
+import lva.spatialindex.storage.Storage;
 
 import java.awt.Rectangle;
 import java.util.Comparator;

@@ -1,6 +1,6 @@
 package lva.spatialindex.memory.unsafe;
 
-import lva.spatialindex.Exceptions;
+import lva.spatialindex.utils.Exceptions;
 import sun.misc.Unsafe;
 import sun.nio.ch.FileChannelImpl;
 

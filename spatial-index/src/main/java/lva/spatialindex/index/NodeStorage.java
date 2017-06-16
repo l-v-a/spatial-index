@@ -3,9 +3,9 @@ package lva.spatialindex.index;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import lva.spatialindex.AbstractStorage;
-import lva.spatialindex.StorageSpace;
 import lva.spatialindex.memory.MemoryMappedFile;
+import lva.spatialindex.storage.AbstractStorage;
+import lva.spatialindex.storage.StorageSpace;
 
 import javax.annotation.Nonnull;
 

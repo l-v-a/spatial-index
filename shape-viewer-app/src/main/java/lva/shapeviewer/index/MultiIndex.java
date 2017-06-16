@@ -1,11 +1,11 @@
-package lva.shapeviewer.model;
+package lva.shapeviewer.index;
 
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lva.shapeviewer.utils.AutoCloseables;
 import lva.shapeviewer.utils.ExecutorUtils;
-import lva.spatialindex.Exceptions;
 import lva.spatialindex.index.Index;
+import lva.spatialindex.utils.Exceptions;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;

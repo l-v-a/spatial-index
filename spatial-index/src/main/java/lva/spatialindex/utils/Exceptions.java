@@ -1,4 +1,4 @@
-package lva.spatialindex;
+package lva.spatialindex.utils;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

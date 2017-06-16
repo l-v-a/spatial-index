@@ -1,8 +1,8 @@
 package lva.spatialindex.index;
 
 import lombok.EqualsAndHashCode;
-import lva.spatialindex.Exceptions;
-import lva.spatialindex.Storage;
+import lva.spatialindex.storage.Storage;
+import lva.spatialindex.utils.Exceptions;
 
 import java.awt.Rectangle;
 import java.io.ByteArrayInputStream;

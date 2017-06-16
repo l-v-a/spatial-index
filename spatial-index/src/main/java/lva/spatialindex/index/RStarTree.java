@@ -1,7 +1,7 @@
 package lva.spatialindex.index;
 
-import lva.spatialindex.Storage;
 import lva.spatialindex.index.Distributions.GroupPair;
+import lva.spatialindex.storage.Storage;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;

@@ -1,8 +1,8 @@
 package lva.spatialindex.index;
 
 import com.google.common.util.concurrent.UncheckedExecutionException;
-import lva.spatialindex.Storage;
-import lva.spatialindex.StorageSpace;
+import lva.spatialindex.storage.Storage;
+import lva.spatialindex.storage.StorageSpace;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

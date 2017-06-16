@@ -1,13 +1,13 @@
 package lva.shapeviewer.controller;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import lva.shapeviewer.model.MultiIndex;
-import lva.shapeviewer.model.Shape;
+import lva.shapeviewer.index.MultiIndex;
 import lva.shapeviewer.model.ShapeRepository;
-import lva.shapeviewer.model.ShapeStorage;
+import lva.shapeviewer.storage.Shape;
+import lva.shapeviewer.storage.ShapeStorage;
 import lva.shapeviewer.utils.AutoCloseables;
-import lva.spatialindex.Storage;
 import lva.spatialindex.index.Index;
+import lva.spatialindex.storage.Storage;
 
 import javax.swing.*;
 import java.awt.Rectangle;
@@ -39,7 +39,7 @@ class ShapeRepositoryWorker extends SwingWorker<ShapeRepository, Void> {
 
             return new ShapeRepository(shapeStorage, index);
         } catch (Exception e) {
-            close(asList(shapeStorage, index));
+            AutoCloseables.close(asList(shapeStorage, index));
             throw e;
         }
     }

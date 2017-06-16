@@ -1,7 +1,7 @@
 package lva.spatialindex.memory;
 
-import lva.spatialindex.Exceptions;
-import lva.spatialindex.StorageSpace;
+import lva.spatialindex.storage.StorageSpace;
+import lva.spatialindex.utils.Exceptions;
 
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;

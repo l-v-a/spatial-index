@@ -1,9 +1,9 @@
-package lva.shapeviewer.model;
+package lva.shapeviewer.storage;
 
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import lva.spatialindex.Exceptions;
+import lva.spatialindex.utils.Exceptions;
 
 import java.awt.Color;
 import java.awt.Graphics;
