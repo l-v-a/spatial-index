@@ -5,6 +5,7 @@ import lva.shapeviewer.model.MultiIndex;
 import lva.shapeviewer.model.Shape;
 import lva.shapeviewer.model.ShapeRepository;
 import lva.shapeviewer.model.ShapeStorage;
+import lva.shapeviewer.utils.AutoCloseables;
 import lva.spatialindex.Storage;
 import lva.spatialindex.index.Index;
 
@@ -17,7 +18,6 @@ import java.util.Collection;
 import java.util.concurrent.*;
 
 import static java.util.Arrays.asList;
-import static lva.shapeviewer.utils.AutoCloseables.close;
 
 /**
  * @author vlitvinenko
@@ -109,7 +109,7 @@ class ShapeRepositoryWorker extends SwingWorker<ShapeRepository, Void> {
 
         } catch (Exception exc) {
             MoreExecutors.shutdownAndAwaitTermination(executor, 1, TimeUnit.SECONDS);
-            close(indexes, exc);
+            AutoCloseables.close(indexes, exc);
             // TODO: remove files
         }
 

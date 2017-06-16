@@ -1,6 +1,7 @@
 package lva.shapeviewer.controller;
 
 import lombok.NonNull;
+import lombok.SneakyThrows;
 import lva.shapeviewer.model.ShapeRepository;
 import lva.shapeviewer.ui.ProgressFrame;
 
@@ -44,6 +45,7 @@ public class ShapeRepositoryController {
         worker.execute();
     }
 
+    @SneakyThrows
     private void handleWorkerDone() {
         System.out.println("done()");
 
@@ -53,12 +55,8 @@ public class ShapeRepositoryController {
         if (worker.isCancelled()) {
             System.out.println("cancelled");
         } else {
-            try {
-                System.out.println("ok");
-                doneConsumer.accept(worker.get());
-            } catch (Exception e) {
-                // TODO: add exception handling / rethrowing
-            }
+            System.out.println("ok");
+            doneConsumer.accept(worker.get());
         }
     }
 
