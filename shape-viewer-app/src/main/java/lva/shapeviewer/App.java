@@ -2,6 +2,7 @@ package lva.shapeviewer;
 
 import lva.shapeviewer.controller.ShapeRepositoryController;
 import lva.shapeviewer.controller.ShapesViewController;
+import lva.shapeviewer.model.ShapeRepository;
 import lva.shapeviewer.ui.ProgressFrame;
 import lva.shapeviewer.ui.ShapesFrame;
 

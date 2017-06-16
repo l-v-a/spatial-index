@@ -1,4 +1,4 @@
-package lva.shapeviewer;
+package lva.shapeviewer.utils;
 
 import com.google.common.util.concurrent.MoreExecutors;
 

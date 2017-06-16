@@ -1,5 +1,7 @@
-package lva.shapeviewer;
+package lva.shapeviewer.model;
 
+import lombok.NonNull;
+import lva.shapeviewer.utils.AutoCloseables;
 import lva.spatialindex.Exceptions;
 import lva.spatialindex.Storage;
 import lva.spatialindex.index.Index;
@@ -17,12 +19,13 @@ public class ShapeRepository implements AutoCloseable {
     private final Storage<Shape> shapeStorage;
     private final Index index;
 
-    public ShapeRepository(Storage<Shape> shapeStorage, Index index) {
+    public ShapeRepository(@NonNull Storage<Shape> shapeStorage, @NonNull Index index) {
         this.shapeStorage = shapeStorage;
         this.index = index;
     }
 
-    public List<Shape> search(Rectangle area) {
+    @NonNull
+    public List<Shape> search(@NonNull Rectangle area) {
         List<Shape> shapes = new ArrayList<>();
         for (long id : index.search(area)) {
             Shape shape = shapeStorage.read(id);
@@ -31,7 +34,7 @@ public class ShapeRepository implements AutoCloseable {
         return shapes;
     }
 
-    public void update(Shape shape) {
+    public void update(@NonNull Shape shape) {
         shapeStorage.write(shape.getOffset(), shape);
     }
 

@@ -1,5 +1,6 @@
-package lva.shapeviewer;
+package lva.shapeviewer.model;
 
+import lombok.NonNull;
 import lva.spatialindex.Exceptions;
 
 import java.awt.Color;
@@ -21,7 +22,7 @@ public class Shape {
     private int order;
     private long offset;
 
-    public Shape(Rectangle mbr) {
+    public Shape(@NonNull Rectangle mbr) {
         this.mbr = mbr;
     }
 
@@ -29,7 +30,7 @@ public class Shape {
         return mbr;
     }
 
-    public void draw(Graphics g) {
+    public void draw(@NonNull Graphics g) {
         g.setColor(Color.LIGHT_GRAY);
         g.fillRect(mbr.x, mbr.y, mbr.width, mbr.height);
 
@@ -38,7 +39,8 @@ public class Shape {
     }
 
     // TODO: move to ans use reflection
-    static byte[] serialize(Shape shape) {
+    @NonNull
+    static byte[] serialize(@NonNull Shape shape) {
         return Exceptions.toRuntime(() -> {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             DataOutputStream os = new DataOutputStream(baos);
@@ -54,7 +56,8 @@ public class Shape {
         });
     }
 
-    static Shape deserialize(byte[] buff) {
+    @NonNull
+    static Shape deserialize(@NonNull byte[] buff) {
         return Exceptions.toRuntime(() -> {
             ByteArrayInputStream bais = new ByteArrayInputStream(buff);
             DataInputStream is = new DataInputStream(bais);

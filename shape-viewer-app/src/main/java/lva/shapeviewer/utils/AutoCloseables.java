@@ -1,4 +1,6 @@
-package lva.shapeviewer;
+package lva.shapeviewer.utils;
+
+import lombok.NonNull;
 
 import java.util.Collection;
 
@@ -10,7 +12,7 @@ import java.util.Collection;
 public class AutoCloseables {
     private AutoCloseables() {}
 
-    public static <T extends AutoCloseable> void close(Collection<T> closeables, Exception wasThrown) throws Exception {
+    public static <T extends AutoCloseable> void close(@NonNull Collection<T> closeables, Exception wasThrown) throws Exception {
         Exception exception = wasThrown;
         for (T closeable: closeables) {
             try {
@@ -31,7 +33,7 @@ public class AutoCloseables {
         }
     }
 
-    public static <T extends AutoCloseable>  void close(Collection<T> closeables) throws Exception {
+    public static <T extends AutoCloseable>  void close(@NonNull Collection<T> closeables) throws Exception {
         close(closeables, null);
     }
 }

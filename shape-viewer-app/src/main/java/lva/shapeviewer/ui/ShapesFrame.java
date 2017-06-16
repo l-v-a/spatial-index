@@ -2,7 +2,7 @@ package lva.shapeviewer.ui;
 
 import lombok.NonNull;
 import lombok.Setter;
-import lva.shapeviewer.Shape;
+import lva.shapeviewer.model.Shape;
 
 import javax.swing.*;
 import java.awt.*;

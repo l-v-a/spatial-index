@@ -1,5 +1,7 @@
 package lva.shapeviewer.ui;
 
+import lombok.NonNull;
+
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -40,8 +42,7 @@ public class ProgressFrame extends JFrame {
         progressBar.setValue(value);
     }
 
-    public void setMessage(String message) {
+    public void setMessage(@NonNull String message) {
         messageLabel.setText(message);
     }
-
 }

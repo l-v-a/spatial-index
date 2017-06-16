@@ -1,6 +1,9 @@
-package lva.shapeviewer;
+package lva.shapeviewer.model;
 
+import lombok.NonNull;
 import lombok.SneakyThrows;
+import lva.shapeviewer.utils.AutoCloseables;
+import lva.shapeviewer.utils.ExecutorUtils;
 import lva.spatialindex.Exceptions;
 import lva.spatialindex.index.Index;
 
@@ -16,13 +19,14 @@ import java.util.concurrent.Future;
 public class MultiIndex implements Index {
     private final Collection<Index> indexes;
 
-    public MultiIndex(Collection<Index> indexes) {
+    public MultiIndex(@NonNull Collection<Index> indexes) {
         this.indexes = indexes;
     }
 
     @Override
+    @NonNull
     @SneakyThrows
-    public Collection<Long> search(Rectangle area) {
+    public Collection<Long> search(@NonNull Rectangle area) {
         List<Future<Collection<Long>>> searchResults = new ArrayList<>(indexes.size());
         for (Index index : indexes) {
             searchResults.add(ExecutorUtils.EXECUTOR_SERVICE.submit(() -> index.search(area)));

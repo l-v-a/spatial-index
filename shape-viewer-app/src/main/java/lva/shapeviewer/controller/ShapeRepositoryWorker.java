@@ -1,10 +1,10 @@
 package lva.shapeviewer.controller;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import lva.shapeviewer.MultiIndex;
-import lva.shapeviewer.Shape;
-import lva.shapeviewer.ShapeRepository;
-import lva.shapeviewer.ShapeStorage;
+import lva.shapeviewer.model.MultiIndex;
+import lva.shapeviewer.model.Shape;
+import lva.shapeviewer.model.ShapeRepository;
+import lva.shapeviewer.model.ShapeStorage;
 import lva.spatialindex.Storage;
 import lva.spatialindex.index.Index;
 
@@ -17,7 +17,7 @@ import java.util.Collection;
 import java.util.concurrent.*;
 
 import static java.util.Arrays.asList;
-import static lva.shapeviewer.AutoCloseables.close;
+import static lva.shapeviewer.utils.AutoCloseables.close;
 
 /**
  * @author vlitvinenko
@@ -58,7 +58,7 @@ class ShapeRepositoryWorker extends SwingWorker<ShapeRepository, Void> {
             Collection<Future<Index>> futures = new ArrayList<>(numOfTasks);
 
             for (int taskNumber = 0; taskNumber < numOfTasks; taskNumber++) {
-                futures.add(executor.submit(new BuildIndexTask(MAX_ELEMENTS_IN_TREE, objectsQueue, taskNumber)));
+                futures.add(executor.submit(new BuildIndexTask(objectsQueue, taskNumber, MAX_ELEMENTS_IN_TREE)));
             }
 
             executor.shutdown();

@@ -1,7 +1,7 @@
 package lva.shapeviewer.controller;
 
 import lombok.NonNull;
-import lva.shapeviewer.ShapeRepository;
+import lva.shapeviewer.model.ShapeRepository;
 import lva.shapeviewer.ui.ProgressFrame;
 
 import java.awt.event.WindowAdapter;

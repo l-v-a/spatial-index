@@ -2,8 +2,8 @@ package lva.shapeviewer.controller;
 
 import com.google.common.collect.Lists;
 import lombok.NonNull;
-import lva.shapeviewer.Shape;
-import lva.shapeviewer.ShapeRepository;
+import lva.shapeviewer.model.Shape;
+import lva.shapeviewer.model.ShapeRepository;
 import lva.shapeviewer.ui.ShapesFrame;
 
 import java.awt.Rectangle;
