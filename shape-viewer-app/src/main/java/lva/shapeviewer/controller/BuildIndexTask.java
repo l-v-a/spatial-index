@@ -1,4 +1,4 @@
-package lva.shapeviewer;
+package lva.shapeviewer.controller;
 
 import lva.spatialindex.index.Index;
 import lva.spatialindex.index.RStarTree;
@@ -13,7 +13,7 @@ import static lva.shapeviewer.AutoCloseables.close;
 /**
  * @author vlitvinenko
  */
-public class BuildIndexTask implements Callable<Index> {
+class BuildIndexTask implements Callable<Index> {
     static class IndexData {
         final long offset;
         final Rectangle mbr;
@@ -30,7 +30,7 @@ public class BuildIndexTask implements Callable<Index> {
     private final BlockingQueue<IndexData> objectsQueue;
     private final int taskNumber;
 
-    public BuildIndexTask(int numOfElements, BlockingQueue<IndexData> objectsQueue, int taskNumber) {
+    BuildIndexTask(int numOfElements, BlockingQueue<IndexData> objectsQueue, int taskNumber) {
         this.numOfElements = numOfElements;
         this.objectsQueue = objectsQueue;
         this.taskNumber = taskNumber;

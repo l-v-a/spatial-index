@@ -1,50 +1,31 @@
-package lva.shapeviewer;
+package lva.shapeviewer.controller;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import lombok.NonNull;
-import lva.shapeviewer.ui.ProgressFrame;
+import lva.shapeviewer.MultiIndex;
+import lva.shapeviewer.Shape;
+import lva.shapeviewer.ShapeRepository;
+import lva.shapeviewer.ShapeStorage;
 import lva.spatialindex.Storage;
 import lva.spatialindex.index.Index;
 
 import javax.swing.*;
 import java.awt.Rectangle;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.*;
-import java.util.function.Consumer;
 
 import static java.util.Arrays.asList;
 import static lva.shapeviewer.AutoCloseables.close;
-import static lva.shapeviewer.BuildIndexTask.NULL_INDEX_DATA;
 
 /**
  * @author vlitvinenko
  */
-public class BuildShapeRepositoryWorker extends SwingWorker<ShapeRepository, Void> implements PropertyChangeListener{
+class ShapeRepositoryWorker extends SwingWorker<ShapeRepository, Void> {
     private static final int MAX_ELEMENTS_IN_TREE = 1000 * 1000;
-    private final ProgressFrame progressView;
-    private final Consumer<ShapeRepository> doneConsumer;
 
-    public BuildShapeRepositoryWorker(@NonNull ProgressFrame progressView, @NonNull Consumer<ShapeRepository> doneConsumer) {
-        this.progressView = progressView;
-        this.doneConsumer = doneConsumer;
-
-        this.progressView.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                cancelWorker();
-            }
-        });
-
-        addPropertyChangeListener(this);
-        this.progressView.setMessage("indexing...");
-    }
+    ShapeRepositoryWorker() {}
 
     @Override
     protected ShapeRepository doInBackground() throws Exception {
@@ -114,7 +95,7 @@ public class BuildShapeRepositoryWorker extends SwingWorker<ShapeRepository, Voi
             long offset = shapeStorage.add(shape);
 
             objectsQueue.put(new BuildIndexTask.IndexData(offset, shape.getMbr()));
-            objectsQueue.put(NULL_INDEX_DATA); // TODO: better to interrupt all tasks? ...
+            objectsQueue.put(BuildIndexTask.NULL_INDEX_DATA); // TODO: better to interrupt all tasks? ...
             // or (Future<Result> f : futures)
             // f.cancel(true);
             // TODO: think about to use CompletionService
@@ -134,39 +115,4 @@ public class BuildShapeRepositoryWorker extends SwingWorker<ShapeRepository, Voi
 
         return indexes;
     }
-
-
-    @Override
-    protected void done() {
-        System.out.println("done()");
-
-        progressView.setVisible(false);
-        progressView.dispose();
-
-        if (isCancelled()) {
-            System.out.println("cancelled");
-        } else {
-            try {
-                System.out.println("ok");
-                doneConsumer.accept(get());
-
-            } catch (Exception e) {
-                // TODO: add exception handling / rethrowing
-            }
-        }
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        if ("progress".equals(evt.getPropertyName())) {
-            int progress = (Integer) evt.getNewValue();
-            progressView.setProgress(progress);
-        }
-    }
-
-    private void cancelWorker() {
-        cancel(true);
-        progressView.setMessage("canceling...");
-    }
-
 }

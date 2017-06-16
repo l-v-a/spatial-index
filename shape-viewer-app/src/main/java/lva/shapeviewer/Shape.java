@@ -25,7 +25,7 @@ public class Shape {
         this.mbr = mbr;
     }
 
-    Rectangle getMbr() {
+    public Rectangle getMbr() {
         return mbr;
     }
 

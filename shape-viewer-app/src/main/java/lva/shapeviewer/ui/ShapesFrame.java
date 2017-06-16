@@ -33,22 +33,17 @@ public class ShapesFrame extends JFrame {
     @Setter
     private ShapesViewListener viewListener = NULL_LISTENER;
 
-    private final Canvas canvas;
-    private final JScrollBar hbar;
-    private final JScrollBar vbar;
+    private final Canvas canvas = new Canvas();
+    private final JScrollBar hbar = new JScrollBar(JScrollBar.HORIZONTAL);
+    private final JScrollBar vbar = new JScrollBar(JScrollBar.VERTICAL);
 
     public ShapesFrame() {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setBounds(0, 0, 1000, 800);
         setTitle("Shape Viewer");
 
-        canvas = new Canvas();
-
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
-
-        hbar = new JScrollBar(JScrollBar.HORIZONTAL);
-        vbar = new JScrollBar(JScrollBar.VERTICAL);
 
         Dimension paneSize = getPaneSize();
         hbar.setMaximum(paneSize.width);
@@ -66,7 +61,7 @@ public class ShapesFrame extends JFrame {
         canvas.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                canvasResized(e);
+                handleCanvasResized(e);
             }
         });
 
@@ -99,7 +94,7 @@ public class ShapesFrame extends JFrame {
     }
 
     public void setShapes(@NonNull Collection<Shape> shapes) {
-        canvas.setShapes(shapes);
+        canvas.shapes = shapes;
     }
 
     public void update() {
@@ -110,7 +105,7 @@ public class ShapesFrame extends JFrame {
         return PANE_SIZE;
     }
 
-    private void canvasResized(ComponentEvent event) {
+    private void handleCanvasResized(ComponentEvent event) {
         Dimension size = canvas.getSize();
 
         setScrollbarAmount(hbar, size.width);
@@ -135,7 +130,7 @@ public class ShapesFrame extends JFrame {
     }
 
     private void viewportChanged() {
-        canvas.setViewport(getViewport());
+        canvas.viewport = getViewport();
         viewListener.viewPortChanged();
     }
 
@@ -149,14 +144,6 @@ public class ShapesFrame extends JFrame {
             for (Shape shape : shapes) {
                 shape.draw(g);
             }
-        }
-
-        void setViewport(Rectangle viewport) {
-            this.viewport = viewport;
-        }
-
-        void setShapes(Collection<Shape> shapes) {
-            this.shapes = shapes;
         }
     }
 }
