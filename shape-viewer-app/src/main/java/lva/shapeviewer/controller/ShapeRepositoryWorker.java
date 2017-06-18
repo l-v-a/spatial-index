@@ -10,12 +10,18 @@ import lva.spatialindex.index.Index;
 import lva.spatialindex.storage.Storage;
 
 import javax.swing.*;
-import java.awt.Rectangle;
-import java.time.Duration;
-import java.time.Instant;
+import java.io.BufferedReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 
@@ -44,18 +50,49 @@ class ShapeRepositoryWorker extends SwingWorker<ShapeRepository, Void> {
         }
     }
 
+
+    private static final Pattern SHAPE_FORMAT_PATTERN
+        = Pattern.compile("\\s*(\\w+)\\s*:\\s*(\\d+\\s*(?:,\\s*\\d+\\s*)*)");
+    private static Shape parse(String str) {
+        Matcher matcher= SHAPE_FORMAT_PATTERN.matcher(str);
+        if (matcher.matches()) {
+            try {
+                String type = matcher.group(1);
+                String params = matcher.group(2);
+                List<Integer> args = Arrays.stream(params.split("\\s*,\\s*"))
+                    .map(Integer::valueOf)
+                    .collect(Collectors.toList());
+
+                int x = args.get(0);
+                int y = args.get(1);
+                int w = args.get(2);
+                int h = args.get(3);
+
+                return new Shape(x, y, w, h);
+            } catch (Exception exc) {
+                throw new IllegalArgumentException(String.format("Bad shape input string: %s", str), exc);
+            }
+        }
+
+        throw new IllegalArgumentException(String.format("Bad shape input string: %s", str));
+    }
+
+    private static final int SIZE_OF_SHAPE_BYTES_AVG = 26;
     private Collection<Index> buildIndexes(Storage<Shape> shapeStorage) throws Exception {
         Collection<Index> indexes = new ArrayList<>();
         ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         try {
-            int maxRows = 100;
-            int maxCols = 100;
-            int numOfElements = maxRows * maxCols;
-            int numOfTasks = (numOfElements + MAX_ELEMENTS_IN_TREE - 1) / MAX_ELEMENTS_IN_TREE;
+
+            Path shapesFile = Paths.get("/home/vlitvinenko/work/lab/rtree/shapes.txt");
+            int numberOfShapesEstimated = (int) Files.size(shapesFile) / SIZE_OF_SHAPE_BYTES_AVG;
+            int numOfTasks = (numberOfShapesEstimated + MAX_ELEMENTS_IN_TREE - 1) / MAX_ELEMENTS_IN_TREE;
 
             BlockingQueue<BuildIndexTask.IndexData> objectsQueue = new LinkedBlockingQueue<>(1000 * 1000);
             Collection<Future<Index>> futures = new ArrayList<>(numOfTasks);
+
+            System.out.printf("Starting. shapes number est.: %s\n tasks number: %s\n",
+                numberOfShapesEstimated, numOfTasks);
 
             for (int taskNumber = 0; taskNumber < numOfTasks; taskNumber++) {
                 futures.add(executor.submit(new BuildIndexTask(objectsQueue, taskNumber, MAX_ELEMENTS_IN_TREE)));
@@ -63,49 +100,40 @@ class ShapeRepositoryWorker extends SwingWorker<ShapeRepository, Void> {
 
             executor.shutdown();
 
-            System.out.println("start build");
-            Instant start = Instant.now();
+            try (BufferedReader reader = Files.newBufferedReader(shapesFile)) {
+                int order = 0;
+                String line;
 
-            int off = 0;
-            int count = 0;
-            int percent = -1;
+                setProgress(0);
 
-            for (int row = 0; row < maxRows; row++) {
-                for (int col = 0; col < maxCols; col++) {
-                    Rectangle r = new Rectangle(off + 3 + row * 35, off + 3 + col * 35, 50, 50);
-                    // Rectangle r = new Rectangle(3 + row * 15 + col % 50 , 3 + col * 15 + row % 50, 10 + col % 50, 10 + row % 50);
-                    Shape shape = new Shape(r);
-                    shape.setOrder(count);
-                    long offset = shapeStorage.add(shape);
+                while ((line = reader.readLine()) != null) {
+                    if (!line.trim().isEmpty()) {
+                        // parse to shape
+                        Shape shape = parse(line);
+                        shape.setOrder(order++);
 
-                    objectsQueue.put(new BuildIndexTask.IndexData(offset, shape.getMbr()));
-                    count++;
-                    int newPercent = (int) ((count * 100L) / numOfElements);
-                    if (newPercent != percent) {
-                        percent = newPercent;
-                        System.out.printf("\rputted %d%%", percent);
-                        setProgress(Math.min(percent,100)); // TODO: simplify
+                        // add to storage
+                        long offset = shapeStorage.add(shape);
+
+                        // scatter to tasks for indexing
+                        objectsQueue.put(new BuildIndexTask.IndexData(offset, shape.getMbr()));
+
+                        int percent = (int) ((order * 100L) / numberOfShapesEstimated);
+                        setProgress(Math.min(percent, 100));
                     }
-
                 }
             }
 
-            Rectangle r = new Rectangle(5000 - 30, 5000 - 30, 30, 30);
-            Shape shape = new Shape(r);
-            long offset = shapeStorage.add(shape);
+            // last task marker
+            objectsQueue.put(BuildIndexTask.NULL_INDEX_DATA);
 
-            objectsQueue.put(new BuildIndexTask.IndexData(offset, shape.getMbr()));
-            objectsQueue.put(BuildIndexTask.NULL_INDEX_DATA); // TODO: better to interrupt all tasks? ...
-            // or (Future<Result> f : futures)
-            // f.cancel(true);
-            // TODO: think about to use CompletionService
+            System.out.println("All shapes added, waiting for tasks");
 
             for (Future<Index> f : futures) {
                 indexes.add(f.get());
             }
 
-            Duration d = Duration.between(start, Instant.now());
-            System.out.printf("\nBuild in time %d ms%n", d.toMillis());
+            setProgress(100);
 
         } catch (Exception exc) {
             MoreExecutors.shutdownAndAwaitTermination(executor, 1, TimeUnit.SECONDS);

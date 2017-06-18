@@ -63,7 +63,7 @@ public class RStarTree implements Index {
     }
 
     void insert(Node node, long offset, Rectangle newMbr) {
-        Node leafNode = chooseLeaf(node, newMbr);
+        Node leafNode = chooseSubtree(node, newMbr);
         Node newNode = null;
 
         Entry entry = new Entry(storage, newMbr, -(offset + 1)); // TODO: move logic to entry
@@ -76,7 +76,7 @@ public class RStarTree implements Index {
         adjust(leafNode, newNode);
     }
 
-    static Node chooseLeaf(Node node, Rectangle newMbr) {
+    static Node chooseSubtree(Node node, Rectangle newMbr) {
         if (node.isLeaf()) {
             return node;
         }
@@ -113,7 +113,7 @@ public class RStarTree implements Index {
 //            .map(Entry::getChildNode)
 //            .orElse(null);
 
-        return chooseLeaf(node, newMbr);
+        return chooseSubtree(node, newMbr);
     }
 
     static Node splitNode(Node node, Node newNode) {

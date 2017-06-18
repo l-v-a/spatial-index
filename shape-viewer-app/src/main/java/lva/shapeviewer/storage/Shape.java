@@ -35,6 +35,10 @@ public class Shape {
     @Setter
     private long offset;
 
+    public Shape(int x, int y, int width, int height) {
+        this(new Rectangle(x, y, width, height));
+    }
+
     public Shape(@NonNull Rectangle mbr) {
         this.mbr = mbr;
     }
