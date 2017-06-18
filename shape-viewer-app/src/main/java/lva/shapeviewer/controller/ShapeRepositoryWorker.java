@@ -3,6 +3,7 @@ package lva.shapeviewer.controller;
 import com.google.common.util.concurrent.MoreExecutors;
 import lva.shapeviewer.index.MultiIndex;
 import lva.shapeviewer.model.ShapeRepository;
+import lva.shapeviewer.storage.RectangleShape;
 import lva.shapeviewer.storage.Shape;
 import lva.shapeviewer.storage.ShapeStorage;
 import lva.shapeviewer.utils.AutoCloseables;
@@ -53,7 +54,7 @@ class ShapeRepositoryWorker extends SwingWorker<ShapeRepository, Void> {
 
     private static final Pattern SHAPE_FORMAT_PATTERN
         = Pattern.compile("\\s*(\\w+)\\s*:\\s*(\\d+\\s*(?:,\\s*\\d+\\s*)*)");
-    private static Shape parse(String str) {
+    private static Shape parseShape(String str) {
         Matcher matcher= SHAPE_FORMAT_PATTERN.matcher(str);
         if (matcher.matches()) {
             try {
@@ -68,7 +69,7 @@ class ShapeRepositoryWorker extends SwingWorker<ShapeRepository, Void> {
                 int w = args.get(2);
                 int h = args.get(3);
 
-                return new Shape(x, y, w, h);
+                return new RectangleShape(x, y, w, h);
             } catch (Exception exc) {
                 throw new IllegalArgumentException(String.format("Bad shape input string: %s", str), exc);
             }
@@ -84,6 +85,7 @@ class ShapeRepositoryWorker extends SwingWorker<ShapeRepository, Void> {
 
         try {
 
+            // TODO: add file existence special handling
             Path shapesFile = Paths.get("/home/vlitvinenko/work/lab/rtree/shapes.txt");
             int numberOfShapesEstimated = Math.max((int) Files.size(shapesFile) / SIZE_OF_SHAPE_BYTES_AVG, 100);
             int numOfTasks = (numberOfShapesEstimated + MAX_ELEMENTS_IN_TREE - 1) / MAX_ELEMENTS_IN_TREE;
@@ -109,7 +111,7 @@ class ShapeRepositoryWorker extends SwingWorker<ShapeRepository, Void> {
                 while ((line = reader.readLine()) != null) {
                     if (!line.trim().isEmpty()) {
                         // parse to shape
-                        Shape shape = parse(line);
+                        Shape shape = parseShape(line);
                         shape.setOrder(order++);
 
                         // add to storage
