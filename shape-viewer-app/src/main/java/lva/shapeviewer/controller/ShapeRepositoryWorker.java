@@ -85,7 +85,7 @@ class ShapeRepositoryWorker extends SwingWorker<ShapeRepository, Void> {
         try {
 
             Path shapesFile = Paths.get("/home/vlitvinenko/work/lab/rtree/shapes.txt");
-            int numberOfShapesEstimated = (int) Files.size(shapesFile) / SIZE_OF_SHAPE_BYTES_AVG;
+            int numberOfShapesEstimated = Math.max((int) Files.size(shapesFile) / SIZE_OF_SHAPE_BYTES_AVG, 100);
             int numOfTasks = (numberOfShapesEstimated + MAX_ELEMENTS_IN_TREE - 1) / MAX_ELEMENTS_IN_TREE;
 
             BlockingQueue<BuildIndexTask.IndexData> objectsQueue = new LinkedBlockingQueue<>(1000 * 1000);
