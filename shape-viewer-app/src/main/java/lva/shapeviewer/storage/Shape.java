@@ -18,6 +18,10 @@ public interface Shape {
 
     void setOrder(int order);
 
+    int getMaxOrder();
+
+    void setMaxOrder(int maxOrder);
+
     long getOffset();
 
     void setOffset(long offset);

@@ -6,7 +6,7 @@ import lva.shapeviewer.model.ShapeRepository;
 import lva.shapeviewer.storage.Shape;
 import lva.shapeviewer.ui.ShapesFrame;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.Collections;
 import java.util.Comparator;
@@ -54,68 +54,17 @@ public class ShapesViewController implements ShapesFrame.ShapesViewListener {
         }
 
         clickedShape.setActive(!clickedShape.isActive());
-// for reorder
-//        if (shapes.size() > 1) {
-//            // TODO: BUG: must use maxOrder over all elements
-//            clickedShape.setOrder(Iterables.getLast(shapes).getOrder() + 1); // TODO: think about overflow
-//        }
+        clickedShape.setOrder(clickedShape.getMaxOrder() + 1);
+        clickedShape.setMaxOrder(clickedShape.getOrder());
 
         shapeRepository.update(clickedShape);
 
         // push to back with highest order
-// for reorder
-//        shapeIterator.remove();
-//        shapes.add(clickedShape);
+        shapeIterator.remove();
+        visibleShapes.add(clickedShape);
 
         view.update();
 
-
-//        // TODO: BUG: must store reference to active shapes
-//        // TODO: think about to use LinkedList for shapes
-//        // find shape
-//        Shape clickedShape = null;
-//        List<Shape> activeShapes = new ArrayList<>();
-//
-//        // TODO: use iterator
-//        for(Shape shape: shapes) {
-//            if (shape.isActive()) {
-//                activeShapes.add(shape);
-//            }
-//            if (shape.hitTest(x, y)) {
-//                if (clickedShape == null || clickedShape.getOrder() < shape.getOrder()) {
-//                    clickedShape = shape;
-//                }
-//            }
-//        }
-//        // set as active
-//        if (clickedShape != null && !clickedShape.isActive()) {
-//            clickedShape.setActive(true);
-//            try {
-//                dbStorage.write(clickedShape.getOffset(), clickedShape);
-//            } catch (Exception e1) {
-//                e1.printStackTrace();
-//            }
-//
-//            // push to back with highest order
-//            int maxOrder = shapes.get(shapes.size() - 1).getOrder();
-//            clickedShape.setOrder(maxOrder + 1); // TODO: think about overflow
-//
-//            // TODO: use iterator
-//            shapes.remove(clickedShape); // TODO: think about memory usage
-//            shapes.add(clickedShape);
-//        }
-//
-//        // reset prev active
-//        for (Shape shape: activeShapes) {
-//            shape.setActive(false);
-//            try {
-//                dbStorage.write(shape.getOffset(), shape);
-//            } catch (Exception e1) {
-//                e1.printStackTrace();
-//            }
-//        }
-//        // re-render
-//        canvas.repaint();
     }
 
     @Override

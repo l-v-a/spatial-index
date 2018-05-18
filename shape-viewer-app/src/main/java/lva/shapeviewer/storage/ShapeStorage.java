@@ -22,6 +22,7 @@ public class ShapeStorage extends AbstractStorage<Shape> {
             kryo.register(Shape.class);
             kryo.register(AbstractShape.class);
             kryo.register(RectangleShape.class);
+            kryo.register(CircleShape.class);
             kryo.register(Rectangle.class);
         }
 

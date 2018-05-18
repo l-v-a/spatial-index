@@ -3,6 +3,7 @@ package lva.shapeviewer.controller;
 import com.google.common.util.concurrent.MoreExecutors;
 import lva.shapeviewer.index.MultiIndex;
 import lva.shapeviewer.model.ShapeRepository;
+import lva.shapeviewer.storage.CircleShape;
 import lva.shapeviewer.storage.RectangleShape;
 import lva.shapeviewer.storage.Shape;
 import lva.shapeviewer.storage.ShapeStorage;
@@ -51,33 +52,6 @@ class ShapeRepositoryWorker extends SwingWorker<ShapeRepository, Void> {
         }
     }
 
-
-    private static final Pattern SHAPE_FORMAT_PATTERN
-        = Pattern.compile("\\s*(\\w+)\\s*:\\s*(\\d+\\s*(?:,\\s*\\d+\\s*)*)");
-    private static Shape parseShape(String str) {
-        Matcher matcher= SHAPE_FORMAT_PATTERN.matcher(str);
-        if (matcher.matches()) {
-            try {
-                String type = matcher.group(1);
-                String params = matcher.group(2);
-                List<Integer> args = Arrays.stream(params.split("\\s*,\\s*"))
-                    .map(Integer::valueOf)
-                    .collect(Collectors.toList());
-
-                int x = args.get(0);
-                int y = args.get(1);
-                int w = args.get(2);
-                int h = args.get(3);
-
-                return new RectangleShape(x, y, w, h);
-            } catch (Exception exc) {
-                throw new IllegalArgumentException(String.format("Bad shape input string: %s", str), exc);
-            }
-        }
-
-        throw new IllegalArgumentException(String.format("Bad shape input string: %s", str));
-    }
-
     private static final int SIZE_OF_SHAPE_BYTES_AVG = 26;
     private Collection<Index> buildIndexes(Storage<Shape> shapeStorage) throws Exception {
         Collection<Index> indexes = new ArrayList<>();
@@ -111,8 +85,9 @@ class ShapeRepositoryWorker extends SwingWorker<ShapeRepository, Void> {
                 while ((line = reader.readLine()) != null) {
                     if (!line.trim().isEmpty()) {
                         // parse to shape
-                        Shape shape = parseShape(line);
+                        Shape shape = ShapeParser.parseShape(line);
                         shape.setOrder(order++);
+                        shape.setMaxOrder(shape.getOrder());
 
                         // add to storage
                         long offset = shapeStorage.add(shape);
@@ -144,5 +119,46 @@ class ShapeRepositoryWorker extends SwingWorker<ShapeRepository, Void> {
         }
 
         return indexes;
+    }
+
+    private static class ShapeParser {
+        private static final Pattern SHAPE_FORMAT_PATTERN = Pattern.compile("(\\w+):(.+)");
+        private static Shape parseShape(String str) {
+            Matcher matcher= SHAPE_FORMAT_PATTERN.matcher(str);
+            if (matcher.matches()) {
+                try {
+                    String type = matcher.group(1).trim().toLowerCase();
+                    String params = matcher.group(2).trim();
+                    List<Integer> args = Arrays.stream(params.split("\\s*,\\s*"))
+                            .map(Integer::valueOf)
+                            .collect(Collectors.toList());
+
+                    switch (type) {
+                        case "rect": {
+                            int x = args.get(0);
+                            int y = args.get(1);
+                            int w = args.get(2);
+                            int h = args.get(3);
+                            return new RectangleShape(x, y, w, h);
+                        }
+
+                        case "circle": {
+                            int x = args.get(0);
+                            int y = args.get(1);
+                            int r = args.get(2);
+                            return new CircleShape(x, y, r);
+                        }
+
+                        default:
+                            throw new IllegalArgumentException("Unknown shape type");
+                    }
+
+                } catch (Exception exc) {
+                    throw new IllegalArgumentException(String.format("Bad shape input string: %s", str), exc);
+                }
+            }
+
+            throw new IllegalArgumentException(String.format("Bad shape input string: %s", str));
+        }
     }
 }
