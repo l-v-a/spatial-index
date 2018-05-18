@@ -21,6 +21,12 @@
     <url>http://maven.apache.org</url>
     <dependencies>
         <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>kryo</artifactId>
+            <version>4.0.2</version>
+        </dependency>
+
+        <dependency>
             <groupId>lva.spatialindex</groupId>
             <artifactId>spatial-index</artifactId>
             <version>1.0-SNAPSHOT</version>

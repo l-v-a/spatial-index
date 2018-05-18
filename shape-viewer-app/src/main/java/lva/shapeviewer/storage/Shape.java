@@ -2,8 +2,7 @@ package lva.shapeviewer.storage;
 
 import lombok.NonNull;
 
-import java.awt.Graphics;
-import java.awt.Rectangle;
+import java.awt.*;
 
 /**
  * @author vlitvinenko
@@ -26,14 +25,4 @@ public interface Shape {
     void draw(@NonNull Graphics g);
 
     boolean hitTest(int x, int y);
-
-    static byte[] serialize(@NonNull Shape shape) {
-        // TODO: reimplement
-        return RectangleShape.serialize(shape);
-    }
-
-    static Shape deserialize(@NonNull byte[] buff) {
-        // TODO: reimplement
-        return RectangleShape.deserialize(buff);
-    }
 }
