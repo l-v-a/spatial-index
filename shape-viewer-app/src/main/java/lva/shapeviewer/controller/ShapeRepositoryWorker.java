@@ -6,6 +6,7 @@ import lva.shapeviewer.model.ShapeRepository;
 import lva.shapeviewer.storage.Shape;
 import lva.shapeviewer.storage.ShapeStorage;
 import lva.shapeviewer.utils.AutoCloseables;
+import lva.shapeviewer.utils.Settings;
 import lva.spatialindex.index.Index;
 import lva.spatialindex.storage.Storage;
 
@@ -25,6 +26,8 @@ import static java.util.Arrays.asList;
  */
 class ShapeRepositoryWorker extends SwingWorker<ShapeRepository, Void> {
     private static final int MAX_ELEMENTS_IN_TREE = 1000 * 1000;
+    private static final long STORAGE_INITIAL_SIZE = 64 * 1024L * 1024L;
+    private static final String DB_FILE_NAME = "shapes.bin";
 
     ShapeRepositoryWorker() {}
 
@@ -34,7 +37,7 @@ class ShapeRepositoryWorker extends SwingWorker<ShapeRepository, Void> {
         Index index = null;
 
         try {
-            shapeStorage = new ShapeStorage("/home/vlitvinenko/work/lab/rtree/db.bin", 64 * 1024L * 1024L);
+            shapeStorage = new ShapeStorage(Paths.get(Settings.getDbPath().toString(), DB_FILE_NAME).toString(), STORAGE_INITIAL_SIZE);
             index = new MultiIndex(buildIndexes(shapeStorage));
             System.out.printf("build ok\n");
 
@@ -51,9 +54,7 @@ class ShapeRepositoryWorker extends SwingWorker<ShapeRepository, Void> {
         ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         try {
-
-            // TODO: add file existence special handling
-            Path shapesFile = Paths.get("/home/vlitvinenko/work/lab/rtree/shapes.txt");
+            Path shapesFile = Settings.getShapesPath();
             int numberOfShapesEstimated = Math.max((int) Files.size(shapesFile) / SIZE_OF_SHAPE_BYTES_AVG, 100);
             int numOfTasks = (numberOfShapesEstimated + MAX_ELEMENTS_IN_TREE - 1) / MAX_ELEMENTS_IN_TREE;
 

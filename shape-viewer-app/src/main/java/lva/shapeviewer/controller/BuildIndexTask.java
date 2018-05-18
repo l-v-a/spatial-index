@@ -3,10 +3,12 @@ package lva.shapeviewer.controller;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lva.shapeviewer.utils.AutoCloseables;
+import lva.shapeviewer.utils.Settings;
 import lva.spatialindex.index.Index;
 import lva.spatialindex.index.RStarTree;
 
-import java.awt.Rectangle;
+import java.awt.*;
+import java.nio.file.Paths;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 
@@ -16,6 +18,8 @@ import static java.util.Collections.singleton;
  * @author vlitvinenko
  */
 class BuildIndexTask implements Callable<Index> {
+    private static final String INDEX_FILE_NAME_FORMAT = "shapes_idx%d.bin";
+
     @RequiredArgsConstructor
     static class IndexData {
         private final long offset;
@@ -36,7 +40,8 @@ class BuildIndexTask implements Callable<Index> {
 
     @Override
     public Index call() throws Exception {
-        RStarTree indexTree = new RStarTree(maxNumberOfElements, "/home/vlitvinenko/work/lab/rtree/buff.bin" + taskNumber);
+        String storageFile = Paths.get(Settings.getDbPath().toString(), String.format(INDEX_FILE_NAME_FORMAT, taskNumber)).toString();
+        RStarTree indexTree = new RStarTree(maxNumberOfElements, storageFile);
 
         try {
             for (int count = 0; count < maxNumberOfElements; count++) {

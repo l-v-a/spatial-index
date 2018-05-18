@@ -7,11 +7,11 @@ import lva.spatialindex.index.Index;
 import lva.spatialindex.storage.Storage;
 import lva.spatialindex.utils.Exceptions;
 
-import java.awt.Rectangle;
-import java.util.ArrayList;
+import java.awt.*;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author vlitvinenko
@@ -27,12 +27,7 @@ public class ShapeRepository implements AutoCloseable {
 
     @NonNull
     public List<Shape> search(@NonNull Rectangle area) {
-        List<Shape> shapes = new ArrayList<>();
-        for (long id : index.search(area)) {
-            Shape shape = shapeStorage.read(id);
-            shapes.add(shape);
-        }
-        return shapes;
+        return index.search(area).stream().map(shapeStorage::read).collect(toList());
     }
 
     public void update(@NonNull Shape shape) {
