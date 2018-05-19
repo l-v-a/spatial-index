@@ -1,17 +1,17 @@
 package lva.shapeviewer.index;
 
 import lombok.NonNull;
-import lombok.SneakyThrows;
 import lva.shapeviewer.utils.AutoCloseables;
 import lva.shapeviewer.utils.ExecutorUtils;
 import lva.spatialindex.index.Index;
 import lva.spatialindex.utils.Exceptions;
 
-import java.awt.Rectangle;
-import java.util.ArrayList;
+import java.awt.*;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author vlitvinenko
@@ -25,19 +25,12 @@ public class MultiIndex implements Index {
 
     @Override
     @NonNull
-    @SneakyThrows
     public Collection<Long> search(@NonNull Rectangle area) {
-        List<Future<Collection<Long>>> searchResults = new ArrayList<>(indexes.size());
-        for (Index index : indexes) {
-            searchResults.add(ExecutorUtils.EXECUTOR_SERVICE.submit(() -> index.search(area)));
-        }
+        List<CompletableFuture<Collection<Long>>> searchTasks =
+            indexes.stream().map((index) -> CompletableFuture.supplyAsync(() -> index.search(area), ExecutorUtils.EXECUTOR_SERVICE))
+                    .collect(toList());
 
-        Collection<Long> result = new ArrayList<>();
-        for (Future<Collection<Long>> searchResult : searchResults) {
-            result.addAll(searchResult.get());
-        }
-
-        return result;
+        return searchTasks.stream().flatMap(f -> f.join().stream()).collect(toList());
 
     }
 
