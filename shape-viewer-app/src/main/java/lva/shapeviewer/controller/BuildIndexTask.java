@@ -6,8 +6,10 @@ import lva.shapeviewer.utils.AutoCloseables;
 import lva.shapeviewer.utils.Settings;
 import lva.spatialindex.index.Index;
 import lva.spatialindex.index.RStarTree;
+import lva.spatialindex.utils.Exceptions;
 
 import java.awt.*;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -39,25 +41,29 @@ class BuildIndexTask implements Callable<Index> {
     }
 
     @Override
-    public Index call() throws Exception {
-        String storageFile = Paths.get(Settings.getDbPath().toString(), String.format(INDEX_FILE_NAME_FORMAT, taskNumber)).toString();
-        RStarTree indexTree = new RStarTree(maxNumberOfElements, storageFile);
+    public Index call() {
+        return Exceptions.toRuntime(() -> {
+            String storageFile = Paths.get(Settings.getDbPath().toString(), String.format(INDEX_FILE_NAME_FORMAT, taskNumber)).toString();
+            RStarTree indexTree = new RStarTree(maxNumberOfElements, storageFile);
 
-        try {
-            for (int count = 0; count < maxNumberOfElements; count++) {
-                IndexData indexData = objectsQueue.take();
-                if (indexData == NULL_INDEX_DATA) {
-                    objectsQueue.put(NULL_INDEX_DATA);
-                    break;
+            try {
+                for (int count = 0; count < maxNumberOfElements; count++) {
+                    IndexData indexData = objectsQueue.take();
+                    if (indexData == NULL_INDEX_DATA) {
+                        objectsQueue.put(NULL_INDEX_DATA);
+                        break;
+                    }
+                    indexTree.insert(indexData.offset, indexData.mbr);
                 }
-                indexTree.insert(indexData.offset, indexData.mbr);
-            }
-            return indexTree;
 
-        } catch (Exception exc) {
-            System.out.printf("task %s closed by exception\n", taskNumber);
-            AutoCloseables.close(singleton(indexTree), exc);
-            throw exc;
-        }
+                return indexTree;
+
+            } catch (Exception exc) {
+                System.out.printf("task %s closed by exception\n", taskNumber);
+                AutoCloseables.close(singleton(indexTree));
+                Files.deleteIfExists(Paths.get(storageFile));
+                throw exc;
+            }
+        });
     }
 }

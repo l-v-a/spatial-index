@@ -5,8 +5,8 @@ import sys
 
 def main(args):
     output_file = args[0]
-    max_rows = 100
-    max_cols = 100
+    max_rows = 2000
+    max_cols = 2000
     num_of_shapes = max_rows * max_cols
 
     print('saving results to "%s", num of elements: %s' % (output_file, num_of_shapes))
