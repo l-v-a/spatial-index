@@ -4,6 +4,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
+/**
+ * @author vlitvinenko
+ */
 public class Settings {
     public static Path getShapesPath() {
         return getPath("lva.shapesPath", Paths.get(System.getProperty("user.home"), "shapes.txt"));

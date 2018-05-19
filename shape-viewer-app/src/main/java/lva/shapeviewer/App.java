@@ -9,6 +9,9 @@ import lva.shapeviewer.ui.ShapesFrame;
 import javax.swing.*;
 import java.util.function.Consumer;
 
+/**
+ * @author vlitvinenko
+ */
 public class App {
     private static void buildShapesRepository(Consumer<ShapeRepository> shapeRepositoryConsumer) {
         ShapeRepositoryController controller =

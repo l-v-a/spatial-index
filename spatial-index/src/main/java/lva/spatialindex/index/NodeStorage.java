@@ -32,7 +32,7 @@ class NodeStorage extends AbstractStorage<Node> {
     private final NodeSerializer serializer;
     private final LoadingCache<Long, Node> cache;
 
-    public NodeStorage(String fileName, long initialSize) {
+    NodeStorage(String fileName, long initialSize) {
         this(new MemoryMappedFile(fileName, initialSize), RECORD_SIZE);
     }
 

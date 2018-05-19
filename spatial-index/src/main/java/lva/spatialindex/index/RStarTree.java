@@ -3,7 +3,7 @@ package lva.spatialindex.index;
 import lva.spatialindex.index.Distributions.GroupPair;
 import lva.spatialindex.storage.Storage;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -35,23 +35,17 @@ public class RStarTree implements Index {
         return search(root, area);
     }
 
-    Collection<Long> search(Node node, Rectangle area) {
-        // TODO: refactor
+    private Collection<Long> search(Node node, Rectangle area) {
         Collection<Long> res = new HashSet<>();
-        if (node.isLeaf()) {
-            for (Entry e: node.getEntries()) {
-                if (area.intersects(e.getMbr())) {
-                    res.add(-(e.getChildOffset() + 1)); // TODO: move logic to entry
-                }
-            }
-        } else {
-            for (Entry e: node.getEntries()) {
-                if (area.intersects(e.getMbr())) {
+        for (Entry e: node.getEntries()) {
+            if (area.intersects(e.getMbr())) {
+                if (node.isLeaf()) {
+                    res.add(-(e.getChildOffset() + 1));
+                } else {
                     res.addAll(search(e.getChildNode(), area));
                 }
             }
         }
-
         return res;
     }
 
@@ -62,11 +56,11 @@ public class RStarTree implements Index {
         }
     }
 
-    void insert(Node node, long offset, Rectangle newMbr) {
+    private void insert(Node node, long offset, Rectangle newMbr) {
         Node leafNode = chooseSubtree(node, newMbr);
         Node newNode = null;
 
-        Entry entry = new Entry(storage, newMbr, -(offset + 1)); // TODO: move logic to entry
+        Entry entry = new Entry(storage, newMbr, -(offset + 1));
         if (!leafNode.isFull()) {
             leafNode.addEntry(entry);
         } else {
@@ -76,7 +70,7 @@ public class RStarTree implements Index {
         adjust(leafNode, newNode);
     }
 
-    static Node chooseSubtree(Node node, Rectangle newMbr) {
+    private static Node chooseSubtree(Node node, Rectangle newMbr) {
         if (node.isLeaf()) {
             return node;
         }
@@ -106,17 +100,10 @@ public class RStarTree implements Index {
             candidates = minList(candidates, e -> area(e.getMbr()));
         }
 
-        node = candidates.isEmpty() ? null : candidates.get(0).getChildNode();
-// TODO: replace with
-//        node = candidates.stream()
-//            .findFirst()
-//            .map(Entry::getChildNode)
-//            .orElse(null);
-
-        return chooseSubtree(node, newMbr);
+        return !candidates.isEmpty() ? chooseSubtree(candidates.get(0).getChildNode(), newMbr) : node;
     }
 
-    static Node splitNode(Node node, Node newNode) {
+    private static Node splitNode(Node node, Node newNode) {
         if (node.isLeaf() != newNode.isLeaf()) {
             return newNode;
         }
@@ -171,7 +158,7 @@ public class RStarTree implements Index {
         return newNode;
     }
 
-    void adjust(Node node1, Node node2) {
+    private void adjust(Node node1, Node node2) {
 
         if (node1.getOffset() == root.getOffset()) {
             // node1 is root node
