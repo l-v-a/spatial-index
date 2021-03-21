@@ -1,10 +1,11 @@
 package lva.spatialindex.index;
 
+import com.google.common.base.Preconditions;
 import lombok.EqualsAndHashCode;
 import lva.spatialindex.storage.Storage;
 import lva.spatialindex.utils.Exceptions;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -20,7 +21,7 @@ import static lva.spatialindex.index.Entry.union;
  */
 @EqualsAndHashCode(exclude = {"storage", "mbr"})
 class Node {
-    static final int PAGE_SIZE = 4096; // TODO: calculate
+    static final int PAGE_SIZE = 4096;
     static final int MAX_ENTRIES = PAGE_SIZE / Entry.SIZE - 1;
     static final int MIN_ENTRIES = MAX_ENTRIES * 2 / 5;
 
@@ -29,10 +30,10 @@ class Node {
     private long parentOffset = -1;
 
     private Rectangle mbr = null;
-    private final List<Entry> entries = new ArrayList<>(); // TODO: test perf. with ArrayList<>(MAX_ENTRIES)
+    private final List<Entry> entries = new ArrayList<>();
 
     private Node(Storage<Node> storage, long offset) {
-        this.storage = storage; // TODO: rename to buffer
+        this.storage = storage;
         this.offset = offset;
     }
 
@@ -96,34 +97,20 @@ class Node {
     }
 
     boolean isLeaf() {
-        return entries.isEmpty() || entries.get(0).isLeaf();
+        return entries.stream().findAny().map(Entry::isLeaf)
+                .orElse(true);
     }
 
     boolean isFull() {
         return entries.size() >= MAX_ENTRIES;
     }
 
-    Node addNode(Node node) {
-        if (isFull()) {
-            throw new IllegalStateException("entries overflow");
-        }
-
-        entries.add(new Entry(storage, node.getMbr(), node.getOffset()));
-
-        node.parentOffset = offset;
-        resetMbr();
-
-        node.save();
-        save();
-
-        return this;
-    }
 
     Rectangle getMbr() {
         if (mbr == null) {
             mbr = union(entries);
         }
-        return mbr; // TODO: add defensive copy
+        return mbr;
     }
 
     Node resetMbr() {
@@ -145,40 +132,33 @@ class Node {
     }
 
     List<Entry> getEntries() {
-        return entries; // TODO: add defensive copy
+        return entries;
+    }
+
+    Node addNode(Node node) {
+        return addEntry(new Entry(storage, node.getMbr(), node.getOffset()));
     }
 
     Node addEntry(Entry entry) {
-        putEntry(entry);
-        save();
-        return this;
+        return putEntry(entry).save();
     }
 
     Node setEntries(List<Entry> entries) {
         this.entries.clear();
-        for (Entry e: entries) {
-            putEntry(e);
-        }
-
-        resetMbr();
-        save();
-        return this;
+        entries.forEach(this::putEntry);
+        return save();
     }
 
     private Node putEntry(Entry entry) {
-        // TODO: think about to refactor this addNode(Node node)
-        if (isFull()) {
-            throw new IllegalStateException("entries overflow");
-        }
+        Preconditions.checkState(!isFull(), "Entries overflow");
 
         entries.add(entry);
         resetMbr();
 
-        Node node = entry.getChildNode();
-        if (node != null) {
-            node.parentOffset = offset;
-            node.save();
-        }
+        entry.getChildNode().ifPresent(childNode -> {
+            childNode.parentOffset = offset;
+            childNode.save();
+        });
 
         return this;
     }

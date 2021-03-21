@@ -6,6 +6,7 @@ import lva.spatialindex.storage.Storage;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.Function;
@@ -42,7 +43,10 @@ public class RStarTree implements Index {
                 if (node.isLeaf()) {
                     res.add(-(e.getChildOffset() + 1));
                 } else {
-                    res.addAll(search(e.getChildNode(), area));
+                    Collection<Long> subRes = e.getChildNode()
+                            .map(childNode -> search(childNode, area))
+                            .orElse(Collections.emptyList());
+                    res.addAll(subRes);
                 }
             }
         }
@@ -78,7 +82,10 @@ public class RStarTree implements Index {
         List<Entry> candidates = new ArrayList<>();
 
         // check that points to leaf node
-        if (!node.getEntries().isEmpty() && node.getEntries().get(0).getChildNode().isLeaf()) {
+        boolean isContainsLeaf = node.getEntries().stream().findAny()
+                .flatMap(Entry::getChildNode)
+                .map(Node::isLeaf).orElse(false);
+        if (isContainsLeaf) {
             // points to leafs
 
             // min overlap cost
@@ -100,7 +107,9 @@ public class RStarTree implements Index {
             candidates = minList(candidates, e -> area(e.getMbr()));
         }
 
-        return !candidates.isEmpty() ? chooseSubtree(candidates.get(0).getChildNode(), newMbr) : node;
+        return candidates.stream().findAny().flatMap(Entry::getChildNode)
+                .map(childNode -> chooseSubtree(childNode, newMbr))
+                .orElse(node);
     }
 
     private static Node splitNode(Node node, Node newNode) {
@@ -171,10 +180,11 @@ public class RStarTree implements Index {
         }
 
         Node parent = storage.read(node1.getParentOffset());
-        Entry parentEntry = null;
 
+        // TODO: fix it
+        Entry parentEntry = null;
         for (Entry e : parent.getEntries()) {
-            if (e.getChildNode().getOffset() == node1.getOffset()) {
+            if (e.getChildNode().map(Node::getOffset).orElse(-1L) == node1.getOffset()) {
                 parentEntry = e;
                 break;
             }
@@ -185,6 +195,17 @@ public class RStarTree implements Index {
             parent.resetMbr()
                 .save();
         }
+
+//        Node possibleChild = node1;
+//        parent.getEntries().stream().filter(
+//                e -> e.getChildNode().map(childNode -> childNode.getOffset() == possibleChild.getOffset()).orElse(false))
+//                .findAny()
+//                .ifPresent(parentEntry -> {
+//                    parentEntry.setMbr(possibleChild.getMbr());
+//                    parent.resetMbr()
+//                            .save();
+//                });
+
 
         Node newNode = null;
         if (node2 != null) {

@@ -7,11 +7,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.awt.Rectangle;
+import java.awt.*;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author vlitvinenko
@@ -36,13 +38,13 @@ public class EntryTest {
 
         Entry entry = new Entry(storage, new Rectangle(), childNodeOffset);
 
-        assertEquals(childNode, entry.getChildNode());
+        assertEquals(childNode, entry.getChildNode().orElse(null));
     }
 
     @Test
     public void should_return_null_for_child_node_if_offset_is_negative() {
         Entry entry = new Entry(storage, new Rectangle(), -123);
-        assertNull(entry.getChildNode());
+        assertFalse(entry.getChildNode().isPresent());
     }
 
     @Test

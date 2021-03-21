@@ -3,9 +3,10 @@ package lva.spatialindex.index;
 import lombok.EqualsAndHashCode;
 import lva.spatialindex.storage.Storage;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -20,18 +21,17 @@ class Entry {
     private static final int SIZE_OF_CHILD = 8;
     static final int SIZE = SIZE_OF_X + SIZE_OF_Y + SIZE_OF_WIDTH + SIZE_OF_HEIGHT + SIZE_OF_CHILD;
 
-    static final Comparator<Entry> LEFT_TO_RIGHT_BY_LEFT_COMPARATOR = (e1, e2) ->
-        Integer.compare(e1.mbr.x, e2.mbr.x);
+    static final Comparator<Entry> LEFT_TO_RIGHT_BY_LEFT_COMPARATOR =
+            Comparator.comparingInt(e -> e.mbr.x);
 
-    static final Comparator<Entry> LEFT_TO_RIGHT_BY_RIGHT_COMPARATOR = (e1, e2) ->
-        Integer.compare(e1.mbr.x + e1.mbr.width, e2.mbr.x + e2.mbr.width);
+    static final Comparator<Entry> LEFT_TO_RIGHT_BY_RIGHT_COMPARATOR =
+            Comparator.comparingInt(e -> e.mbr.x + e.mbr.width);
 
-    static final Comparator<Entry> TOP_TO_BOTTOM_BY_BOTTOM_COMPARATOR = (e1, e2) ->
-        Integer.compare(e1.mbr.y + e1.mbr.height, e2.mbr.y + e2.mbr.height);
+    static final Comparator<Entry> TOP_TO_BOTTOM_BY_BOTTOM_COMPARATOR =
+            Comparator.comparingInt(e -> e.mbr.y + e.mbr.height);
 
-    static final Comparator<Entry> TOP_TO_BOTTOM_BY_TOP_COMPARATOR = (e1, e2) ->
-        Integer.compare(e1.mbr.y, e2.mbr.y);
-
+    static final Comparator<Entry> TOP_TO_BOTTOM_BY_TOP_COMPARATOR =
+            Comparator.comparingInt(e -> e.mbr.y);
 
     private final Storage<Node> storage;
     private final long childOffset;
@@ -44,8 +44,9 @@ class Entry {
         this.childOffset = childOffset;
     }
 
-    Node getChildNode() {
-        return childOffset >= 0 ? storage.read(childOffset) : null;
+    // TODO: use Either
+    Optional<Node> getChildNode() {
+        return Optional.ofNullable(childOffset >= 0 ? storage.read(childOffset) : null);
     }
 
     long getChildOffset() {
@@ -53,7 +54,7 @@ class Entry {
     }
 
     Rectangle getMbr() {
-        return mbr; // TODO: think about defensive copy
+        return mbr;
     }
 
     void setMbr(Rectangle mbr) {
@@ -64,19 +65,14 @@ class Entry {
         return childOffset < 0;
     }
 
-    static Rectangle union(List<Entry> entries) { // TODO: use Collection or stream
-        Rectangle r = entries.isEmpty() ? new Rectangle() : entries.get(0).mbr;
-        for (Entry e: entries) {
-            r = r.union(e.mbr);
-        }
-        return r;
+    static Rectangle union(List<Entry> entries) {
+        return entries.stream()
+                .map(Entry::getMbr).reduce(Rectangle::union)
+                .orElse(new Rectangle());
     }
 
     static int margin(List<Entry> entries) {
-        int margin = 0;
-        for (Entry e: entries) {
-            margin += Rectangles.margin(e.mbr);
-        }
-        return margin;
+        return entries.stream()
+                .mapToInt(e -> Rectangles.margin(e.mbr)).sum();
     }
 }

@@ -6,11 +6,15 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.awt.Rectangle;
+import java.awt.*;
 
 import static com.google.common.collect.Iterables.getLast;
 import static java.util.Arrays.asList;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -70,7 +74,9 @@ public class NodeTest {
         long thisOffset = 123;
         Node node = Node.newNode(storage)
             .setOffset(thisOffset);
-        Node newNode = Node.newNode(storage);
+
+        Node newNode = Node.newNode(storage).setOffset(123L);
+        when(storage.read(123L)).thenReturn(newNode);
 
         node.addNode(newNode);
 
@@ -96,7 +102,9 @@ public class NodeTest {
         long thisOffset = 123;
         Node node = Node.newNode(storage)
             .setOffset(thisOffset);
-        Node newNode = Node.newNode(storage);
+
+        Node newNode = Node.newNode(storage).setOffset(111L);
+        when(storage.read(111L)).thenReturn(newNode);
 
         node.addNode(newNode);
 
@@ -107,8 +115,9 @@ public class NodeTest {
     public void should_save_new_node_when_new_node_is_added() {
         long newNodeOffset = 456;
         Node node = Node.newNode(storage);
-        Node newNode = Node.newNode(storage)
-            .setOffset(newNodeOffset);
+
+        Node newNode = Node.newNode(storage).setOffset(newNodeOffset);
+        when(storage.read(newNodeOffset)).thenReturn(newNode);
 
         node.addNode(newNode);
 
