@@ -80,33 +80,23 @@ public class RStarTree implements Index {
             return node;
         }
 
-        List<Entry> candidates = new ArrayList<>();
+        Function<Entry, Long> bySize = e -> area(e.getMbr());
+        Function<Entry, Long> byEnlarge = e -> area(e.getMbr().union(newMbr));
+        Function<Entry, Long> byCost = e -> area(e.getMbr().intersection(newMbr));
+
+        List<Entry> candidates = node.getEntries();
 
         // check that points to leaf node
         boolean isContainsLeaf = node.getEntries().stream().findAny()
                 .flatMap(Entry::getChildNode)
                 .map(Node::isLeaf).orElse(false);
+
         if (isContainsLeaf) {
-            // points to leafs
-
-            // min overlap cost
-            candidates = minList(node.getEntries(), e -> area(e.getMbr().intersection(newMbr)));
-
-            // by min enlarged
-            candidates = minList(candidates, e -> area(e.getMbr().union(newMbr)));
-
-            // by size
-            candidates = minList(candidates, e -> area(e.getMbr()));
-
-        } else {
-            // not points to leaf
-
-            // by min enlarged
-            candidates = minList(node.getEntries(), e -> area(e.getMbr().union(newMbr)));
-
-            // by size
-            candidates = minList(candidates, e -> area(e.getMbr()));
+            candidates = minList(candidates, byCost);
         }
+
+        candidates = minList(candidates, byEnlarge);
+        candidates = minList(candidates, bySize);
 
         return candidates.stream().findAny().flatMap(Entry::getChildNode)
                 .map(childNode -> chooseSubtree(childNode, newMbr))
@@ -169,7 +159,6 @@ public class RStarTree implements Index {
     }
 
     private void adjust(Node node1, Node node2) {
-
         if (node1.getOffset() == root.getOffset()) {
             // node1 is root node
             if (node2 != null) {
