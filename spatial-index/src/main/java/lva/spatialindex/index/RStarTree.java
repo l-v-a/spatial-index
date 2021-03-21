@@ -15,7 +15,7 @@ import java.util.function.Predicate;
 
 import static java.util.stream.Collectors.toList;
 import static lva.spatialindex.index.Distributions.getDistributionGroups;
-import static lva.spatialindex.index.Distributions.getMargins;
+import static lva.spatialindex.index.Distributions.getGroupMargins;
 import static lva.spatialindex.index.Entry.union;
 import static lva.spatialindex.index.RStarTree.Utils.minList;
 import static lva.spatialindex.index.Rectangles.area;
@@ -115,7 +115,7 @@ public class RStarTree implements Index {
 
         List<List<GroupPair>> groupsX = getDistributionGroups(allEntries, Entry.X_COMPARATORS);
         List<List<GroupPair>> groupsY = getDistributionGroups(allEntries, Entry.Y_COMPARATORS);
-        List<List<GroupPair>> groups = getMargins(groupsX) < getMargins(groupsY) ? groupsX : groupsY;
+        List<List<GroupPair>> groups = getGroupMargins(groupsX) < getGroupMargins(groupsY) ? groupsX : groupsY;
 
         // find min overlapped values distribution
         List<GroupPair> overlapped = groups.stream().flatMap(Collection::stream).collect(toList());

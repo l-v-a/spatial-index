@@ -20,12 +20,26 @@ class Distributions {
         List<Entry> group2 = new ArrayList<>();
     }
 
-    static int marginGroups(List<GroupPair> groups) {
-        return groups.stream().mapToInt(g -> margin(g.group1) + margin(g.group2))
-                .sum();
+    static int getGroupMargins(List<List<GroupPair>> distributionGroups) {
+        return distributionGroups.stream().mapToInt(Distributions::margins).sum();
     }
 
-    static List<GroupPair> getDistributions(List<Entry> entries) {
+    static List<List<GroupPair>> getDistributionGroups(List<Entry> entries,
+                                                       Collection<Comparator<Entry>> comparators) {
+
+        Function<Comparator<Entry>, List<Entry>> sorted = cmp ->
+                entries.stream().sorted(cmp).collect(toList());
+
+        return comparators.stream().map(sorted)
+                .map(Distributions::distributions)
+                .collect(toList());
+    }
+
+    private static int margins(List<GroupPair> groups) {
+        return groups.stream().mapToInt(g -> margin(g.group1) + margin(g.group2)).sum();
+    }
+
+    private static List<GroupPair> distributions(List<Entry> entries) {
         List<GroupPair> groups = new ArrayList<>();
         for (int k = 0; k < (Node.MAX_ENTRIES - 2 * Node.MIN_ENTRIES + 2); k++) {
             GroupPair pair = new GroupPair();
@@ -36,18 +50,4 @@ class Distributions {
         return groups;
     }
 
-    static int getMargins(List<List<GroupPair>> distributionGroups) {
-        return distributionGroups.stream().mapToInt(Distributions::marginGroups).sum();
-    }
-
-    static List<List<GroupPair>> getDistributionGroups(List<Entry> entries,
-                                                       Collection<Comparator<Entry>> comparators) {
-
-        Function<Comparator<Entry>, List<Entry>> sorted = cmp ->
-                entries.stream().sorted(cmp).collect(toList());
-
-        return comparators.stream().map(sorted)
-                .map(Distributions::getDistributions)
-                .collect(toList());
-    }
 }
