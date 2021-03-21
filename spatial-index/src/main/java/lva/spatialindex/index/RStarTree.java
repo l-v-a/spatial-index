@@ -7,7 +7,6 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +14,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static java.util.stream.Collectors.toList;
+import static lva.spatialindex.index.Distributions.getDistributionGroups;
+import static lva.spatialindex.index.Distributions.getMargins;
 import static lva.spatialindex.index.Entry.union;
 import static lva.spatialindex.index.RStarTree.Utils.minList;
 import static lva.spatialindex.index.Rectangles.area;
@@ -112,27 +113,14 @@ public class RStarTree implements Index {
         List<Entry> allEntries = new ArrayList<>(node.getEntries());
         allEntries.addAll(newNode.getEntries());
 
-        Function<Comparator<Entry>, List<Entry>> sorted = cmp ->
-                allEntries.stream().sorted(cmp).collect(toList());
-
-        List<List<GroupPair>> groupsX = Entry.X_COMPARATORS.stream().map(sorted)
-                .map(Distributions::getDistributions)
-                .collect(toList());
-        int marginX = groupsX.stream().mapToInt(Distributions::marginGroups).sum();
-
-        List<List<GroupPair>> groupsY = Entry.Y_COMPARATORS.stream().map(sorted)
-                .map(Distributions::getDistributions)
-                .collect(toList());
-        int marginY = groupsY.stream().mapToInt(Distributions::marginGroups).sum();
-
-        List<List<GroupPair>> groups = marginX < marginY ? groupsX : groupsY;
+        List<List<GroupPair>> groupsX = getDistributionGroups(allEntries, Entry.X_COMPARATORS);
+        List<List<GroupPair>> groupsY = getDistributionGroups(allEntries, Entry.Y_COMPARATORS);
+        List<List<GroupPair>> groups = getMargins(groupsX) < getMargins(groupsY) ? groupsX : groupsY;
 
         // find min overlapped values distribution
-        List<GroupPair> overlapped = groups.stream().flatMap(Collection::stream)
-                .collect(toList());
-
-        overlapped = minList(overlapped, g -> area(union(g.group1).intersection(union(g.group2))));
-        overlapped = minList(overlapped, g -> area(union(g.group1)) + area(union(g.group2)));
+        List<GroupPair> overlapped = groups.stream().flatMap(Collection::stream).collect(toList());
+        overlapped = minList(overlapped, pair -> area(union(pair.group1).intersection(union(pair.group2))));
+        overlapped = minList(overlapped, pair -> area(union(pair.group1)) + area(union(pair.group2)));
 
         GroupPair pair = overlapped.stream().findAny().orElse(new GroupPair());
 
