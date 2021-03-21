@@ -12,7 +12,6 @@ import javax.annotation.Nonnull;
 /**
  * @author vlitvinenko
  */
-// TODO: rename to IndexStorage
 class NodeStorage extends AbstractStorage<Node> {
     static final int RECORD_SIZE = 4096;
 
@@ -71,8 +70,6 @@ class NodeStorage extends AbstractStorage<Node> {
     @Override
     public void write(long offset, Node node) {
         super.write(offset, node);
-        // TODO: perf. think about to reload node from cache
-        // cache.refresh(offset);
     }
 
     @Override

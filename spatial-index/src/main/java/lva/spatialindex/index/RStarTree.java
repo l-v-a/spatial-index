@@ -9,7 +9,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static lva.spatialindex.index.Distributions.getDistributions;
 import static lva.spatialindex.index.Distributions.marginGroups;
@@ -53,7 +55,6 @@ public class RStarTree implements Index {
         return res;
     }
 
-    // TODO: think about common interface with DB
     public void insert(long offset, Rectangle newMbr) {
         if (!newMbr.isEmpty()) {
             insert(root, offset, newMbr);
@@ -180,32 +181,7 @@ public class RStarTree implements Index {
         }
 
         Node parent = storage.read(node1.getParentOffset());
-
-        // TODO: fix it
-        Entry parentEntry = null;
-        for (Entry e : parent.getEntries()) {
-            if (e.getChildNode().map(Node::getOffset).orElse(-1L) == node1.getOffset()) {
-                parentEntry = e;
-                break;
-            }
-        }
-
-        if (parentEntry != null) {
-            parentEntry.setMbr(node1.getMbr());
-            parent.resetMbr()
-                .save();
-        }
-
-//        Node possibleChild = node1;
-//        parent.getEntries().stream().filter(
-//                e -> e.getChildNode().map(childNode -> childNode.getOffset() == possibleChild.getOffset()).orElse(false))
-//                .findAny()
-//                .ifPresent(parentEntry -> {
-//                    parentEntry.setMbr(possibleChild.getMbr());
-//                    parent.resetMbr()
-//                            .save();
-//                });
-
+        syncMbr(parent, node1);
 
         Node newNode = null;
         if (node2 != null) {
@@ -220,6 +196,21 @@ public class RStarTree implements Index {
         node2 = newNode;
 
         adjust(node1, node2);
+    }
+
+    private static void syncMbr(Node targetNode, Node sourceNode) {
+        Predicate<Entry> isTargetEntry = entry -> entry.getChildNode()
+                .map(Node::getOffset)
+                .map(offset -> offset == sourceNode.getOffset()).orElse(false);
+
+        Optional<Entry> targetEntry = targetNode.getEntries().stream()
+                .filter(isTargetEntry).findAny();
+
+        targetEntry.ifPresent(entry -> {
+            entry.setMbr(sourceNode.getMbr());
+            targetNode.resetMbr()
+                    .save();
+        });
     }
 
     @Override
