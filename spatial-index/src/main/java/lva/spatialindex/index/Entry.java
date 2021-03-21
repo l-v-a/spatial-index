@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import lva.spatialindex.storage.Storage;
 
 import java.awt.*;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +33,12 @@ class Entry {
 
     static final Comparator<Entry> TOP_TO_BOTTOM_BY_TOP_COMPARATOR =
             Comparator.comparingInt(e -> e.mbr.y);
+
+    static final List<Comparator<Entry>> X_COMPARATORS =
+            Arrays.asList(LEFT_TO_RIGHT_BY_LEFT_COMPARATOR, LEFT_TO_RIGHT_BY_RIGHT_COMPARATOR);
+
+    static final List<Comparator<Entry>> Y_COMPARATORS =
+            Arrays.asList(TOP_TO_BOTTOM_BY_BOTTOM_COMPARATOR, TOP_TO_BOTTOM_BY_TOP_COMPARATOR);
 
     private final Storage<Node> storage;
     private final long childOffset;
@@ -73,6 +80,7 @@ class Entry {
 
     static int margin(List<Entry> entries) {
         return entries.stream()
-                .mapToInt(e -> Rectangles.margin(e.mbr)).sum();
+                .mapToInt(e -> Rectangles.margin(e.mbr))
+                .sum();
     }
 }

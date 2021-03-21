@@ -7,14 +7,14 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static lva.spatialindex.index.Distributions.getDistributions;
-import static lva.spatialindex.index.Distributions.marginGroups;
+import static java.util.stream.Collectors.toList;
 import static lva.spatialindex.index.Entry.union;
 import static lva.spatialindex.index.RStarTree.Utils.minList;
 import static lva.spatialindex.index.Rectangles.area;
@@ -109,48 +109,32 @@ public class RStarTree implements Index {
         }
 
         // distribute entries between nodes
-
-        List<Entry> allEntries = new ArrayList<>(node.getEntries().size() + newNode.getEntries().size());
-        allEntries.addAll(node.getEntries());
+        List<Entry> allEntries = new ArrayList<>(node.getEntries());
         allEntries.addAll(newNode.getEntries());
 
-        // sort by x axis
-        List<Entry> sort1ByX = new ArrayList<>(allEntries);
-        sort1ByX.sort(Entry.LEFT_TO_RIGHT_BY_LEFT_COMPARATOR);
-        List<Entry> sort2ByX = new ArrayList<>(allEntries);
-        sort2ByX.sort(Entry.LEFT_TO_RIGHT_BY_RIGHT_COMPARATOR);
+        Function<Comparator<Entry>, List<Entry>> sorted = cmp ->
+                allEntries.stream().sorted(cmp).collect(toList());
 
-        // sort by y axis
-        List<Entry> sort1ByY = new ArrayList<>(allEntries);
-        sort1ByY.sort(Entry.TOP_TO_BOTTOM_BY_TOP_COMPARATOR);
-        List<Entry> sort2ByY = new ArrayList<>(allEntries);
-        sort2ByY.sort(Entry.TOP_TO_BOTTOM_BY_BOTTOM_COMPARATOR);
+        List<List<GroupPair>> groupsX = Entry.X_COMPARATORS.stream().map(sorted)
+                .map(Distributions::getDistributions)
+                .collect(toList());
+        int marginX = groupsX.stream().mapToInt(Distributions::marginGroups).sum();
 
-        List<GroupPair> groups1X = getDistributions(sort1ByX);
-        List<GroupPair> groups2X = getDistributions(sort2ByX);
-        List<GroupPair> groups1Y = getDistributions(sort1ByY);
-        List<GroupPair> groups2Y = getDistributions(sort2ByY);
+        List<List<GroupPair>> groupsY = Entry.Y_COMPARATORS.stream().map(sorted)
+                .map(Distributions::getDistributions)
+                .collect(toList());
+        int marginY = groupsY.stream().mapToInt(Distributions::marginGroups).sum();
 
-        int marginX = marginGroups(groups1X) + marginGroups(groups2X);
-        int marginY = marginGroups(groups1Y) + marginGroups(groups2Y);
-
-        List<GroupPair> axisGroups = new ArrayList<>();
-        axisGroups.addAll(marginX < marginY ? groups1X : groups1Y);
-        axisGroups.addAll(marginX < marginY ? groups2X : groups2Y);
-
+        List<List<GroupPair>> groups = marginX < marginY ? groupsX : groupsY;
 
         // find min overlapped values distribution
-        List<GroupPair> candidatesOverlapped = minList(axisGroups, g -> {
-            Rectangle gr1 = union(g.group1);
-            Rectangle gr2 = union(g.group2);
-            return area(gr1.intersection(gr2));
-        });
+        List<GroupPair> overlapped = groups.stream().flatMap(Collection::stream)
+                .collect(toList());
 
-        candidatesOverlapped = minList(candidatesOverlapped,
-            g -> area(union(g.group1)) + area(union(g.group2)));
+        overlapped = minList(overlapped, g -> area(union(g.group1).intersection(union(g.group2))));
+        overlapped = minList(overlapped, g -> area(union(g.group1)) + area(union(g.group2)));
 
-        GroupPair pair = candidatesOverlapped.isEmpty() ? new GroupPair()
-            : candidatesOverlapped.get(0);
+        GroupPair pair = overlapped.stream().findAny().orElse(new GroupPair());
 
         node.setEntries(pair.group1);
         newNode.setEntries(pair.group2);
@@ -208,8 +192,6 @@ public class RStarTree implements Index {
     }
 
     static class Utils {
-        private Utils() {}
-
         static <T> List<T> minList(List<? extends T> list, Function<? super T, Long> criteria) {
             List<T> candidates = new ArrayList<>();
             long minValue = Integer.MAX_VALUE;
