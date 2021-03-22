@@ -1,4 +1,4 @@
-package lva.shapeviewer.utils;
+package lva.spatialindex.viewer.utils;
 
 import lombok.NonNull;
 

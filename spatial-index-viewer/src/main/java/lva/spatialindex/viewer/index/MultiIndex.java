@@ -1,10 +1,10 @@
-package lva.shapeviewer.index;
+package lva.spatialindex.viewer.index;
 
 import lombok.NonNull;
-import lva.shapeviewer.utils.AutoCloseables;
-import lva.shapeviewer.utils.ExecutorUtils;
 import lva.spatialindex.index.Index;
 import lva.spatialindex.utils.Exceptions;
+import lva.spatialindex.viewer.utils.AutoCloseables;
+import lva.spatialindex.viewer.utils.ExecutorUtils;
 
 import java.awt.*;
 import java.util.Collection;

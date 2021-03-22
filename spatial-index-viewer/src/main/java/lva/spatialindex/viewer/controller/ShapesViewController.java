@@ -1,10 +1,10 @@
-package lva.shapeviewer.controller;
+package lva.spatialindex.viewer.controller;
 
 import com.google.common.collect.Lists;
 import lombok.NonNull;
-import lva.shapeviewer.model.ShapeRepository;
-import lva.shapeviewer.storage.Shape;
-import lva.shapeviewer.ui.ShapesFrame;
+import lva.spatialindex.viewer.model.ShapeRepository;
+import lva.spatialindex.viewer.storage.Shape;
+import lva.spatialindex.viewer.ui.ShapesFrame;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -19,7 +19,7 @@ import java.util.List;
 public class ShapesViewController implements ShapesFrame.ShapesViewListener {
     private final ShapesFrame view;
     private final ShapeRepository shapeRepository;
-    private List<Shape> visibleShapes;
+    private List<lva.spatialindex.viewer.storage.Shape> visibleShapes;
 
     public ShapesViewController(@NonNull ShapesFrame view, @NonNull ShapeRepository shapeRepository) {
         this.view = view;
@@ -38,10 +38,10 @@ public class ShapesViewController implements ShapesFrame.ShapesViewListener {
         int x = event.getX() + viewport.x;
         int y = event.getY() + viewport.y;
 
-        Shape clickedShape = null;
-        Iterator<Shape> shapeIterator = Lists.reverse(visibleShapes).iterator();
+        lva.spatialindex.viewer.storage.Shape clickedShape = null;
+        Iterator<lva.spatialindex.viewer.storage.Shape> shapeIterator = Lists.reverse(visibleShapes).iterator();
         while (shapeIterator.hasNext()) {
-            Shape shape = shapeIterator.next();
+            lva.spatialindex.viewer.storage.Shape shape = shapeIterator.next();
             if (shape.hitTest(x, y)) {
                 clickedShape = shape;
                 break;

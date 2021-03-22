@@ -1,9 +1,9 @@
-package lva.shapeviewer.controller;
+package lva.spatialindex.viewer.controller;
 
 import lombok.NonNull;
 import lombok.SneakyThrows;
-import lva.shapeviewer.model.ShapeRepository;
-import lva.shapeviewer.ui.ProgressFrame;
+import lva.spatialindex.viewer.model.ShapeRepository;
+import lva.spatialindex.viewer.ui.ProgressFrame;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;

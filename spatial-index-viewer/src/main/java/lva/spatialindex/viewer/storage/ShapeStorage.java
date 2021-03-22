@@ -1,4 +1,4 @@
-package lva.shapeviewer.storage;
+package lva.spatialindex.viewer.storage;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
@@ -15,11 +15,11 @@ import java.io.ByteArrayOutputStream;
  * @author vlitvinenko
  */
 
-public class ShapeStorage extends AbstractStorage<Shape> {
-    private static class ShapeSerializer implements Serializer<Shape> {
+public class ShapeStorage extends AbstractStorage<lva.spatialindex.viewer.storage.Shape> {
+    private static class ShapeSerializer implements Serializer<lva.spatialindex.viewer.storage.Shape> {
         private final Kryo kryo = new Kryo();
         {
-            kryo.register(Shape.class);
+            kryo.register(lva.spatialindex.viewer.storage.Shape.class);
             kryo.register(AbstractShape.class);
             kryo.register(RectangleShape.class);
             kryo.register(CircleShape.class);
@@ -28,7 +28,7 @@ public class ShapeStorage extends AbstractStorage<Shape> {
 
         @NonNull
         @Override
-        public byte[] serialize(@NonNull Shape shape) {
+        public byte[] serialize(@NonNull lva.spatialindex.viewer.storage.Shape shape) {
             return Exceptions.toRuntime(() -> {
                 try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
                      Output output = new Output(baos);) {
@@ -42,9 +42,9 @@ public class ShapeStorage extends AbstractStorage<Shape> {
 
         @NonNull
         @Override
-        public Shape deserialize(@NonNull byte[] bytes) {
+        public lva.spatialindex.viewer.storage.Shape deserialize(@NonNull byte[] bytes) {
             try (Input input = new Input(bytes)) {
-                return (Shape) kryo.readClassAndObject(input);
+                return (lva.spatialindex.viewer.storage.Shape) kryo.readClassAndObject(input);
             }
         }
     }
@@ -54,7 +54,7 @@ public class ShapeStorage extends AbstractStorage<Shape> {
 
     @NonNull
     @Override
-    protected Serializer<Shape> getSerializer() {
+    protected Serializer<lva.spatialindex.viewer.storage.Shape> getSerializer() {
         return serializer;
     }
 
@@ -64,7 +64,7 @@ public class ShapeStorage extends AbstractStorage<Shape> {
     }
 
     @Override
-    public long add(@NonNull Shape shape) {
+    public long add(@NonNull lva.spatialindex.viewer.storage.Shape shape) {
         // TODO: think about interface and move to base class
         long offset = super.add(shape);
         shape.setOffset(offset);
@@ -73,7 +73,7 @@ public class ShapeStorage extends AbstractStorage<Shape> {
 
     @NonNull
     @Override
-    public Shape read(long offset) {
+    public lva.spatialindex.viewer.storage.Shape read(long offset) {
         // TODO: think about interface and move to base class
         Shape shape = super.read(offset);
         shape.setOffset(offset);

@@ -1,10 +1,10 @@
-package lva.shapeviewer;
+package lva.spatialindex.viewer;
 
-import lva.shapeviewer.controller.ShapeRepositoryController;
-import lva.shapeviewer.controller.ShapesViewController;
-import lva.shapeviewer.model.ShapeRepository;
-import lva.shapeviewer.ui.ProgressFrame;
-import lva.shapeviewer.ui.ShapesFrame;
+import lva.spatialindex.viewer.controller.ShapeRepositoryController;
+import lva.spatialindex.viewer.controller.ShapesViewController;
+import lva.spatialindex.viewer.model.ShapeRepository;
+import lva.spatialindex.viewer.ui.ProgressFrame;
+import lva.spatialindex.viewer.ui.ShapesFrame;
 
 import javax.swing.*;
 import java.util.function.Consumer;

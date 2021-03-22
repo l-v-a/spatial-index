@@ -1,12 +1,12 @@
-package lva.shapeviewer.controller;
+package lva.spatialindex.viewer.controller;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lva.shapeviewer.utils.AutoCloseables;
-import lva.shapeviewer.utils.Settings;
 import lva.spatialindex.index.Index;
 import lva.spatialindex.index.RStarTree;
 import lva.spatialindex.utils.Exceptions;
+import lva.spatialindex.viewer.utils.AutoCloseables;
+import lva.spatialindex.viewer.utils.Settings;
 
 import java.awt.*;
 import java.nio.file.Files;

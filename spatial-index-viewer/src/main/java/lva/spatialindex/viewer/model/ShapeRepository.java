@@ -1,11 +1,11 @@
-package lva.shapeviewer.model;
+package lva.spatialindex.viewer.model;
 
 import lombok.NonNull;
-import lva.shapeviewer.storage.Shape;
-import lva.shapeviewer.utils.AutoCloseables;
 import lva.spatialindex.index.Index;
 import lva.spatialindex.storage.Storage;
 import lva.spatialindex.utils.Exceptions;
+import lva.spatialindex.viewer.storage.Shape;
+import lva.spatialindex.viewer.utils.AutoCloseables;
 
 import java.awt.*;
 import java.util.List;
@@ -17,16 +17,16 @@ import static java.util.stream.Collectors.toList;
  * @author vlitvinenko
  */
 public class ShapeRepository implements AutoCloseable {
-    private final Storage<Shape> shapeStorage;
+    private final Storage<lva.spatialindex.viewer.storage.Shape> shapeStorage;
     private final Index index;
 
-    public ShapeRepository(@NonNull Storage<Shape> shapeStorage, @NonNull Index index) {
+    public ShapeRepository(@NonNull Storage<lva.spatialindex.viewer.storage.Shape> shapeStorage, @NonNull Index index) {
         this.shapeStorage = shapeStorage;
         this.index = index;
     }
 
     @NonNull
-    public List<Shape> search(@NonNull Rectangle area) {
+    public List<lva.spatialindex.viewer.storage.Shape> search(@NonNull Rectangle area) {
         return index.search(area).stream().map(shapeStorage::read).collect(toList());
     }
 

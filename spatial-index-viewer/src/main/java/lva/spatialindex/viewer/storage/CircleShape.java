@@ -1,4 +1,4 @@
-package lva.shapeviewer.storage;
+package lva.spatialindex.viewer.storage;
 
 import java.awt.*;
 

@@ -1,15 +1,15 @@
-package lva.shapeviewer.controller;
+package lva.spatialindex.viewer.controller;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import lva.shapeviewer.index.MultiIndex;
-import lva.shapeviewer.model.ShapeRepository;
-import lva.shapeviewer.storage.Shape;
-import lva.shapeviewer.storage.ShapeStorage;
-import lva.shapeviewer.utils.AutoCloseables;
-import lva.shapeviewer.utils.Settings;
 import lva.spatialindex.index.Index;
 import lva.spatialindex.storage.Storage;
 import lva.spatialindex.utils.Exceptions;
+import lva.spatialindex.viewer.index.MultiIndex;
+import lva.spatialindex.viewer.model.ShapeRepository;
+import lva.spatialindex.viewer.storage.Shape;
+import lva.spatialindex.viewer.storage.ShapeStorage;
+import lva.spatialindex.viewer.utils.AutoCloseables;
+import lva.spatialindex.viewer.utils.Settings;
 
 import javax.swing.*;
 import java.io.BufferedReader;

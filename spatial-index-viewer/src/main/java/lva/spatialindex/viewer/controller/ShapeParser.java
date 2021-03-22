@@ -1,9 +1,9 @@
-package lva.shapeviewer.controller;
+package lva.spatialindex.viewer.controller;
 
 import com.google.common.collect.ImmutableMap;
-import lva.shapeviewer.storage.CircleShape;
-import lva.shapeviewer.storage.RectangleShape;
-import lva.shapeviewer.storage.Shape;
+import lva.spatialindex.viewer.storage.CircleShape;
+import lva.spatialindex.viewer.storage.RectangleShape;
+import lva.spatialindex.viewer.storage.Shape;
 
 import java.util.Arrays;
 import java.util.List;

@@ -1,8 +1,8 @@
-package lva.shapeviewer.ui;
+package lva.spatialindex.viewer.ui;
 
 import lombok.NonNull;
 import lombok.Setter;
-import lva.shapeviewer.storage.Shape;
+import lva.spatialindex.viewer.storage.Shape;
 
 import javax.swing.*;
 import java.awt.*;
@@ -98,7 +98,7 @@ public class ShapesFrame extends JFrame {
             hbar.getVisibleAmount(), vbar.getVisibleAmount());
     }
 
-    public void setShapes(@NonNull Collection<Shape> shapes) {
+    public void setShapes(@NonNull Collection<lva.spatialindex.viewer.storage.Shape> shapes) {
         canvas.shapes = shapes;
     }
 
@@ -141,7 +141,7 @@ public class ShapesFrame extends JFrame {
 
     private static class Canvas extends JComponent {
         private Rectangle viewport = new Rectangle();
-        private Collection<Shape> shapes = new ArrayList<>();
+        private Collection<lva.spatialindex.viewer.storage.Shape> shapes = new ArrayList<>();
 
         @Override
         public void paint(Graphics g) {

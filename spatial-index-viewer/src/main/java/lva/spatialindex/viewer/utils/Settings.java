@@ -1,4 +1,4 @@
-package lva.shapeviewer.utils;
+package lva.spatialindex.viewer.utils;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

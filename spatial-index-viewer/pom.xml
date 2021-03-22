@@ -49,7 +49,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>lva.shapeviewer.App</mainClass>
+                            <mainClass>lva.spatialindex.viewer.App</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
