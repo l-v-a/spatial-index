@@ -2,7 +2,6 @@ package lva.spatialindex.memory.unsafe;
 
 import lva.spatialindex.utils.Exceptions;
 import sun.misc.Unsafe;
-import sun.nio.ch.FileChannelImpl;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -31,8 +30,9 @@ public class Native {
             theUnsafeField.setAccessible(true);
             UNSAFE = (Unsafe) theUnsafeField.get(null);
 
-            MAP_METHOD = getMethod(FileChannelImpl.class, "map0", int.class, long.class, long.class);
-            UNMAP_METHOD = getMethod(FileChannelImpl.class, "unmap0", long.class, long.class);
+            Class<?> fciClass = Class.forName("sun.nio.ch.FileChannelImpl");
+            MAP_METHOD = getMethod(fciClass, "map0", int.class, long.class, long.class);
+            UNMAP_METHOD = getMethod(fciClass, "unmap0", long.class, long.class);
 
             BYTE_ARRAY_OFFSET = UNSAFE.arrayBaseOffset(byte[].class);
         } catch (Exception e){

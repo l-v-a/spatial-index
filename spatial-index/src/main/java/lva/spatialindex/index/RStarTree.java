@@ -30,7 +30,7 @@ public class RStarTree implements Index {
 
     public RStarTree(int maxNumberOfElements, String storageFileName) {
         long size = 64 * 1024L * 1024L; // TODO: make it as func (maxNumberOfElements)
-        this.storage = new NodeStorage(storageFileName, size);
+        this.storage = new NodeStorage(storageFileName, size); // TODO: move out creation
         this.root = Node.newNode(this.storage);
     }
 
