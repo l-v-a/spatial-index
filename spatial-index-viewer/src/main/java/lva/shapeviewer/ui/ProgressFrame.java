@@ -3,9 +3,7 @@ package lva.shapeviewer.ui;
 import lombok.NonNull;
 
 import javax.swing.*;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Toolkit;
+import java.awt.*;
 
 /**
  * @author vlitvinenko
