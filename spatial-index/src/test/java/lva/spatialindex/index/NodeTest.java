@@ -6,7 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.awt.*;
+import java.awt.Rectangle;
 
 import static com.google.common.collect.Iterables.getLast;
 import static java.util.Arrays.asList;
@@ -29,13 +29,14 @@ public class NodeTest {
 
     @Test
     public void should_serialize_deserialize() {
-        Node node = Node.newNode(storage)
-            .addEntry(new Entry(storage, new Rectangle(1, 2, 3, 4), 1))
-            .addEntry(new Entry(storage, new Rectangle(2, 3, 4, 5), 2));
+        NodeStorage.NodeSerializer serializer = new NodeStorage.NodeSerializer(storage);
 
-        byte[] serialized = node.serialize();
-        Node restoredNode = Node.newNode(storage)
-            .deserialize(serialized);
+        Node node = new Node(storage, -1)
+                .addEntry(new Entry(storage, new Rectangle(1, 2, 3, 4), -1))
+                .addEntry(new Entry(storage, new Rectangle(2, 3, 4, 5), -1));
+
+        byte[] serialized = serializer.serialize(node);
+        Node restoredNode = serializer.deserialize(serialized);
 
         assertEquals(restoredNode, node);
         assertNotSame(restoredNode, node);

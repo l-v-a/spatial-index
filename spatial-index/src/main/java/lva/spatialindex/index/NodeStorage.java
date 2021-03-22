@@ -1,34 +1,52 @@
 package lva.spatialindex.index;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import lva.spatialindex.memory.MemoryMappedFile;
 import lva.spatialindex.storage.AbstractStorage;
+import lva.spatialindex.storage.Storage;
 import lva.spatialindex.storage.StorageSpace;
 
 import javax.annotation.Nonnull;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * @author vlitvinenko
  */
 class NodeStorage extends AbstractStorage<Node> {
-    static final int RECORD_SIZE = 4096;
 
-    private class NodeSerializer implements Serializer<Node> {
-        @Override
-        public byte[] serialize(Node node) {
-            return node.serialize();
+    static class NodeSerializer extends AbstractSerializer<Node> {
+        private final Kryo kryo = new Kryo();
+
+        NodeSerializer(Storage<Node> storage) {
+            kryo.addDefaultSerializer(Node.class, new Node.Ser(storage));
+            kryo.addDefaultSerializer(Entry.class, new Entry.Ser(storage));
         }
 
         @Override
-        public Node deserialize(byte[] bytes) {
-            return Node.newNode(NodeStorage.this)
-                .deserialize(bytes);
+        public void write(OutputStream out, Node node) {
+            try (Output output = new Output(out)) {
+                kryo.writeObject(output, node);
+                output.flush();
+            }
+        }
+
+        @Override
+        public Node read(InputStream in) {
+            try (Input input = new Input(in)) {
+                return kryo.readObject(input, Node.class);
+            }
         }
     }
 
-    private final NodeSerializer serializer;
+    static final int RECORD_SIZE = 4096 * 2;
+
+    private final Serializer<Node> serializer;
     private final LoadingCache<Long, Node> cache;
 
     NodeStorage(String fileName, long initialSize) {
@@ -41,17 +59,17 @@ class NodeStorage extends AbstractStorage<Node> {
 
     private NodeStorage(StorageSpace storageSpace, int recordSize) {
         super(storageSpace, recordSize);
-        serializer = new NodeSerializer();
         cache = CacheBuilder.newBuilder()
-            .softValues()
-            //.maximumSize(10000)
-            //.expireAfterWrite(10, TimeUnit.MINUTES)
-            .build(new CacheLoader<Long, Node>() {
-                @Override
-                public Node load(@Nonnull Long offset) {
-                    return NodeStorage.this.load(offset);
-                }
-            });
+                .softValues()
+//                .maximumSize(100)
+                //.expireAfterWrite(10, TimeUnit.MINUTES)
+                .build(new CacheLoader<Long, Node>() {
+                    @Override
+                    public Node load(@Nonnull Long offset) {
+                        return NodeStorage.this.load(offset);
+                    }
+                });
+        this.serializer = new NodeSerializer(this);
     }
 
     @Override

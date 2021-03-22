@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.awt.*;
+import java.awt.Rectangle;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;

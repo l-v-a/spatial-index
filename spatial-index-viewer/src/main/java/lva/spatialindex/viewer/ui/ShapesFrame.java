@@ -4,8 +4,16 @@ import lombok.NonNull;
 import lombok.Setter;
 import lva.spatialindex.viewer.storage.Shape;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollBar;
+import javax.swing.WindowConstants;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
@@ -98,7 +106,7 @@ public class ShapesFrame extends JFrame {
             hbar.getVisibleAmount(), vbar.getVisibleAmount());
     }
 
-    public void setShapes(@NonNull Collection<lva.spatialindex.viewer.storage.Shape> shapes) {
+    public void setShapes(@NonNull Collection<Shape> shapes) {
         canvas.shapes = shapes;
     }
 
@@ -141,7 +149,7 @@ public class ShapesFrame extends JFrame {
 
     private static class Canvas extends JComponent {
         private Rectangle viewport = new Rectangle();
-        private Collection<lva.spatialindex.viewer.storage.Shape> shapes = new ArrayList<>();
+        private Collection<Shape> shapes = new ArrayList<>();
 
         @Override
         public void paint(Graphics g) {

@@ -1,7 +1,6 @@
 package lva.spatialindex.index;
 
 import com.google.common.util.concurrent.UncheckedExecutionException;
-import lva.spatialindex.storage.Storage;
 import lva.spatialindex.storage.StorageSpace;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,33 +11,59 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.awt.Rectangle;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author vlitvinenko
  */
 @RunWith(MockitoJUnitRunner.class)
 public class NodeStorageTest {
-    private Storage<Node> storage;
+    private NodeStorage storage;
     private Node node;
     private byte[] serializedNode;
 
     @Mock
     private StorageSpace storageSpace;
 
+    @Mock
+    private NodeStorage.NodeSerializer nodeSerializer;
+
     @Before
     public void setUp() {
-        storage = new NodeStorage(storageSpace);
-        when(storageSpace.getSize()).thenReturn((long)NodeStorage.RECORD_SIZE);
-        node = Node.newNode(storage)
-            .setOffset(123)
-            .addEntry(new Entry(storage, new Rectangle(1, 2, 3, 4), -1));
-        serializedNode = node.serialize();
-
         reset(storageSpace);
+        reset(nodeSerializer);
+
+        storage = new NodeStorage(storageSpace) {
+            @Override
+            public NodeSerializer getSerializer() {
+                return nodeSerializer;
+            }
+        };
+
+        when(storageSpace.getSize()).thenReturn((long)NodeStorage.RECORD_SIZE);
+
+        node = new Node(mock(NodeStorage.class), -1)
+            .setOffset(123)
+            .addEntry(new Entry(mock(NodeStorage.class), new Rectangle(1, 2, 3, 4), -1));
+
+        serializedNode = new NodeStorage.NodeSerializer(storage)
+                .serialize(node);
+
+        when(nodeSerializer.serialize(any())).thenReturn(serializedNode);
+        when(nodeSerializer.deserialize(any())).thenReturn(node);
     }
 
     @Test
@@ -81,11 +106,12 @@ public class NodeStorageTest {
             .thenReturn(123L);
 
         Node bigNode = mock(Node.class);
-        when(bigNode.serialize()).thenReturn(new byte[NodeStorage.RECORD_SIZE + 1]);
+        when(nodeSerializer.serialize(bigNode)).thenReturn(new byte[NodeStorage.RECORD_SIZE + 1]);
         storage.add(bigNode);
 
         fail();
     }
+
 
     @Test
     public void should_write_to_storage() {
@@ -123,7 +149,7 @@ public class NodeStorageTest {
             .thenReturn((long)serializedNode.length + 1);
 
         Node bigNode = mock(Node.class);
-        when(bigNode.serialize()).thenReturn(new byte[NodeStorage.RECORD_SIZE + 1]);
+        when(nodeSerializer.serialize(bigNode)).thenReturn(new byte[NodeStorage.RECORD_SIZE + 1]);
         storage.write(0, bigNode);
 
         fail();

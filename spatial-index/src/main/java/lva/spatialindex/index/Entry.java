@@ -1,9 +1,13 @@
 package lva.spatialindex.index;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.Serializer;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 import lombok.EqualsAndHashCode;
 import lva.spatialindex.storage.Storage;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -15,6 +19,7 @@ import java.util.Optional;
  * @author vlitvinenko
  */
 @EqualsAndHashCode(exclude = {"storage"})
+public
 class Entry {
     private static final int SIZE_OF_X = 4;
     private static final int SIZE_OF_Y = 4;
@@ -83,5 +88,34 @@ class Entry {
         return entries.stream()
                 .mapToInt(e -> Rectangles.margin(e.mbr))
                 .sum();
+    }
+
+    static class Ser extends Serializer<Entry> {
+        private final Storage<Node> storage;
+        Ser(Storage<Node> storage) {
+            this.storage = storage;
+        }
+
+        @Override
+        public void write(Kryo kryo, Output output, Entry entry) {
+            Rectangle mbr = entry.getMbr();
+
+            output.writeInt(mbr.x);
+            output.writeInt(mbr.y);
+            output.writeInt(mbr.width);
+            output.writeInt(mbr.height);
+            output.writeLong(entry.getChildOffset());
+        }
+
+        @Override
+        public Entry read(Kryo kryo, Input input, Class<Entry> type) {
+            int x = input.readInt();
+            int y = input.readInt();
+            int width = input.readInt();
+            int height = input.readInt();
+            long childOffset = input.readLong();
+
+            return new Entry(storage, new Rectangle(x, y, width, height), childOffset);
+        }
     }
 }

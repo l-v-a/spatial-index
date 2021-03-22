@@ -1,18 +1,17 @@
 package lva.spatialindex.index;
 
-import com.google.common.base.Preconditions;
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.Serializer;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 import lombok.EqualsAndHashCode;
 import lva.spatialindex.storage.Storage;
-import lva.spatialindex.utils.Exceptions;
 
-import java.awt.*;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkState;
 import static lva.spatialindex.index.Entry.union;
 
 
@@ -32,7 +31,7 @@ class Node {
     private Rectangle mbr = null;
     private final List<Entry> entries = new ArrayList<>();
 
-    private Node(Storage<Node> storage, long offset) {
+    Node(Storage<Node> storage, long offset) {
         this.storage = storage;
         this.offset = offset;
     }
@@ -46,54 +45,6 @@ class Node {
     Node save() {
         storage.write(offset, this);
         return this;
-    }
-
-    byte[] serialize() {
-        return Exceptions.toRuntime(() -> {
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            DataOutputStream os = new DataOutputStream(baos);
-
-            os.writeLong(parentOffset);
-            os.writeInt(entries.size());
-
-            for (Entry entry: entries) {
-                Rectangle mbr = entry.getMbr();
-
-                os.writeInt(mbr.x);
-                os.writeInt(mbr.y);
-                os.writeInt(mbr.width);
-                os.writeInt(mbr.height);
-                os.writeLong(entry.getChildOffset());
-            }
-
-            return baos.toByteArray();
-        });
-    }
-
-
-    Node deserialize(byte[] buff) {
-        return Exceptions.toRuntime(() -> {
-
-            ByteArrayInputStream bais = new ByteArrayInputStream(buff);
-            DataInputStream is = new DataInputStream(bais);
-
-            parentOffset = is.readLong();
-
-            int entriesSize = is.readInt();
-            entries.clear();
-
-            for (int i = 0; i < entriesSize; i++) {
-                int x = is.readInt();
-                int y = is.readInt();
-                int width = is.readInt();
-                int height = is.readInt();
-                long childOffset = is.readLong();
-                entries.add(new Entry(storage, new Rectangle(x, y, width, height), childOffset));
-            }
-
-            return this;
-        });
     }
 
     boolean isLeaf() {
@@ -151,7 +102,7 @@ class Node {
     }
 
     private Node putEntry(Entry entry) {
-        Preconditions.checkState(!isFull(), "Entries overflow");
+        checkState(!isFull(), "Entries overflow");
 
         entries.add(entry);
         resetMbr();
@@ -162,5 +113,35 @@ class Node {
         });
 
         return this;
+    }
+
+    static class Ser extends Serializer<Node> {
+        private final Storage<Node> storage;
+        Ser(Storage<Node> storage) {
+            this.storage = storage;
+        }
+
+        @Override
+        public void write(Kryo kryo, Output output, Node node) {
+            output.writeLong(node.parentOffset);
+
+            output.writeInt(node.entries.size());
+            for (Entry entry : node.entries) {
+                kryo.writeObject(output, entry);
+            }
+        }
+
+        @Override
+        public Node read(Kryo kryo, Input input, Class<Node> type) {
+            Node node = new Node(storage, -1);
+            node.parentOffset = input.readLong();
+
+            int entriesSize = input.readInt();
+            while (entriesSize > 0) {
+                node.entries.add(kryo.readObject(input, Entry.class));
+                entriesSize--;
+            }
+            return node;
+        }
     }
 }
