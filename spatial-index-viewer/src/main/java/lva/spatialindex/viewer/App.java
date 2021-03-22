@@ -13,9 +13,9 @@ import java.util.function.Consumer;
  * @author vlitvinenko
  */
 public class App {
-    private static void buildShapesRepository(Consumer<ShapeRepository> shapeRepositoryConsumer) {
+    private static void buildShapesRepository(Consumer<ShapeRepository> shapeRepositoryConsumer, String shapesFile) {
         ShapeRepositoryController controller =
-            new ShapeRepositoryController(new ProgressFrame(), shapeRepositoryConsumer);
+            new ShapeRepositoryController(new ProgressFrame(), shapeRepositoryConsumer, shapesFile);
         controller.build();
     }
 
@@ -26,8 +26,12 @@ public class App {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            buildShapesRepository((App::showShapesRepository));
-        });
+        if (args.length > 0) {
+            String shapesFile = args[0];
+            SwingUtilities.invokeLater(() ->
+                    buildShapesRepository(App::showShapesRepository, shapesFile));
+        } else {
+            System.err.println("shapes file path is required");
+        }
     }
 }

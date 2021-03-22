@@ -8,6 +8,7 @@ import lva.spatialindex.viewer.ui.ProgressFrame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
+import java.nio.file.Paths;
 import java.util.function.Consumer;
 
 /**
@@ -18,11 +19,13 @@ public class ShapeRepositoryController {
     private final ShapeRepositoryWorker worker;
     private final Consumer<ShapeRepository> doneConsumer;
 
-    public ShapeRepositoryController(@NonNull ProgressFrame progressView, @NonNull Consumer<ShapeRepository> doneConsumer) {
+    public ShapeRepositoryController(@NonNull ProgressFrame progressView,
+                                     @NonNull Consumer<ShapeRepository> doneConsumer,
+                                     @NonNull String shapesFilePath) {
         this.progressView = progressView;
         this.doneConsumer = doneConsumer;
 
-        this.worker = new ShapeRepositoryWorker() {
+        this.worker = new ShapeRepositoryWorker(Paths.get(shapesFilePath)) {
             @Override
             protected void done() {
                 handleWorkerDone();

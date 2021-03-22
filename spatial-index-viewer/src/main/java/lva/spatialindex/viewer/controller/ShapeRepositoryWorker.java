@@ -9,13 +9,11 @@ import lva.spatialindex.viewer.model.ShapeRepository;
 import lva.spatialindex.viewer.storage.Shape;
 import lva.spatialindex.viewer.storage.ShapeStorage;
 import lva.spatialindex.viewer.utils.AutoCloseables;
-import lva.spatialindex.viewer.utils.Settings;
 
 import javax.swing.*;
 import java.io.BufferedReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
@@ -39,13 +37,19 @@ class ShapeRepositoryWorker extends SwingWorker<ShapeRepository, Void> {
     private static final int SIZE_OF_SHAPE_BYTES_AVG = 26;
     private static final String DB_FILE_NAME = "shapes.bin";
 
+    private final Path shapesFile;
+
+    ShapeRepositoryWorker(Path shapesFile) {
+        this.shapesFile = shapesFile;
+    }
+
     @Override
     protected ShapeRepository doInBackground() throws Exception {
         Storage<Shape> shapeStorage = null;
         Index index = null;
 
         try {
-            shapeStorage = new ShapeStorage(Paths.get(Settings.getDbPath().toString(), DB_FILE_NAME).toString(), STORAGE_INITIAL_SIZE);
+            shapeStorage = new ShapeStorage(shapesFile.resolveSibling(DB_FILE_NAME).toString(), STORAGE_INITIAL_SIZE);
             index = new MultiIndex(buildIndexes(shapeStorage));
             return new ShapeRepository(shapeStorage, index);
         } catch (Exception e) {
@@ -58,7 +62,7 @@ class ShapeRepositoryWorker extends SwingWorker<ShapeRepository, Void> {
         ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         try {
-            Path shapesFile = Settings.getShapesPath();
+            Path indexPath = shapesFile.getParent();
             int numberOfShapesEstimated = Math.max((int) Files.size(shapesFile) / SIZE_OF_SHAPE_BYTES_AVG, 100);
             int numOfTasks = (numberOfShapesEstimated + MAX_ELEMENTS_IN_TREE - 1) / MAX_ELEMENTS_IN_TREE;
 
@@ -68,7 +72,7 @@ class ShapeRepositoryWorker extends SwingWorker<ShapeRepository, Void> {
                 numberOfShapesEstimated, numOfTasks);
 
             Collection<CompletableFuture<Index>> indexingTasks = IntStream.range(0, numOfTasks)
-                    .mapToObj((taskNumber) -> new BuildIndexTask(shapesQueue, taskNumber, MAX_ELEMENTS_IN_TREE))
+                    .mapToObj((taskNumber) -> new BuildIndexTask(shapesQueue, indexPath, taskNumber, MAX_ELEMENTS_IN_TREE))
                     .map((task) -> CompletableFuture.supplyAsync(task::call, executor))
                     .collect(toList());
 

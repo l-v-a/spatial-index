@@ -6,14 +6,14 @@ import lva.spatialindex.index.Index;
 import lva.spatialindex.index.RStarTree;
 import lva.spatialindex.utils.Exceptions;
 import lva.spatialindex.viewer.utils.AutoCloseables;
-import lva.spatialindex.viewer.utils.Settings;
 
 import java.awt.*;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 
+import static java.lang.String.format;
 import static java.util.Collections.singleton;
 
 /**
@@ -33,9 +33,11 @@ class BuildIndexTask implements Callable<Index> {
     private final int maxNumberOfElements;
     private final BlockingQueue<IndexData> objectsQueue;
     private final int taskNumber;
+    private final Path indexPath;
 
-    BuildIndexTask(@NonNull BlockingQueue<IndexData> objectsQueue, int taskNumber, int maxNumberOfElements) {
+    BuildIndexTask(@NonNull BlockingQueue<IndexData> objectsQueue, @NonNull Path indexPath, int taskNumber, int maxNumberOfElements) {
         this.maxNumberOfElements = maxNumberOfElements;
+        this.indexPath = indexPath;
         this.objectsQueue = objectsQueue;
         this.taskNumber = taskNumber;
     }
@@ -43,8 +45,8 @@ class BuildIndexTask implements Callable<Index> {
     @Override
     public Index call() {
         return Exceptions.toRuntime(() -> {
-            String storageFile = Paths.get(Settings.getDbPath().toString(), String.format(INDEX_FILE_NAME_FORMAT, taskNumber)).toString();
-            RStarTree indexTree = new RStarTree(maxNumberOfElements, storageFile);
+            Path storageFile = indexPath.resolve(format(INDEX_FILE_NAME_FORMAT, taskNumber));
+            RStarTree indexTree = new RStarTree(maxNumberOfElements, storageFile.toString());
 
             try {
                 for (int count = 0; count < maxNumberOfElements; count++) {
@@ -61,7 +63,7 @@ class BuildIndexTask implements Callable<Index> {
             } catch (Exception exc) {
                 System.out.printf("task %s closed by exception\n", taskNumber);
                 AutoCloseables.close(singleton(indexTree));
-                Files.deleteIfExists(Paths.get(storageFile));
+                Files.deleteIfExists(storageFile);
                 throw exc;
             }
         });
