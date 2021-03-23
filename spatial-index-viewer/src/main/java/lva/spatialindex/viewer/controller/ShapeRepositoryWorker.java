@@ -10,13 +10,13 @@ import lva.spatialindex.viewer.storage.Shape;
 import lva.spatialindex.viewer.storage.ShapeStorage;
 import lva.spatialindex.viewer.utils.AutoCloseables;
 
-import javax.swing.*;
+import javax.swing.SwingWorker;
 import java.io.BufferedReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -25,7 +25,10 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
+import static lva.spatialindex.viewer.controller.BuildIndexTask.NULL_INDEX_DATA;
+import static lva.spatialindex.viewer.utils.ExecutorUtils.gather;
 
 /**
  * @author vlitvinenko
@@ -65,56 +68,59 @@ class ShapeRepositoryWorker extends SwingWorker<ShapeRepository, Void> {
             Path indexPath = shapesFile.getParent();
             int numberOfShapesEstimated = Math.max((int) Files.size(shapesFile) / SIZE_OF_SHAPE_BYTES_AVG, 100);
             int numOfTasks = (numberOfShapesEstimated + MAX_ELEMENTS_IN_TREE - 1) / MAX_ELEMENTS_IN_TREE;
-
             BlockingQueue<BuildIndexTask.IndexData> shapesQueue = new LinkedBlockingQueue<>(SHAPES_QUEUE_CAPACITY);
 
             System.out.printf("Starting. shapes number est.: %s\n tasks number: %s\n",
                 numberOfShapesEstimated, numOfTasks);
 
-            Collection<CompletableFuture<Index>> indexingTasks = IntStream.range(0, numOfTasks)
-                    .mapToObj((taskNumber) -> new BuildIndexTask(shapesQueue, indexPath, taskNumber, MAX_ELEMENTS_IN_TREE))
-                    .map((task) -> CompletableFuture.supplyAsync(task::call, executor))
+            setProgress(0);
+
+            var indexingTasks = IntStream.range(0, numOfTasks)
+                    .mapToObj(taskNumber ->
+                            new BuildIndexTask(shapesQueue, indexPath, taskNumber, MAX_ELEMENTS_IN_TREE)
+                                    .callAsync(executor))
                     .collect(toList());
 
             try (BufferedReader reader = Files.newBufferedReader(shapesFile)) {
-                setProgress(0);
+                toShapes(reader.lines()).forEachOrdered(shape -> {
 
-                Stream<Shape> shapesStream = reader.lines().filter((line) -> !line.trim().isEmpty())
-                        .map((line) -> {
-                            Shape shape = ShapeParser.parseShape(line);
-                            shape.setMaxOrder(shape.getMaxOrder() + 1);
-                            shape.setOrder(shape.getMaxOrder());
-                            return shape;
-                        });
-
-                shapesStream.forEachOrdered((shape) -> {
                     Exceptions.toRuntime(() -> {
-                        // add to storage
-                        long offset = shapeStorage.add(shape);
-
-                        // scatter to tasks for indexing
-                        shapesQueue.put(new BuildIndexTask.IndexData(offset, shape.getMbr()));
+                        shapesQueue.put(BuildIndexTask.IndexData.of(shapeStorage.add(shape), shape.getMbr()));
 
                         int percent = (int) ((shape.getOrder() * 100L) / numberOfShapesEstimated);
                         setProgress(Math.min(percent, 100));
                     });
                 });
-
             }
 
             // last task marker
-            shapesQueue.put(BuildIndexTask.NULL_INDEX_DATA);
+            shapesQueue.put(NULL_INDEX_DATA);
 
-            System.out.println("All shapes added, waiting for tasks");
+            System.out.println("All shapes added, gathering results");
+            Collection<Index> indexes = gather(indexingTasks);
 
-            Collection<Index> indexes = indexingTasks.stream().map(CompletableFuture::join).collect(toList());
             setProgress(100);
-
             return indexes;
 
         } finally {
             MoreExecutors.shutdownAndAwaitTermination(executor, 5, TimeUnit.SECONDS);
         }
+    }
+
+    private static Stream<Shape> toShapes(Stream<String> lines) {
+        Stream<Shape> shapes = lines.filter(not(String::isBlank))
+                .map(line -> ShapeParser.parseShape(line).or(() -> {
+                    System.out.printf("Unable to parse shape from input string: %s%n", line);
+                    return Optional.empty();
+                }))
+                .flatMap(Optional::stream);
+
+        shapes = shapes.peek(shape -> {
+            shape.setMaxOrder(shape.getMaxOrder() + 1);
+            shape.setOrder(shape.getMaxOrder());
+        });
+
+        return shapes;
     }
 }
 

@@ -12,6 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
@@ -26,6 +28,9 @@ class BuildIndexTask implements Callable<Index> {
     static class IndexData {
         private final long offset;
         private final Rectangle mbr;
+        static IndexData of(long offset, Rectangle mbr) {
+            return new IndexData(offset, mbr);
+        }
     }
 
     static final IndexData NULL_INDEX_DATA = new IndexData(0, new Rectangle());
@@ -72,4 +77,9 @@ class BuildIndexTask implements Callable<Index> {
             }
         });
     }
+
+    CompletableFuture<Index> callAsync(ExecutorService executorService) {
+        return CompletableFuture.supplyAsync(this::call, executorService);
+    }
+
 }
