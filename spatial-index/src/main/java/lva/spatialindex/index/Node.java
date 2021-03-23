@@ -25,12 +25,10 @@ class Node {
     static final int MIN_ENTRIES = MAX_ENTRIES * 2 / 5;
 
     private final Storage<Node> storage;
+    private final List<Entry> entries = new ArrayList<>();
     private long offset;
     private long parentOffset = -1;
-
     private Rectangle mbr = null;
-
-    private final List<Entry> entries = new ArrayList<>();
 
     Node(Storage<Node> storage, long offset) {
         this.storage = storage;

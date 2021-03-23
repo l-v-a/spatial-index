@@ -22,7 +22,13 @@ import static java.util.Collections.singleton;
  * @author vlitvinenko
  */
 class BuildIndexTask implements Callable<Index> {
+    static final IndexData NULL_INDEX_DATA = new IndexData(0, new Rectangle());
     private static final String INDEX_FILE_NAME_FORMAT = "shapes_idx%d.bin";
+
+    private final BlockingQueue<IndexData> objectsQueue;
+    private final Path indexPath;
+    private final int maxNumberOfElements;
+    private final int taskNumber;
 
     @RequiredArgsConstructor
     static class IndexData {
@@ -32,13 +38,6 @@ class BuildIndexTask implements Callable<Index> {
             return new IndexData(offset, mbr);
         }
     }
-
-    static final IndexData NULL_INDEX_DATA = new IndexData(0, new Rectangle());
-
-    private final int maxNumberOfElements;
-    private final BlockingQueue<IndexData> objectsQueue;
-    private final int taskNumber;
-    private final Path indexPath;
 
     BuildIndexTask(@NonNull BlockingQueue<IndexData> objectsQueue,
                    @NonNull Path indexPath,
