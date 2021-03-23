@@ -2,8 +2,14 @@ package lva.spatialindex.viewer.ui;
 
 import lombok.NonNull;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 
 /**
  * @author vlitvinenko
@@ -22,13 +28,11 @@ public class ProgressFrame extends JFrame {
 
         progressBar.setStringPainted(true);
 
-        // setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-        setBounds(0, 0, 300, 50);
+        setBounds(0, 0, 500, 70);
         setResizable(false);
         setTitle("Shape Viewer");
-        // setUndecorated(true);
 
         setContentPane(panel);
 

@@ -7,71 +7,56 @@ import lva.spatialindex.viewer.ui.ProgressFrame;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author vlitvinenko
  */
 public class ShapeRepositoryController {
     private final ProgressFrame progressView;
-    private final ShapeRepositoryWorker worker;
-    private final Consumer<ShapeRepository> doneConsumer;
+    private final Path shapesFilePath;
 
     public ShapeRepositoryController(@NonNull ProgressFrame progressView,
-                                     @NonNull Consumer<ShapeRepository> doneConsumer,
                                      @NonNull String shapesFilePath) {
-        this.progressView = progressView;
-        this.doneConsumer = doneConsumer;
 
-        this.worker = new ShapeRepositoryWorker(Paths.get(shapesFilePath)) {
-            @Override
+        this.shapesFilePath = Paths.get(shapesFilePath);
+        this.progressView = progressView;
+    }
+
+    public CompletableFuture<ShapeRepository> build() {
+        CompletableFuture<ShapeRepository> result = new CompletableFuture<>();
+        ShapeRepositoryWorker worker = new ShapeRepositoryWorker(shapesFilePath) {
+            @SneakyThrows
             protected void done() {
-                handleWorkerDone();
+                progressView.setVisible(false);
+                progressView.dispose();
+                if (!isCancelled()) {
+                    result.complete(get());
+                }
             }
         };
+
+        worker.addPropertyChangeListener(evt -> {
+            if ("progress".equals(evt.getPropertyName())) {
+                int progress = (Integer) evt.getNewValue();
+                progressView.setProgress(progress);
+            }
+        });
 
         this.progressView.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                handleProgressViewClosing();
+                worker.cancel(true);
+                progressView.setMessage("canceling...");
             }
         });
 
-        worker.addPropertyChangeListener(this::propertyChange);
-    }
-
-    public void build() {
         progressView.setMessage("indexing...");
         progressView.setVisible(true);
         worker.execute();
-    }
 
-    @SneakyThrows
-    private void handleWorkerDone() {
-        System.out.println("done()");
-
-        progressView.setVisible(false);
-        progressView.dispose();
-
-        if (worker.isCancelled()) {
-            System.out.println("cancelled");
-        } else {
-            System.out.println("ok");
-            doneConsumer.accept(worker.get());
-        }
-    }
-
-    private void handleProgressViewClosing() {
-        worker.cancel(true);
-        progressView.setMessage("canceling...");
-    }
-
-    private void propertyChange(PropertyChangeEvent evt) {
-        if ("progress".equals(evt.getPropertyName())) {
-            int progress = (Integer) evt.getNewValue();
-            progressView.setProgress(progress);
-        }
+        return result;
     }
 }

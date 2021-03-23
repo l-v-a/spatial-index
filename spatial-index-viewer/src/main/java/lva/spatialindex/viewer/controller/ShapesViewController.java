@@ -8,7 +8,6 @@ import lva.spatialindex.viewer.ui.ShapesFrame;
 
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -34,7 +33,6 @@ public class ShapesViewController implements ShapesFrame.ShapesViewListener {
     @Override
     public void clicked(@NonNull MouseEvent event) {
         Rectangle viewport = view.getViewport();
-        // translate to viewport
         int x = event.getX() + viewport.x;
         int y = event.getY() + viewport.y;
 
@@ -71,7 +69,7 @@ public class ShapesViewController implements ShapesFrame.ShapesViewListener {
     public void viewPortChanged() {
         Rectangle viewport = view.getViewport();
         visibleShapes = shapeRepository.search(viewport);
-        Collections.sort(visibleShapes, Comparator.comparing(Shape::getOrder, Integer::compare));
+        visibleShapes.sort(Comparator.comparing(Shape::getOrder, Integer::compare));
 
         view.setShapes(visibleShapes);
         view.update();

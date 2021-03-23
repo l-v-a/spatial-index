@@ -27,7 +27,8 @@ public class ShapeRepository implements AutoCloseable {
 
     @NonNull
     public List<Shape> search(@NonNull Rectangle area) {
-        return index.search(area).stream().map(shapeStorage::read).collect(toList());
+        return index.search(area).stream()
+                .map(shapeStorage::read).collect(toList());
     }
 
     public void update(@NonNull Shape shape) {

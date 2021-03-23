@@ -6,17 +6,17 @@ import lva.spatialindex.viewer.model.ShapeRepository;
 import lva.spatialindex.viewer.ui.ProgressFrame;
 import lva.spatialindex.viewer.ui.ShapesFrame;
 
-import javax.swing.*;
-import java.util.function.Consumer;
+import javax.swing.SwingUtilities;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author vlitvinenko
  */
 public class App {
-    private static void buildShapesRepository(Consumer<ShapeRepository> shapeRepositoryConsumer, String shapesFile) {
+    private static CompletableFuture<ShapeRepository> buildShapesRepository(String shapesFile) {
         ShapeRepositoryController controller =
-            new ShapeRepositoryController(new ProgressFrame(), shapeRepositoryConsumer, shapesFile);
-        controller.build();
+                new ShapeRepositoryController(new ProgressFrame(), shapesFile);
+        return controller.build();
     }
 
     private static void showShapesRepository(ShapeRepository shapeRepository) {
@@ -29,7 +29,9 @@ public class App {
         if (args.length > 0) {
             String shapesFile = args[0];
             SwingUtilities.invokeLater(() ->
-                    buildShapesRepository(App::showShapesRepository, shapesFile));
+                    buildShapesRepository(shapesFile)
+                            .thenAccept(App::showShapesRepository)
+            );
         } else {
             System.err.println("shapes file path is required");
         }
