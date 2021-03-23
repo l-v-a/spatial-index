@@ -12,6 +12,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.stream.Collectors.toList;
 import static lva.spatialindex.index.Distributions.getDistributionGroups;
 import static lva.spatialindex.index.Distributions.getGroupMargins;
@@ -47,9 +48,8 @@ public class RStarTree implements Index {
     }
 
     public void insert(long offset, Rectangle newMbr) {
-        if (!newMbr.isEmpty()) {
-            insert(root, offset, newMbr);
-        }
+        checkArgument(!newMbr.isEmpty(), "Invalid region");
+        insert(root, offset, newMbr);
     }
 
     private void insert(Node node, long offset, Rectangle newMbr) {
