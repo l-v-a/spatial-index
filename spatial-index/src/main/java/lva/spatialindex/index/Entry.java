@@ -4,6 +4,7 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import io.vavr.control.Either;
 import lombok.EqualsAndHashCode;
 import lva.spatialindex.storage.Storage;
 
@@ -52,9 +53,13 @@ class Entry {
         this.childOffset = childOffset;
     }
 
-    // TODO: use Either
+    Either<Node, Long> data() {
+        return childOffset < 0 ? Either.right(childOffset) :
+                Either.left(storage.read(childOffset));
+    }
+
     Optional<Node> getChildNode() {
-        return Optional.ofNullable(childOffset >= 0 ? storage.read(childOffset) : null);
+        return data().swap().toJavaOptional();
     }
 
     long getChildOffset() {

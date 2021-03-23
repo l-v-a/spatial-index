@@ -3,15 +3,14 @@ package lva.spatialindex.index;
 import lva.spatialindex.index.Distributions.GroupPair;
 import lva.spatialindex.storage.Storage;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static lva.spatialindex.index.Distributions.getDistributionGroups;
@@ -36,24 +35,15 @@ public class RStarTree implements Index {
 
     @Override
     public Collection<Long> search(Rectangle area) {
-        return search(root, area);
+        return search(root, area).collect(toList());
     }
 
-    private Collection<Long> search(Node node, Rectangle area) {
-        Collection<Long> res = new HashSet<>();
-        for (Entry e: node.getEntries()) {
-            if (area.intersects(e.getMbr())) {
-                if (node.isLeaf()) {
-                    res.add(-(e.getChildOffset() + 1));
-                } else {
-                    Collection<Long> subRes = e.getChildNode()
-                            .map(childNode -> search(childNode, area))
-                            .orElse(Collections.emptyList());
-                    res.addAll(subRes);
-                }
-            }
-        }
-        return res;
+    private Stream<Long> search(Node node, Rectangle area) {
+        return node.getEntries().stream().filter(entry -> area.intersects(entry.getMbr()))
+                .flatMap(entry ->
+                        entry.data().map(value -> Stream.of(-(value + 1)))
+                                .getOrElseGet(childNode -> search(childNode, area))
+                );
     }
 
     public void insert(long offset, Rectangle newMbr) {

@@ -29,6 +29,7 @@ class Node {
     private long parentOffset = -1;
 
     private Rectangle mbr = null;
+
     private final List<Entry> entries = new ArrayList<>();
 
     Node(Storage<Node> storage, long offset) {
@@ -42,11 +43,6 @@ class Node {
         return node;
     }
 
-    Node save() {
-        storage.write(offset, this);
-        return this;
-    }
-
     boolean isLeaf() {
         return entries.stream().findAny().map(Entry::isLeaf)
                 .orElse(true);
@@ -55,7 +51,6 @@ class Node {
     boolean isFull() {
         return entries.size() >= MAX_ENTRIES;
     }
-
 
     Rectangle getMbr() {
         if (mbr == null) {
@@ -86,7 +81,6 @@ class Node {
         return entries;
     }
 
-
     Node addNode(Node node) {
         return addEntry(new Entry(storage, node.getMbr(), node.getOffset()));
     }
@@ -112,6 +106,11 @@ class Node {
             childNode.save();
         });
 
+        return this;
+    }
+
+    Node save() {
+        storage.write(offset, this);
         return this;
     }
 
