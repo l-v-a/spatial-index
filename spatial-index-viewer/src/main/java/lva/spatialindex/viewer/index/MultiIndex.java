@@ -4,11 +4,9 @@ import lombok.NonNull;
 import lva.spatialindex.index.Index;
 import lva.spatialindex.utils.Exceptions;
 import lva.spatialindex.viewer.utils.AutoCloseables;
-import lva.spatialindex.viewer.utils.ExecutorUtils;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static java.util.stream.Collectors.toList;
@@ -26,12 +24,12 @@ public class MultiIndex implements Index {
     @Override
     @NonNull
     public Collection<Long> search(@NonNull Rectangle area) {
-        List<CompletableFuture<Collection<Long>>> searchTasks =
-            indexes.stream().map((index) -> CompletableFuture.supplyAsync(() -> index.search(area), ExecutorUtils.EXECUTOR_SERVICE))
-                    .collect(toList());
+        AsyncSearch search = AsyncSearch.of(area);
+        var results = indexes.stream().map(search::byIndex).collect(toList());
 
-        return searchTasks.stream().flatMap(f -> f.join().stream()).collect(toList());
-
+        return results.stream().map(CompletableFuture::join)
+                .flatMap(Collection::stream)
+                .collect(toList());
     }
 
     @Override

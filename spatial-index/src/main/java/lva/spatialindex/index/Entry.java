@@ -21,12 +21,7 @@ import java.util.Optional;
 @EqualsAndHashCode(exclude = {"storage"})
 public
 class Entry {
-    private static final int SIZE_OF_X = 4;
-    private static final int SIZE_OF_Y = 4;
-    private static final int SIZE_OF_WIDTH = 4;
-    private static final int SIZE_OF_HEIGHT = 4;
-    private static final int SIZE_OF_CHILD = 8;
-    static final int SIZE = SIZE_OF_X + SIZE_OF_Y + SIZE_OF_WIDTH + SIZE_OF_HEIGHT + SIZE_OF_CHILD;
+    static final int SIZE = 24;
 
     static final Comparator<Entry> LEFT_TO_RIGHT_BY_LEFT_COMPARATOR =
             Comparator.comparingInt(e -> e.mbr.x);

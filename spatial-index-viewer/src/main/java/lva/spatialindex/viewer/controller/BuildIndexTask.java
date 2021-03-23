@@ -7,7 +7,7 @@ import lva.spatialindex.index.RStarTree;
 import lva.spatialindex.utils.Exceptions;
 import lva.spatialindex.viewer.utils.AutoCloseables;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.BlockingQueue;
@@ -35,7 +35,11 @@ class BuildIndexTask implements Callable<Index> {
     private final int taskNumber;
     private final Path indexPath;
 
-    BuildIndexTask(@NonNull BlockingQueue<IndexData> objectsQueue, @NonNull Path indexPath, int taskNumber, int maxNumberOfElements) {
+    BuildIndexTask(@NonNull BlockingQueue<IndexData> objectsQueue,
+                   @NonNull Path indexPath,
+                   int taskNumber,
+                   int maxNumberOfElements) {
+
         this.maxNumberOfElements = maxNumberOfElements;
         this.indexPath = indexPath;
         this.objectsQueue = objectsQueue;
