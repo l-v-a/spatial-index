@@ -7,7 +7,6 @@ import lva.spatialindex.viewer.ui.ProgressFrame;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
 
@@ -15,19 +14,11 @@ import java.util.concurrent.CompletableFuture;
  * @author vlitvinenko
  */
 public class ShapeRepositoryController {
-    private final ProgressFrame progressView;
-    private final Path shapesFilePath;
+    public static CompletableFuture<ShapeRepository> build(@NonNull ProgressFrame progressView,
+                                                           @NonNull String shapesFilePath) {
 
-    public ShapeRepositoryController(@NonNull ProgressFrame progressView,
-                                     @NonNull String shapesFilePath) {
-
-        this.shapesFilePath = Paths.get(shapesFilePath);
-        this.progressView = progressView;
-    }
-
-    public CompletableFuture<ShapeRepository> build() {
         CompletableFuture<ShapeRepository> result = new CompletableFuture<>();
-        ShapeRepositoryWorker worker = new ShapeRepositoryWorker(shapesFilePath) {
+        ShapeRepositoryWorker worker = new ShapeRepositoryWorker(Paths.get(shapesFilePath)) {
             @SneakyThrows
             protected void done() {
                 progressView.setVisible(false);
@@ -45,7 +36,7 @@ public class ShapeRepositoryController {
             }
         });
 
-        this.progressView.addWindowListener(new WindowAdapter() {
+        progressView.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
                 worker.cancel(true);
