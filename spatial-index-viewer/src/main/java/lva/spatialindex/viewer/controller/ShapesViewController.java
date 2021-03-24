@@ -11,6 +11,7 @@ import java.awt.event.MouseEvent;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author vlitvinenko
@@ -36,33 +37,29 @@ public class ShapesViewController implements ShapesFrame.ShapesViewListener {
         int x = event.getX() + viewport.x;
         int y = event.getY() + viewport.y;
 
-        Shape clickedShape = null;
+        takeClicked(x, y).ifPresent(clickedShape -> {
+            // push to back with the highest order
+            clickedShape.setActive(!clickedShape.isActive());
+            clickedShape.setOrder(clickedShape.getMaxOrder() + 1);
+            clickedShape.setMaxOrder(clickedShape.getOrder());
+
+            shapeRepository.update(clickedShape);
+            visibleShapes.add(clickedShape);
+
+            view.update();
+        });
+    }
+
+    private Optional<Shape> takeClicked(int x, int y) {
         Iterator<Shape> shapeIterator = Lists.reverse(visibleShapes).iterator();
         while (shapeIterator.hasNext()) {
             Shape shape = shapeIterator.next();
             if (shape.hitTest(x, y)) {
-                clickedShape = shape;
-                break;
+                shapeIterator.remove();
+                return Optional.of(shape);
             }
         }
-
-        if (clickedShape == null) {
-            // nothing to do
-            return;
-        }
-
-        clickedShape.setActive(!clickedShape.isActive());
-        clickedShape.setOrder(clickedShape.getMaxOrder() + 1);
-        clickedShape.setMaxOrder(clickedShape.getOrder());
-
-        shapeRepository.update(clickedShape);
-
-        // push to back with highest order
-        shapeIterator.remove();
-        visibleShapes.add(clickedShape);
-
-        view.update();
-
+        return Optional.empty();
     }
 
     @Override

@@ -32,7 +32,7 @@ public class ShapesFrame extends JFrame {
 
     private static final ShapesViewListener NULL_LISTENER = new ShapesViewListener() {
         @Override
-        public void clicked(MouseEvent event) {}
+        public void clicked(@NonNull MouseEvent event) {}
 
         @Override
         public void viewPortChanged() {}
