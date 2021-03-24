@@ -10,18 +10,19 @@ import java.awt.event.WindowEvent;
 import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
 
+import static java.util.Objects.requireNonNullElse;
+
 /**
  * @author vlitvinenko
  */
 public class ShapeRepositoryController {
-    public static CompletableFuture<ShapeRepository> build(@NonNull ProgressFrame progressView,
-                                                           @NonNull String shapesFilePath) {
+    public static CompletableFuture<ShapeRepository> buildRepository(@NonNull ProgressFrame progressView,
+                                                                     @NonNull String shapesFilePath) {
 
         CompletableFuture<ShapeRepository> result = new CompletableFuture<>();
         ShapeRepositoryWorker worker = new ShapeRepositoryWorker(Paths.get(shapesFilePath)) {
             @SneakyThrows
             protected void done() {
-                progressView.setVisible(false);
                 progressView.dispose();
                 if (!isCancelled()) {
                     result.complete(get());
@@ -31,7 +32,7 @@ public class ShapeRepositoryController {
 
         worker.addPropertyChangeListener(evt -> {
             if ("progress".equals(evt.getPropertyName())) {
-                int progress = (Integer) evt.getNewValue();
+                int progress = (int) requireNonNullElse(evt.getNewValue(), 0);
                 progressView.setProgress(progress);
             }
         });

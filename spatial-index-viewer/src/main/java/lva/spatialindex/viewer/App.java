@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public class App {
     private static CompletableFuture<ShapeRepository> buildShapesRepository(String shapesFile) {
-        return ShapeRepositoryController.build(new ProgressFrame(), shapesFile);
+        return ShapeRepositoryController.buildRepository(new ProgressFrame(), shapesFile);
     }
 
     private static void showShapesRepository(ShapeRepository shapeRepository) {
