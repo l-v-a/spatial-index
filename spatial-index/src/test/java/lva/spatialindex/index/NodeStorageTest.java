@@ -7,7 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.awt.Rectangle;
 
@@ -53,7 +53,6 @@ public class NodeStorageTest {
             }
         };
 
-        when(storageSpace.getSize()).thenReturn((long)NodeStorage.RECORD_SIZE);
 
         node = new Node(mock(NodeStorage.class), -1)
             .setOffset(123)
@@ -63,7 +62,6 @@ public class NodeStorageTest {
                 .serialize(node);
 
         when(nodeSerializer.serialize(any())).thenReturn(serializedNode);
-        when(nodeSerializer.deserialize(any())).thenReturn(node);
     }
 
     @Test
@@ -102,9 +100,6 @@ public class NodeStorageTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void should_throw_if_allocation_size_exceeds_record_size() {
-        when(storageSpace.allocate(anyLong()))
-            .thenReturn(123L);
-
         Node bigNode = mock(Node.class);
         when(nodeSerializer.serialize(bigNode)).thenReturn(new byte[NodeStorage.RECORD_SIZE + 1]);
         storage.add(bigNode);
@@ -125,11 +120,7 @@ public class NodeStorageTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void should_throw_for_negative_offset_when_writing() {
-        when(storageSpace.getSize())
-            .thenReturn((long)NodeStorage.RECORD_SIZE);
-
         storage.write(-1, node);
-
         fail();
     }
 
@@ -145,9 +136,6 @@ public class NodeStorageTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void should_throw_if_node_size_exceeds_record_size_when_writing() {
-        when(storageSpace.getSize())
-            .thenReturn((long)serializedNode.length + 1);
-
         Node bigNode = mock(Node.class);
         when(nodeSerializer.serialize(bigNode)).thenReturn(new byte[NodeStorage.RECORD_SIZE + 1]);
         storage.write(0, bigNode);
@@ -183,8 +171,6 @@ public class NodeStorageTest {
     @Test
     public void should_use_cache_when_reading() {
         NodeStorage nodeStorage = new NodeStorage(storageSpace);
-        when(storageSpace.getSize())
-            .thenReturn((long) NodeStorage.RECORD_SIZE);
 
         nodeStorage.add(node);
         Node newNode = nodeStorage.read(node.getOffset());
