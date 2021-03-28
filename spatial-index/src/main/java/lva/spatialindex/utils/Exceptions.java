@@ -23,6 +23,7 @@ public class Exceptions {
         }
     }
 
+    // TODO: use vavr's CheckedFunctions
     public static void toRuntime(VoidCallable voidCallable) {
         toRuntime(voidCallable.toCallable());
     }

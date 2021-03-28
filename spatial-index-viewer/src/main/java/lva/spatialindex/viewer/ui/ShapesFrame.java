@@ -1,8 +1,9 @@
 package lva.spatialindex.viewer.ui;
 
 import lombok.NonNull;
-import lombok.Setter;
 import lva.spatialindex.viewer.storage.Shape;
+import lva.spatialindex.viewer.utils.EventSource.EventStore;
+import lva.spatialindex.viewer.utils.EventSource.TypedEventStore;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -23,28 +24,13 @@ import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 
+
 public class ShapesFrame extends JFrame {
-    public interface ShapesViewListener {
-        void clicked(@NonNull MouseEvent event);
-        void viewPortChanged();
-        void closing();
-    }
-
-    private static final ShapesViewListener NULL_LISTENER = new ShapesViewListener() {
-        @Override
-        public void clicked(@NonNull MouseEvent event) {}
-
-        @Override
-        public void viewPortChanged() {}
-
-        @Override
-        public void closing() {}
-    };
+    public final EventStore closingEvent = new EventStore();
+    public final EventStore viewPortChangedEvent  = new EventStore();
+    public final TypedEventStore<MouseEvent> clickedEvent = new TypedEventStore<>();
 
     private static final Dimension PANE_SIZE = new Dimension(5000, 5000);
-
-    @Setter
-    private ShapesViewListener viewListener = NULL_LISTENER;
 
     private final Canvas canvas = new Canvas();
     private final JScrollBar hbar = new JScrollBar(JScrollBar.HORIZONTAL);
@@ -81,7 +67,7 @@ public class ShapesFrame extends JFrame {
         canvas.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                viewListener.clicked(e);
+                clickedEvent.dispatch(e);
             }
         });
 
@@ -91,7 +77,7 @@ public class ShapesFrame extends JFrame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                viewListener.closing();
+                closingEvent.dispatch();
             }
         });
 
@@ -144,7 +130,7 @@ public class ShapesFrame extends JFrame {
 
     private void viewportChanged() {
         canvas.viewport = getViewport();
-        viewListener.viewPortChanged();
+        viewPortChangedEvent.dispatch();
     }
 
     private static class Canvas extends JComponent {

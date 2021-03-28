@@ -16,23 +16,25 @@ import java.util.Optional;
 /**
  * @author vlitvinenko
  */
-public class ShapesViewController implements ShapesFrame.ShapesViewListener {
+public class ShapesViewController {
     private final ShapesFrame view;
     private final ShapeRepository shapeRepository;
     private List<Shape> visibleShapes;
 
     public ShapesViewController(@NonNull ShapesFrame view, @NonNull ShapeRepository shapeRepository) {
         this.view = view;
-        this.view.setViewListener(this);
         this.shapeRepository = shapeRepository;
+
+        this.view.clickedEvent.register(this::onShapesViewClicked);
+        this.view.closingEvent.register(this::onClosing);
+        this.view.viewPortChangedEvent.register(this::onViewPortChanged);
     }
 
     public void run() {
         this.view.setVisible(true);
     }
 
-    @Override
-    public void clicked(@NonNull MouseEvent event) {
+    private void onShapesViewClicked(MouseEvent event) {
         Rectangle viewport = view.getViewport();
         int x = event.getX() + viewport.x;
         int y = event.getY() + viewport.y;
@@ -62,8 +64,7 @@ public class ShapesViewController implements ShapesFrame.ShapesViewListener {
         return Optional.empty();
     }
 
-    @Override
-    public void viewPortChanged() {
+    private void onViewPortChanged() {
         Rectangle viewport = view.getViewport();
         visibleShapes = shapeRepository.search(viewport);
         visibleShapes.sort(Comparator.comparing(Shape::getOrder, Integer::compare));
@@ -72,8 +73,7 @@ public class ShapesViewController implements ShapesFrame.ShapesViewListener {
         view.update();
     }
 
-    @Override
-    public void closing() {
+    private void onClosing() {
         shapeRepository.close();
     }
 }
