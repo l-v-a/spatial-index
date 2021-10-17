@@ -2,6 +2,7 @@ package lva.spatialindex.viewer.storage
 
 import java.awt.Color
 import java.awt.Graphics
+import java.awt.Point
 import java.awt.Rectangle
 
 /**
@@ -14,7 +15,7 @@ interface Shape {
     var order: Int
     var maxOrder: Int
     var offset: Long
-    fun draw(g: Graphics)
+    fun draw(graphics: Graphics)
     fun hitTest(x: Int, y: Int): Boolean
 }
 
@@ -26,7 +27,7 @@ abstract class AbstractShape : Shape {
     override var order = 0
     override var offset: Long = 0
 
-    // override var maxOrder by ::maxOrderImpl // TODO: fix it
+    // override var maxOrder by ::maxOrderImpl //TODO: fix it
     override var maxOrder
         get() = maxOrderImpl
         set(value) { maxOrderImpl = value }
@@ -39,12 +40,12 @@ class CircleShape(private val x: Int, private val y: Int, private val radius: In
     override val mbr: Rectangle
         get() = Rectangle(x - radius, y - radius, radius * 2, radius * 2)
 
-    override fun draw(g: Graphics) {
+    override fun draw(graphics: Graphics) = with(graphics) {
         val boundRect = mbr
-        g.color = Color.LIGHT_GRAY
-        g.fillOval(boundRect.x, boundRect.y, boundRect.width, boundRect.height)
-        g.color = if (isActive) Color.RED else Color.BLACK
-        g.drawOval(boundRect.x, boundRect.y, boundRect.width, boundRect.height)
+        color = Color.LIGHT_GRAY
+        fillOval(boundRect.x, boundRect.y, boundRect.width, boundRect.height)
+        color = if (isActive) Color.RED else Color.BLACK
+        drawOval(boundRect.x, boundRect.y, boundRect.width, boundRect.height)
     }
 
     override fun hitTest(x: Int, y: Int) =
@@ -59,12 +60,12 @@ class RectangleShape(private val rectangle: Rectangle) : AbstractShape() {
     override val mbr: Rectangle
         get() = Rectangle(rectangle)
 
-    override fun draw(g: Graphics) {
-        g.color = Color.LIGHT_GRAY
-        g.fillRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height)
-        g.color = if (isActive) Color.RED else Color.BLACK
-        g.drawRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height)
+    override fun draw(graphics: Graphics) = with(graphics) {
+        color = Color.LIGHT_GRAY
+        fillRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height)
+        color = if (isActive) Color.RED else Color.BLACK
+        drawRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height)
     }
 
-    override fun hitTest(x: Int, y: Int) = rectangle.contains(x, y)
+    override fun hitTest(x: Int, y: Int) = Point(x, y) in rectangle
 }
