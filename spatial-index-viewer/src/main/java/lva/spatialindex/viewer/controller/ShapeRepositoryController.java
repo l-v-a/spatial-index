@@ -1,7 +1,6 @@
 package lva.spatialindex.viewer.controller;
 
 import lombok.NonNull;
-import lombok.SneakyThrows;
 import lva.spatialindex.viewer.model.ShapeRepository;
 import lva.spatialindex.viewer.ui.ProgressFrame;
 
@@ -21,11 +20,14 @@ public class ShapeRepositoryController {
 
         CompletableFuture<ShapeRepository> result = new CompletableFuture<>();
         ShapeRepositoryWorker worker = new ShapeRepositoryWorker(Paths.get(shapesFilePath)) {
-            @SneakyThrows
             protected void done() {
                 progressView.dispose();
                 if (!isCancelled()) {
-                    result.complete(get());
+                    try {
+                        result.complete(get());
+                    } catch (Exception e) {
+                        result.completeExceptionally(e);
+                    }
                 }
             }
         };
