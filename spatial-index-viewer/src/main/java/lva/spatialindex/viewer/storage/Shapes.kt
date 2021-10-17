@@ -30,11 +30,18 @@ abstract class AbstractShape : Shape {
     // override var maxOrder by ::maxOrderImpl //FIXME:
     override var maxOrder
         get() = maxOrderImpl
-        set(value) { maxOrderImpl = value }
+        set(value) {
+            maxOrderImpl = value
+        }
 }
 
 
-class CircleShape(private val x: Int = 0, private val y: Int = 0, private val radius: Int = 0) : AbstractShape() {
+class CircleShape(
+    private val x: Int = 0,
+    private val y: Int = 0,
+    private val radius: Int = 0
+) : AbstractShape() {
+
     override val mbr: Rectangle
         get() = Rectangle(x - radius, y - radius, radius * 2, radius * 2)
 
@@ -51,7 +58,9 @@ class CircleShape(private val x: Int = 0, private val y: Int = 0, private val ra
 }
 
 
-class RectangleShape(private val rectangle: Rectangle = Rectangle(0, 0, 0, 0)) : AbstractShape() {
+class RectangleShape(
+    private val rectangle: Rectangle = Rectangle(0, 0, 0, 0)
+) : AbstractShape() {
     constructor(x: Int, y: Int, width: Int, height: Int) : this(Rectangle(x, y, width, height))
 
     override val mbr: Rectangle
