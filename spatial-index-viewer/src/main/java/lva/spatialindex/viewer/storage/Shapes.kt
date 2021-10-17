@@ -61,6 +61,7 @@ class CircleShape(
 class RectangleShape(
     private val rectangle: Rectangle = Rectangle(0, 0, 0, 0)
 ) : AbstractShape() {
+
     constructor(x: Int, y: Int, width: Int, height: Int) : this(Rectangle(x, y, width, height))
 
     override val mbr: Rectangle
