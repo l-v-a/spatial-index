@@ -2,7 +2,6 @@ package lva.spatialindex.viewer.controller
 
 import lva.spatialindex.viewer.storage.CircleShape
 import lva.spatialindex.viewer.storage.RectangleShape
-import lva.spatialindex.viewer.storage.Shape
 import java.util.*
 
 /**
@@ -10,9 +9,7 @@ import java.util.*
  */
 internal object ShapeParser {
     @JvmStatic
-    fun parseShape(str: String): Optional<Shape> {
-        return Optional.ofNullable(parse(str)) //TODO: for compatibility only. remove later
-    }
+    fun parseShape(str: String) = Optional.ofNullable(parse(str)) //TODO: for compatibility only. remove later
 
     private fun parse(str: String) = Regex("(\\w+):(.+)").find(str)?.let {
         val (type, params) = it.destructured
