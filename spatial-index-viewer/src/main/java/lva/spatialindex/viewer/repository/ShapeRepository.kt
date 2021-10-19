@@ -1,50 +1,93 @@
-package lva.spatialindex.viewer.ui;
+package lva.spatialindex.viewer.repository
 
-import lombok.NonNull;
-
-import javax.swing.BorderFactory;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Toolkit;
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import lva.spatialindex.viewer.model.ShapeRepository
+import lva.spatialindex.viewer.ui.UIScope
+import java.awt.BorderLayout
+import java.awt.Toolkit
+import java.awt.event.WindowAdapter
+import java.awt.event.WindowEvent
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.util.concurrent.CompletableFuture
+import javax.swing.BorderFactory
+import javax.swing.JFrame
+import javax.swing.JLabel
+import javax.swing.JPanel
+import javax.swing.JProgressBar
 
 /**
  * @author vlitvinenko
  */
-public class ProgressFrame extends JFrame {
-    private final JProgressBar progressBar = new JProgressBar();
-    private final JLabel messageLabel = new JLabel();
+class RepositoryBuilderFrame : JFrame(), UIScope {
+    private val progressBar = JProgressBar()
+    private val messageLabel = JLabel()
 
-    public ProgressFrame() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-        panel.setBorder(BorderFactory.createEmptyBorder(7, 7, 7, 7));
+    init {
+        val panel = JPanel()
+        with(panel) {
+            layout = BorderLayout()
+            border = BorderFactory.createEmptyBorder(7, 7, 7, 7)
+            add(messageLabel, BorderLayout.NORTH)
+            add(progressBar, BorderLayout.CENTER)
+        }
 
-        panel.add(messageLabel, BorderLayout.NORTH);
-        panel.add(progressBar, BorderLayout.CENTER);
+        defaultCloseOperation = EXIT_ON_CLOSE
+        addWindowListener(object : WindowAdapter() {
+            override fun windowClosing(e: WindowEvent?) {
+                job.cancel()
+            }
+        })
 
-        progressBar.setStringPainted(true);
+        progressBar.isStringPainted = true
+        isResizable = false
+        title = "Shape Viewer"
+        contentPane = panel
 
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-
-        setBounds(0, 0, 500, 70);
-        setResizable(false);
-        setTitle("Shape Viewer");
-
-        setContentPane(panel);
-
-        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        setLocation(dim.width / 2 - getSize().width / 2, dim.height / 2 - getSize().height / 2);
+        setBounds(0, 0, 500, 70)
+        val dim = Toolkit.getDefaultToolkit().screenSize
+        setLocation(dim.width / 2 - size.width / 2, dim.height / 2 - size.height / 2)
     }
 
-    public void setProgress(int value) {
-        progressBar.setValue(value);
+    override val job = Job()
+
+    private fun setProgress(value: Int) {
+        progressBar.value = value
     }
 
-    public void setMessage(@NonNull String message) {
-        messageLabel.setText(message);
+    fun setMessage(message: String) {
+        messageLabel.text = message
     }
+
+    fun execute(shapesFile: Path, onComplete: (ShapeRepository) -> Unit) {
+        launch {
+            val repository = ShapesRepositoryBuilder
+                .build(shapesFile) {
+                    withContext(Dispatchers.Main) {
+                        setProgress(it)
+                    }
+                }
+
+            onComplete(repository)
+        }
+    }
+}
+
+
+fun buildShapesRepository(shapesFile: String): CompletableFuture<ShapeRepository> {
+    val frame = RepositoryBuilderFrame().apply {
+        setMessage("indexing...");
+        isVisible = true;
+    }
+
+    val repositoryFutureResult = CompletableFuture<ShapeRepository>()
+    frame.execute(Paths.get(shapesFile)) {
+        frame.isVisible = false
+        repositoryFutureResult.complete(it)
+    }
+
+    return repositoryFutureResult
 }
