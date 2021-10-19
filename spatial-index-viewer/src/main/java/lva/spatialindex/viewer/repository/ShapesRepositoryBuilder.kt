@@ -56,24 +56,23 @@ object ShapesRepositoryBuilder {
 
         val itemsEstimated = max(Files.size(shapesFile) / SIZE_OF_SHAPE_BYTES_AVG, 100).toInt()
         val numOfTasks = (itemsEstimated + MAX_ELEMENTS_IN_TREE - 1) / MAX_ELEMENTS_IN_TREE
+        var itemsProcessed = 0;
+
+        suspend fun onItemIndexed() {
+            withContext(coroutineContext) {
+                val percentage = (++itemsProcessed * 100) / itemsEstimated
+                onProgress(min(percentage, 100))
+            }
+        }
 
         log.info("Starting build indexes. shapes number est.: $itemsEstimated, tasks number: $numOfTasks")
         onProgress(0)
 
         val shapes = readShapes(shapesFile)
         val shapesToIndex = commitShapes(shapes, storage)
-
-        val thisContext = coroutineContext
-        var itemsProcessed = 0;
-
         val deferIndexes = (1..numOfTasks).map {
             async(Dispatchers.IO) {
-                indexShapes(it, shapesFile.parent, shapesToIndex) {
-                    withContext(thisContext) {
-                        val percentage = (++itemsProcessed * 100) / itemsEstimated
-                        onProgress(min(percentage, 100))
-                    }
-                }
+                indexShapes(it, shapesFile.parent, shapesToIndex) { onItemIndexed() }
             }
         }
 
@@ -103,7 +102,7 @@ object ShapesRepositoryBuilder {
         storage: Storage<Shape>
     ): ReceiveChannel<IndexData> = produce(capacity = SHAPES_QUEUE_CAPACITY) {
         for (shape in shapes) {
-            shape.maxOrder = shape.maxOrder + 1
+            shape.maxOrder += 1
             shape.order = shape.maxOrder
             send(IndexData(storage.add(shape), shape.mbr))
         }
