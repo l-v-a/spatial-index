@@ -23,7 +23,9 @@ import java.nio.file.Path
 import kotlin.math.max
 import kotlin.math.min
 
-
+/**
+ * @author vlitvinenko
+ */
 private data class IndexData(val offset: Long, val mbr: Rectangle)
 
 object ShapesRepositoryBuilder {
