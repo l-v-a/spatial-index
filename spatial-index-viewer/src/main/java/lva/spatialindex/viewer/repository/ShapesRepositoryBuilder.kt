@@ -16,7 +16,6 @@ import lva.spatialindex.viewer.index.MultiIndex
 import lva.spatialindex.viewer.model.ShapeRepository
 import lva.spatialindex.viewer.storage.Shape
 import lva.spatialindex.viewer.storage.ShapeStorage
-import lva.spatialindex.viewer.utils.AutoCloseables
 import lva.spatialindex.viewer.utils.AutoCloseables.close
 import org.slf4j.LoggerFactory
 import java.awt.Rectangle
@@ -132,7 +131,7 @@ object ShapesRepositoryBuilder {
             indexTree
         } catch (e: Exception) {
             log.error("task $taskNumber closed by exception", e)
-            AutoCloseables.close(setOf(indexTree))
+            close(setOf(indexTree))
             Files.deleteIfExists(storageFile)
             throw e;
         }
