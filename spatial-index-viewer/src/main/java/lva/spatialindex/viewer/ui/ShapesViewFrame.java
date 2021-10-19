@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 
-public class ShapesFrame extends JFrame {
+public class ShapesViewFrame extends JFrame {
     public final EventStore closingEvent = new EventStore();
     public final EventStore viewPortChangedEvent  = new EventStore();
     public final TypedEventStore<MouseEvent> clickedEvent = new TypedEventStore<>();
@@ -36,7 +36,7 @@ public class ShapesFrame extends JFrame {
     private final JScrollBar hbar = new JScrollBar(JScrollBar.HORIZONTAL);
     private final JScrollBar vbar = new JScrollBar(JScrollBar.VERTICAL);
 
-    public ShapesFrame() {
+    public ShapesViewFrame() {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setBounds(0, 0, 1000, 800);
         setTitle("Shape Viewer");

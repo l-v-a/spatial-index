@@ -1,25 +1,21 @@
 package lva.spatialindex.viewer;
 
-import lva.spatialindex.viewer.controller.ShapeRepositoryController;
-import lva.spatialindex.viewer.controller.ShapesViewController;
-import lva.spatialindex.viewer.model.ShapeRepository;
-import lva.spatialindex.viewer.ui.ProgressFrame;
-import lva.spatialindex.viewer.ui.ShapesFrame;
+import lva.spatialindex.viewer.repository.ShapeRepository;
+import lva.spatialindex.viewer.ui.ShapesViewController;
+import lva.spatialindex.viewer.ui.ShapesViewFrame;
 
 import javax.swing.SwingUtilities;
-import java.util.concurrent.CompletableFuture;
+
+import static lva.spatialindex.viewer.repository.RepositoryBuilderFrameKt.buildShapesRepository;
+
 
 /**
  * @author vlitvinenko
  */
 public class App {
-    private static CompletableFuture<ShapeRepository> buildShapesRepository(String shapesFile) {
-        return ShapeRepositoryController.buildRepository(new ProgressFrame(), shapesFile);
-    }
-
     private static void showShapesRepository(ShapeRepository shapeRepository) {
         ShapesViewController controller =
-            new ShapesViewController(new ShapesFrame(), shapeRepository);
+            new ShapesViewController(new ShapesViewFrame(), shapeRepository);
         controller.run();
     }
 

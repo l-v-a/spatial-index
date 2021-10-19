@@ -1,10 +1,9 @@
-package lva.spatialindex.viewer.controller;
+package lva.spatialindex.viewer.ui;
 
 import com.google.common.collect.Lists;
 import lombok.NonNull;
-import lva.spatialindex.viewer.model.ShapeRepository;
+import lva.spatialindex.viewer.repository.ShapeRepository;
 import lva.spatialindex.viewer.storage.Shape;
-import lva.spatialindex.viewer.ui.ShapesFrame;
 
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
@@ -17,11 +16,11 @@ import java.util.Optional;
  * @author vlitvinenko
  */
 public class ShapesViewController {
-    private final ShapesFrame view;
+    private final ShapesViewFrame view;
     private final ShapeRepository shapeRepository;
     private List<Shape> visibleShapes;
 
-    public ShapesViewController(@NonNull ShapesFrame view, @NonNull ShapeRepository shapeRepository) {
+    public ShapesViewController(@NonNull ShapesViewFrame view, @NonNull ShapeRepository shapeRepository) {
         this.view = view;
         this.shapeRepository = shapeRepository;
 
