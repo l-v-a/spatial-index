@@ -17,6 +17,7 @@ import lva.spatialindex.viewer.model.ShapeRepository
 import lva.spatialindex.viewer.storage.Shape
 import lva.spatialindex.viewer.storage.ShapeStorage
 import lva.spatialindex.viewer.utils.AutoCloseables
+import lva.spatialindex.viewer.utils.AutoCloseables.close
 import org.slf4j.LoggerFactory
 import java.awt.Rectangle
 import java.nio.file.Files
@@ -37,16 +38,13 @@ object ShapesRepositoryBuilder {
     private val log = LoggerFactory.getLogger(ShapesRepositoryBuilder::class.java)
 
     suspend fun build(shapesFile: Path, onProgress: suspend (Int) -> Unit): ShapeRepository {
-        var shapeStorage: Storage<Shape>? = null
-        var index: Index? = null
-
+        val shapeStorage = ShapeStorage(shapesFile.resolveSibling(DB_FILE_NAME).toString(), STORAGE_INITIAL_SIZE)
         return try {
-            shapeStorage = ShapeStorage(shapesFile.resolveSibling(DB_FILE_NAME).toString(), STORAGE_INITIAL_SIZE)
-            index = MultiIndex(buildIndexes(shapeStorage, shapesFile, onProgress))
+            val index = MultiIndex(buildIndexes(shapeStorage, shapesFile, onProgress))
             ShapeRepository(shapeStorage, index)
         } catch (e: Exception) {
             log.error("Unable to create repository for $shapesFile", e)
-            AutoCloseables.close(listOf(shapeStorage, index))
+            close(listOf(shapeStorage))
             throw e
         }
     }
