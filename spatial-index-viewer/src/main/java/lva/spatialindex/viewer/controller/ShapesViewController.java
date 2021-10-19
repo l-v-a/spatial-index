@@ -2,7 +2,7 @@ package lva.spatialindex.viewer.controller;
 
 import com.google.common.collect.Lists;
 import lombok.NonNull;
-import lva.spatialindex.viewer.model.ShapeRepository;
+import lva.spatialindex.viewer.repository.ShapeRepository;
 import lva.spatialindex.viewer.storage.Shape;
 import lva.spatialindex.viewer.ui.ShapesFrame;
 

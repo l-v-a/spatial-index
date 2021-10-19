@@ -4,7 +4,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import lva.spatialindex.viewer.model.ShapeRepository
 import lva.spatialindex.viewer.ui.UIScope
 import java.awt.BorderLayout
 import java.awt.Toolkit

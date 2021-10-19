@@ -1,7 +1,7 @@
 package lva.spatialindex.viewer;
 
 import lva.spatialindex.viewer.controller.ShapesViewController;
-import lva.spatialindex.viewer.model.ShapeRepository;
+import lva.spatialindex.viewer.repository.ShapeRepository;
 import lva.spatialindex.viewer.ui.ShapesFrame;
 
 import javax.swing.SwingUtilities;

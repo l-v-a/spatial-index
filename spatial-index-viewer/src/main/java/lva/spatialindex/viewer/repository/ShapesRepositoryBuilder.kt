@@ -13,7 +13,6 @@ import lva.spatialindex.index.Index
 import lva.spatialindex.index.RStarTree
 import lva.spatialindex.storage.Storage
 import lva.spatialindex.viewer.index.MultiIndex
-import lva.spatialindex.viewer.model.ShapeRepository
 import lva.spatialindex.viewer.storage.Shape
 import lva.spatialindex.viewer.storage.ShapeStorage
 import lva.spatialindex.viewer.utils.AutoCloseables.close
