@@ -16,7 +16,7 @@ internal object ShapeParser {
         val (type, params) = it.destructured
         val dims = params.trim()
             .split(Regex("\\s*,\\s*"))
-            .map { p -> p.toInt() }
+            .map(String::toInt)
         toShape(type.lowercase(), dims)
     }
 
