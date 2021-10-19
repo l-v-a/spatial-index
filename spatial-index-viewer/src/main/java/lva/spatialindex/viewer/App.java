@@ -1,8 +1,8 @@
 package lva.spatialindex.viewer;
 
-import lva.spatialindex.viewer.controller.ShapesViewController;
 import lva.spatialindex.viewer.repository.ShapeRepository;
-import lva.spatialindex.viewer.ui.ShapesFrame;
+import lva.spatialindex.viewer.ui.ShapesViewController;
+import lva.spatialindex.viewer.ui.ShapesViewFrame;
 
 import javax.swing.SwingUtilities;
 
@@ -15,7 +15,7 @@ import static lva.spatialindex.viewer.repository.RepositoryBuilderFrameKt.buildS
 public class App {
     private static void showShapesRepository(ShapeRepository shapeRepository) {
         ShapesViewController controller =
-            new ShapesViewController(new ShapesFrame(), shapeRepository);
+            new ShapesViewController(new ShapesViewFrame(), shapeRepository);
         controller.run();
     }
 
