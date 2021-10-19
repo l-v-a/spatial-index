@@ -60,15 +60,15 @@ object ShapesRepositoryBuilder {
         log.info("Starting build indexes. shapes number est.: $itemsEstimated, tasks number: $numOfTasks")
         onProgress(0)
 
-        val shapes = shapeReader(shapesFile)
-        val shapesToIndex = shapeCommitter(shapes, storage)
+        val shapes = readShapes(shapesFile)
+        val shapesToIndex = commitShapes(shapes, storage)
 
         val thisContext = coroutineContext
         var itemsProcessed = 0;
 
         val deferIndexes = (1..numOfTasks).map {
             async(Dispatchers.IO) {
-                shapeIndexer(it, shapesFile.parent, shapesToIndex) {
+                indexShapes(it, shapesFile.parent, shapesToIndex) {
                     withContext(thisContext) {
                         val percentage = (++itemsProcessed * 100) / itemsEstimated
                         onProgress(min(percentage, 100))
@@ -83,7 +83,7 @@ object ShapesRepositoryBuilder {
         indexes
     }
 
-    private fun CoroutineScope.shapeReader(shapesFile: Path): ReceiveChannel<Shape> = produce(capacity = UNLIMITED) {
+    private fun CoroutineScope.readShapes(shapesFile: Path): ReceiveChannel<Shape> = produce(capacity = UNLIMITED) {
         val reader = Files.newBufferedReader(shapesFile)
         val shapes = reader.use {
             it.lineSequence()
@@ -98,7 +98,7 @@ object ShapesRepositoryBuilder {
         }
     }
 
-    private fun CoroutineScope.shapeCommitter(
+    private fun CoroutineScope.commitShapes(
         shapes: ReceiveChannel<Shape>,
         storage: Storage<Shape>
     ): ReceiveChannel<IndexData> = produce(capacity = SHAPES_QUEUE_CAPACITY) {
@@ -109,7 +109,7 @@ object ShapesRepositoryBuilder {
         }
     }
 
-    private suspend fun shapeIndexer(
+    private suspend fun indexShapes(
         taskNumber: Int,
         indexPath: Path,
         toIndex: ReceiveChannel<IndexData>,
