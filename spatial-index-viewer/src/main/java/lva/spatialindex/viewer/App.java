@@ -6,7 +6,7 @@ import lva.spatialindex.viewer.ui.ShapesFrame;
 
 import javax.swing.SwingUtilities;
 
-import static lva.spatialindex.viewer.repository.ShapeRepositoryKt.buildShapesRepository;
+import static lva.spatialindex.viewer.repository.RepositoryBuilderFrameKt.buildShapesRepository;
 
 
 /**
