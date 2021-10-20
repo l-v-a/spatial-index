@@ -4,7 +4,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.coroutineScope
@@ -83,18 +82,13 @@ object ShapesRepositoryBuilder {
         indexes
     }
 
-    private fun CoroutineScope.readShapes(shapesFile: Path): ReceiveChannel<Shape> = produce(capacity = UNLIMITED) {
-        val reader = Files.newBufferedReader(shapesFile)
-        val shapes = reader.use {
-            it.lineSequence()
+    private fun CoroutineScope.readShapes(shapesFile: Path): ReceiveChannel<Shape> = produce(capacity = SHAPES_QUEUE_CAPACITY) {
+        Files.newBufferedReader(shapesFile).use { reader ->
+            reader.lineSequence()
                 .filter(String::isNotBlank)
                 .map(ShapeParser::parseShape)
                 .filterNotNull()
-                .toList()
-        }
-
-        for (shape in shapes) {
-            send(shape)
+                .forEach { send(it) }
         }
     }
 
