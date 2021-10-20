@@ -40,9 +40,9 @@ class Distributions {
     }
 
     private static List<GroupPair> distributions(List<Entry> entries) {
-        List<GroupPair> groups = new ArrayList<>();
+        var groups = new ArrayList<GroupPair>();
         for (int k = 0; k < (Node.MAX_ENTRIES - 2 * Node.MIN_ENTRIES + 2); k++) {
-            GroupPair pair = new GroupPair();
+            var pair = new GroupPair();
             pair.group1 = entries.subList(0, Node.MIN_ENTRIES + k);
             pair.group2 = entries.subList(Node.MIN_ENTRIES + k, entries.size());
             groups.add(pair);

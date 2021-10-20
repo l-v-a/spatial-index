@@ -100,19 +100,19 @@ public class RStarTree implements Index {
         }
 
         // distribute entries between nodes
-        List<Entry> allEntries = new ArrayList<>(node.getEntries());
+        var allEntries = new ArrayList<>(node.getEntries());
         allEntries.addAll(newNode.getEntries());
 
-        List<List<GroupPair>> groupsX = getDistributionGroups(allEntries, Entry.X_COMPARATORS);
-        List<List<GroupPair>> groupsY = getDistributionGroups(allEntries, Entry.Y_COMPARATORS);
-        List<List<GroupPair>> groups = getGroupMargins(groupsX) < getGroupMargins(groupsY) ? groupsX : groupsY;
+        var groupsX = getDistributionGroups(allEntries, Entry.X_COMPARATORS);
+        var groupsY = getDistributionGroups(allEntries, Entry.Y_COMPARATORS);
+        var groups = getGroupMargins(groupsX) < getGroupMargins(groupsY) ? groupsX : groupsY;
 
         // find min overlapped values distribution
-        List<GroupPair> overlapped = groups.stream().flatMap(Collection::stream).collect(toList());
+        var overlapped = groups.stream().flatMap(Collection::stream).collect(toList());
         overlapped = minList(overlapped, pair -> area(union(pair.group1).intersection(union(pair.group2))));
         overlapped = minList(overlapped, pair -> area(union(pair.group1)) + area(union(pair.group2)));
 
-        GroupPair pair = overlapped.stream().findAny().orElse(new GroupPair());
+        var pair = overlapped.stream().findAny().orElse(new GroupPair());
 
         node.setEntries(pair.group1);
         newNode.setEntries(pair.group2);
