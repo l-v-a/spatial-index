@@ -13,26 +13,20 @@ interface Shape {
     val mbr: Rectangle
     var isActive: Boolean
     var order: Int
-    var maxOrder: Int
     var offset: Long
     fun draw(graphics: Graphics)
     fun hitTest(x: Int, y: Int): Boolean
 }
 
 
-private var maxOrderImpl: Int = 0
-
 abstract class AbstractShape : Shape {
     override var isActive = false
     override var order = 0
     override var offset: Long = 0
 
-    // override var maxOrder by ::maxOrderImpl //FIXME:
-    override var maxOrder
-        get() = maxOrderImpl
-        set(value) {
-            maxOrderImpl = value
-        }
+    companion object {
+        var maxOrder: Int = 0
+    }
 }
 
 

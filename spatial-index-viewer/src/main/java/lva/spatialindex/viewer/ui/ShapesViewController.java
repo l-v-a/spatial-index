@@ -3,6 +3,7 @@ package lva.spatialindex.viewer.ui;
 import com.google.common.collect.Lists;
 import lombok.NonNull;
 import lva.spatialindex.viewer.repository.ShapeRepository;
+import lva.spatialindex.viewer.storage.AbstractShape;
 import lva.spatialindex.viewer.storage.Shape;
 
 import java.awt.Rectangle;
@@ -41,8 +42,8 @@ public class ShapesViewController {
         takeClicked(x, y).ifPresent(clickedShape -> {
             // push to back with the highest order
             clickedShape.setActive(!clickedShape.isActive());
-            clickedShape.setOrder(clickedShape.getMaxOrder() + 1);
-            clickedShape.setMaxOrder(clickedShape.getOrder());
+            clickedShape.setOrder(AbstractShape.Companion.getMaxOrder() + 1);
+            AbstractShape.Companion.setMaxOrder(clickedShape.getOrder());
 
             shapeRepository.update(clickedShape);
             visibleShapes.add(clickedShape);
