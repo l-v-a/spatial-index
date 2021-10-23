@@ -1,10 +1,12 @@
 package lva.spatialindex.viewer
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import lva.spatialindex.viewer.repository.ShapeRepository
 import lva.spatialindex.viewer.repository.buildShapesRepository
 import lva.spatialindex.viewer.ui.ShapesViewController
 import lva.spatialindex.viewer.ui.ShapesViewFrame
-import javax.swing.SwingUtilities
 
 /**
  * @author vlitvinenko
@@ -12,13 +14,14 @@ import javax.swing.SwingUtilities
 private fun showShapesRepository(shapeRepository: ShapeRepository) =
     ShapesViewController(ShapesViewFrame(), shapeRepository).run()
 
-fun main(vararg args: String) {
+suspend fun main(vararg args: String): Unit = coroutineScope {
     if (args.isNotEmpty()) {
         val shapesFile = args[0]
-        SwingUtilities.invokeLater {
+        launch(Dispatchers.Main) {
             buildShapesRepository(shapesFile) { showShapesRepository(it) }
         }
     } else {
         System.err.println("shapes file path is required")
     }
 }
+

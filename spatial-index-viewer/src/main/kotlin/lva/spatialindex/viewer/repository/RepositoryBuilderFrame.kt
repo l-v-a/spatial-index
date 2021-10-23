@@ -1,15 +1,13 @@
 package lva.spatialindex.viewer.repository
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import lva.spatialindex.viewer.ui.UIScope
 import java.awt.BorderLayout
 import java.awt.Toolkit
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
-import java.nio.file.Path
 import java.nio.file.Paths
 import javax.swing.BorderFactory
 import javax.swing.JFrame
@@ -20,7 +18,7 @@ import javax.swing.JProgressBar
 /**
  * @author vlitvinenko
  */
-class RepositoryBuilderFrame : JFrame(), UIScope {
+class RepositoryBuilderFrame : JFrame() {
     private val progressBar = JProgressBar()
     private val messageLabel = JLabel()
 
@@ -34,11 +32,6 @@ class RepositoryBuilderFrame : JFrame(), UIScope {
         }
 
         defaultCloseOperation = EXIT_ON_CLOSE
-        addWindowListener(object : WindowAdapter() {
-            override fun windowClosing(e: WindowEvent?) {
-                job.cancel()
-            }
-        })
 
         progressBar.isStringPainted = true
         isResizable = false
@@ -50,36 +43,37 @@ class RepositoryBuilderFrame : JFrame(), UIScope {
         setLocation(dim.width / 2 - size.width / 2, dim.height / 2 - size.height / 2)
     }
 
-    override val job = Job()
+    fun onClose(block: () -> Unit) = addWindowListener(object : WindowAdapter() {
+        override fun windowClosing(e: WindowEvent?) {
+            block()
+        }
+    })
 
-    private fun setProgress(value: Int) {
+    fun setProgress(value: Int) {
         progressBar.value = value
     }
 
     fun setMessage(message: String) {
         messageLabel.text = message
     }
-
-    fun startProcessing(shapesFile: Path, onComplete: (ShapeRepository) -> Unit) {
-        launch {
-            val repository = ShapesRepositoryBuilder.build(shapesFile) {
-                withContext(Dispatchers.Main) {
-                    setProgress(it)
-                }
-            }
-
-            onComplete(repository)
-        }
-    }
 }
 
-
-fun buildShapesRepository(shapesFile: String, onComplete: (ShapeRepository) -> Unit) = with(RepositoryBuilderFrame()) {
+fun CoroutineScope.buildShapesRepository(shapesFile: String, onComplete: (ShapeRepository) -> Unit) = with(RepositoryBuilderFrame()) {
     setMessage("indexing...")
     isVisible = true
 
-    startProcessing(Paths.get(shapesFile)) {
+    val job = launch {
+        val repository = ShapesRepositoryBuilder.build(Paths.get(shapesFile)) {
+            withContext(Dispatchers.Main) {
+                setProgress(it)
+            }
+        }
+
+        onComplete(repository)
         isVisible = false
-        onComplete(it)
+    }
+
+    onClose {
+        job.cancel()
     }
 }
