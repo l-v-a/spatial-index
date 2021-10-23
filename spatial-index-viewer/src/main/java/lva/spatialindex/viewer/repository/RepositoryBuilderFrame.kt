@@ -11,7 +11,6 @@ import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.util.concurrent.CompletableFuture
 import javax.swing.BorderFactory
 import javax.swing.JFrame
 import javax.swing.JLabel
@@ -61,14 +60,13 @@ class RepositoryBuilderFrame : JFrame(), UIScope {
         messageLabel.text = message
     }
 
-    fun execute(shapesFile: Path, onComplete: (ShapeRepository) -> Unit) {
+    fun startProcessing(shapesFile: Path, onComplete: (ShapeRepository) -> Unit) {
         launch {
-            val repository = ShapesRepositoryBuilder
-                .build(shapesFile) {
-                    withContext(Dispatchers.Main) {
-                        setProgress(it)
-                    }
+            val repository = ShapesRepositoryBuilder.build(shapesFile) {
+                withContext(Dispatchers.Main) {
+                    setProgress(it)
                 }
+            }
 
             onComplete(repository)
         }
@@ -76,17 +74,12 @@ class RepositoryBuilderFrame : JFrame(), UIScope {
 }
 
 
-fun buildShapesRepository(shapesFile: String): CompletableFuture<ShapeRepository> {
-    val frame = RepositoryBuilderFrame().apply {
-        setMessage("indexing...");
-        isVisible = true;
-    }
+fun buildShapesRepository(shapesFile: String, onComplete: (ShapeRepository) -> Unit) = with(RepositoryBuilderFrame()) {
+    setMessage("indexing...")
+    isVisible = true
 
-    val repositoryFutureResult = CompletableFuture<ShapeRepository>()
-    frame.execute(Paths.get(shapesFile)) {
-        frame.isVisible = false
-        repositoryFutureResult.complete(it)
+    startProcessing(Paths.get(shapesFile)) {
+        isVisible = false
+        onComplete(it)
     }
-
-    return repositoryFutureResult
 }

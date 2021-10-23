@@ -1,33 +1,24 @@
-package lva.spatialindex.viewer;
+package lva.spatialindex.viewer
 
-import lva.spatialindex.viewer.repository.ShapeRepository;
-import lva.spatialindex.viewer.ui.ShapesViewController;
-import lva.spatialindex.viewer.ui.ShapesViewFrame;
-
-import javax.swing.SwingUtilities;
-
-import static lva.spatialindex.viewer.repository.RepositoryBuilderFrameKt.buildShapesRepository;
-
+import lva.spatialindex.viewer.repository.ShapeRepository
+import lva.spatialindex.viewer.repository.buildShapesRepository
+import lva.spatialindex.viewer.ui.ShapesViewController
+import lva.spatialindex.viewer.ui.ShapesViewFrame
+import javax.swing.SwingUtilities
 
 /**
  * @author vlitvinenko
  */
-public class App {
-    private static void showShapesRepository(ShapeRepository shapeRepository) {
-        ShapesViewController controller =
-            new ShapesViewController(new ShapesViewFrame(), shapeRepository);
-        controller.run();
-    }
+private fun showShapesRepository(shapeRepository: ShapeRepository) =
+    ShapesViewController(ShapesViewFrame(), shapeRepository).run()
 
-    public static void main(String[] args) {
-        if (args.length > 0) {
-            String shapesFile = args[0];
-            SwingUtilities.invokeLater(() ->
-                    buildShapesRepository(shapesFile)
-                            .thenAccept(App::showShapesRepository)
-            );
-        } else {
-            System.err.println("shapes file path is required");
+fun main(vararg args: String) {
+    if (args.isNotEmpty()) {
+        val shapesFile = args[0]
+        SwingUtilities.invokeLater {
+            buildShapesRepository(shapesFile) { showShapesRepository(it) }
         }
+    } else {
+        System.err.println("shapes file path is required")
     }
 }
