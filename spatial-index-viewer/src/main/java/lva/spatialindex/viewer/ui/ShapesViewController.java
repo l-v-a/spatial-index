@@ -10,7 +10,6 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,29 +41,23 @@ public class ShapesViewController {
         int x = event.getX() + viewport.x;
         int y = event.getY() + viewport.y;
 
-        takeClicked(x, y).ifPresent(clickedShape -> {
-            // push to back with the highest order
-            clickedShape.setActive(!clickedShape.isActive());
-            clickedShape.setOrder(AbstractShape.Companion.getMaxOrder() + 1);
-            AbstractShape.Companion.setMaxOrder(clickedShape.getOrder());
+        Optional<ShapeUI> clickedShape = Lists.reverse(visibleShapes).stream()
+                .filter(shape -> shape.hitTest(x, y))
+                .findFirst();
 
-            shapeRepository.update(clickedShape.getUnwrapped());
-            visibleShapes.add(clickedShape);
+        clickedShape.ifPresent(shape -> {
+            // push to back with the highest order
+            shape.setActive(!shape.isActive());
+            shape.setOrder(AbstractShape.Companion.getMaxOrder() + 1);
+            AbstractShape.Companion.setMaxOrder(shape.getOrder());
+
+            shapeRepository.update(shape.getUnwrapped());
+
+            visibleShapes.remove(shape);
+            visibleShapes.add(shape);
 
             view.update();
         });
-    }
-
-    private Optional<ShapeUI> takeClicked(int x, int y) {
-        Iterator<ShapeUI> shapeIterator = Lists.reverse(visibleShapes).iterator();
-        while (shapeIterator.hasNext()) {
-            ShapeUI shape = shapeIterator.next();
-            if (shape.hitTest(x, y)) {
-                shapeIterator.remove();
-                return Optional.of(shape);
-            }
-        }
-        return Optional.empty();
     }
 
     private void onViewPortChanged() {
