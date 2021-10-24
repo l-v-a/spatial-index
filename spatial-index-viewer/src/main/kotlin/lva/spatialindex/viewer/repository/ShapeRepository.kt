@@ -10,14 +10,10 @@ import java.awt.Rectangle
  * @author vlitvinenko
  */
 class ShapeRepository(private val shapeStorage: Storage<Shape>, private val index: Index) : AutoCloseable {
-
-    fun search(area: Rectangle) = index.search(area)
-        .map { shapeStorage.read(it) }.toList()
+    fun search(area: Rectangle) =
+        index.search(area).map { shapeStorage.read(it) }.toList()
 
     fun update(shape: Shape) = shapeStorage.write(shape.offset, shape)
 
-    override fun close() {
-        close(listOf(index, shapeStorage))
-    }
-
+    override fun close() = close(listOf(index, shapeStorage))
 }

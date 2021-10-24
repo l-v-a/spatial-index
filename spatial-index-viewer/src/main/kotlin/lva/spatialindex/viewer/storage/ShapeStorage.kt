@@ -1,73 +1,50 @@
-package lva.spatialindex.viewer.storage;
+package lva.spatialindex.viewer.storage
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
-import lombok.NonNull;
-import lva.spatialindex.memory.MemoryMappedFile;
-import lva.spatialindex.storage.AbstractStorage;
-
-import java.awt.Rectangle;
-import java.io.InputStream;
-import java.io.OutputStream;
+import com.esotericsoftware.kryo.Kryo
+import com.esotericsoftware.kryo.io.Input
+import com.esotericsoftware.kryo.io.Output
+import lva.spatialindex.memory.MemoryMappedFile
+import lva.spatialindex.storage.AbstractStorage
+import java.awt.Rectangle
+import java.io.InputStream
+import java.io.OutputStream
 
 /**
  * @author vlitvinenko
  */
-public class ShapeStorage extends AbstractStorage<Shape> {
+class ShapeStorage(fileName: String, initialSize: Long) :
+    AbstractStorage<Shape>(MemoryMappedFile(fileName, initialSize), RECORD_SIZE) {
 
-    private static class ShapeSerializer extends AbstractSerializer<Shape> {
-        private final Kryo kryo = new Kryo();
-        {
-            kryo.register(Shape.class);
-            kryo.register(AbstractShape.class);
-            kryo.register(RectangleShape.class);
-            kryo.register(CircleShape.class);
-            kryo.register(Rectangle.class);
+    private val serializer = object : AbstractSerializer<Shape>() {
+        private val kryo = Kryo()
+
+        init {
+            kryo.register(Shape::class.java)
+            kryo.register(AbstractShape::class.java)
+            kryo.register(RectangleShape::class.java)
+            kryo.register(CircleShape::class.java)
+            kryo.register(Rectangle::class.java)
         }
 
-        @Override
-        public void write(OutputStream os, Shape shape) {
-            try (Output output = new Output(os)) {
-                kryo.writeClassAndObject(output, shape);
-                output.flush();
-            }
+        override fun write(os: OutputStream, shape: Shape) = Output(os).use {
+            kryo.writeClassAndObject(it, shape)
+            it.flush()
         }
 
-        @Override
-        public Shape read(InputStream is) {
-            try (Input input = new Input(is)) {
-                return (Shape) kryo.readClassAndObject(input);
-            }
+        override fun read(input: InputStream) = Input(input).use {
+            kryo.readClassAndObject(it) as Shape
         }
     }
 
-    private static final int RECORD_SIZE = 128;
-    private final ShapeSerializer serializer = new ShapeSerializer();
+    override fun getSerializer(): Serializer<Shape> = serializer
 
-    @NonNull
-    @Override
-    protected Serializer<Shape> getSerializer() {
-        return serializer;
-    }
+    override fun add(shape: Shape): Long =
+        super.add(shape).also { shape.offset = it }
 
-    public ShapeStorage(@NonNull String fileName, long initialSize) throws Exception {
-        super(new MemoryMappedFile(fileName, initialSize), RECORD_SIZE);
+    override fun read(offset: Long): Shape =
+        super.read(offset).also { it.offset = offset }
 
-    }
-
-    @Override
-    public long add(@NonNull Shape shape) {
-        long offset = super.add(shape);
-        shape.setOffset(offset);
-        return offset;
-    }
-
-    @NonNull
-    @Override
-    public Shape read(long offset) {
-        Shape shape = super.read(offset);
-        shape.setOffset(offset);
-        return shape;
+    private companion object {
+        private const val RECORD_SIZE = 128
     }
 }
