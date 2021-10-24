@@ -8,6 +8,7 @@ import lva.spatialindex.viewer.storage.Shape;
 
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -21,7 +22,7 @@ import static java.util.stream.Collectors.toList;
 public class ShapesViewController {
     private final ShapesViewFrame view;
     private final ShapeRepository shapeRepository;
-    private List<ShapeUI> visibleShapes;
+    private final List<ShapeUI> visibleShapes = new ArrayList<>();
 
     public ShapesViewController(@NonNull ShapesViewFrame view, @NonNull ShapeRepository shapeRepository) {
         this.view = view;
@@ -68,11 +69,15 @@ public class ShapesViewController {
 
     private void onViewPortChanged() {
         Rectangle viewport = view.getViewport();
-        visibleShapes = shapeRepository.search(viewport).stream()
-                .map(ShapesUIKt::asUI).collect(toList());
-        visibleShapes.sort(Comparator.comparing(Shape::getOrder, Integer::compare));
+        List<ShapeUI> foundShapes = shapeRepository.search(viewport).stream()
+                .sorted(Comparator.comparing(Shape::getOrder, Integer::compare))
+                .map(ShapesUIKt::asUI)
+                .collect(toList());
 
+        visibleShapes.clear();
+        visibleShapes.addAll(foundShapes);
         view.setShapes(visibleShapes);
+
         view.update();
     }
 
