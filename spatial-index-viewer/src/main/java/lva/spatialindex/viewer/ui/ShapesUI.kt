@@ -17,14 +17,21 @@ interface ShapeUI : Shape {
     val unwrapped: Shape
 }
 
-class CircleShapeUI(private val circle: CircleShape) : ShapeUI, Shape by circle {
+abstract class AbstractShapeUI : ShapeUI {
+    val bgColor: Color
+        get() = if (isActive) Color.GRAY else Color.LIGHT_GRAY
+
+    val borderColor: Color = Color.BLACK
+}
+
+class CircleShapeUI(private val circle: CircleShape) : AbstractShapeUI(), Shape by circle {
     override val unwrapped = circle
 
     override fun draw(graphics: Graphics) = with(graphics) {
         val boundRect = mbr
-        color = Color.LIGHT_GRAY
+        color = bgColor
         fillOval(boundRect.x, boundRect.y, boundRect.width, boundRect.height)
-        color = if (isActive) Color.RED else Color.BLACK
+        color = borderColor
         drawOval(boundRect.x, boundRect.y, boundRect.width, boundRect.height)
     }
 
@@ -33,14 +40,14 @@ class CircleShapeUI(private val circle: CircleShape) : ShapeUI, Shape by circle 
     }
 }
 
-class RectangleShapeUI(private val rectShape: RectangleShape) : ShapeUI, Shape by rectShape {
+class RectangleShapeUI(private val rectShape: RectangleShape) : AbstractShapeUI(), Shape by rectShape {
     override val unwrapped = rectShape
 
     override fun draw(graphics: Graphics) = with(graphics) {
-        color = Color.LIGHT_GRAY
         with(rectShape) {
+            color = bgColor
             fillRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height)
-            color = if (isActive) Color.RED else Color.BLACK
+            color = borderColor
             drawRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height)
         }
     }
