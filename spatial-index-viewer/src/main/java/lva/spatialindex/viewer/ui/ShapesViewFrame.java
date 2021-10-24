@@ -1,7 +1,6 @@
 package lva.spatialindex.viewer.ui;
 
 import lombok.NonNull;
-import lva.spatialindex.viewer.storage.Shape;
 import lva.spatialindex.viewer.utils.EventSource.EventStore;
 import lva.spatialindex.viewer.utils.EventSource.TypedEventStore;
 
@@ -92,7 +91,7 @@ public class ShapesViewFrame extends JFrame {
             hbar.getVisibleAmount(), vbar.getVisibleAmount());
     }
 
-    public void setShapes(@NonNull Collection<Shape> shapes) {
+    public void setShapes(@NonNull Collection<ShapeUI> shapes) {
         canvas.shapes = shapes;
     }
 
@@ -135,12 +134,12 @@ public class ShapesViewFrame extends JFrame {
 
     private static class Canvas extends JComponent {
         private Rectangle viewport = new Rectangle();
-        private Collection<Shape> shapes = new ArrayList<>();
+        private Collection<ShapeUI> shapes = new ArrayList<>();
 
         @Override
         public void paint(Graphics g) {
             g.translate(-viewport.x, -viewport.y);
-            for (Shape shape : shapes) {
+            for (ShapeUI shape : shapes) {
                 shape.draw(g);
             }
         }

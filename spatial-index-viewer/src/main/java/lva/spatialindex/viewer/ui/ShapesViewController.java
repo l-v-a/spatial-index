@@ -13,13 +13,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.stream.Collectors.toList;
+
 /**
  * @author vlitvinenko
  */
 public class ShapesViewController {
     private final ShapesViewFrame view;
     private final ShapeRepository shapeRepository;
-    private List<Shape> visibleShapes;
+    private List<ShapeUI> visibleShapes;
 
     public ShapesViewController(@NonNull ShapesViewFrame view, @NonNull ShapeRepository shapeRepository) {
         this.view = view;
@@ -45,17 +47,17 @@ public class ShapesViewController {
             clickedShape.setOrder(AbstractShape.Companion.getMaxOrder() + 1);
             AbstractShape.Companion.setMaxOrder(clickedShape.getOrder());
 
-            shapeRepository.update(clickedShape);
+            shapeRepository.update(clickedShape.getUnwrapped());
             visibleShapes.add(clickedShape);
 
             view.update();
         });
     }
 
-    private Optional<Shape> takeClicked(int x, int y) {
-        Iterator<Shape> shapeIterator = Lists.reverse(visibleShapes).iterator();
+    private Optional<ShapeUI> takeClicked(int x, int y) {
+        Iterator<ShapeUI> shapeIterator = Lists.reverse(visibleShapes).iterator();
         while (shapeIterator.hasNext()) {
-            Shape shape = shapeIterator.next();
+            ShapeUI shape = shapeIterator.next();
             if (shape.hitTest(x, y)) {
                 shapeIterator.remove();
                 return Optional.of(shape);
@@ -66,7 +68,8 @@ public class ShapesViewController {
 
     private void onViewPortChanged() {
         Rectangle viewport = view.getViewport();
-        visibleShapes = shapeRepository.search(viewport);
+        visibleShapes = shapeRepository.search(viewport).stream()
+                .map(ShapesUIKt::asUI).collect(toList());
         visibleShapes.sort(Comparator.comparing(Shape::getOrder, Integer::compare));
 
         view.setShapes(visibleShapes);
