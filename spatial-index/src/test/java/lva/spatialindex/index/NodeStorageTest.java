@@ -54,9 +54,9 @@ public class NodeStorageTest {
         };
 
 
-        node = new Node(mock(NodeStorage.class), -1)
-            .setOffset(123)
-            .addEntry(new Entry(mock(NodeStorage.class), new Rectangle(1, 2, 3, 4), -1));
+        node = new Node(mock(NodeStorage.class), -1);
+        node.setOffset(123);
+        node.addEntry(new Entry(mock(NodeStorage.class), new Rectangle(1, 2, 3, 4), -1));
 
         serializedNode = new NodeStorage.NodeSerializer(storage)
                 .serialize(node);
@@ -154,7 +154,12 @@ public class NodeStorageTest {
             .thenReturn(serializedNode);
 
         Node newNode  = nodeStorage.read(offset);
-        assertEquals(newNode, node);
+
+        assertEquals(newNode.getEntries(), node.getEntries());
+        assertEquals(newNode.getParentOffset(), node.getParentOffset());
+        assertEquals(newNode.getOffset(), node.getOffset());
+        assertEquals(newNode.isLeaf(), node.isLeaf());
+        assertEquals(newNode.isFull(), node.isFull());
     }
 
     @Test(expected = UncheckedExecutionException.class)

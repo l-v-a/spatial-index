@@ -31,8 +31,9 @@ public class EntryTest {
     @Test
     public void should_return_child_node_if_offset_is_positive() {
         long childNodeOffset = 123;
-        Node childNode = Node.newNode(storage)
-            .setOffset(childNodeOffset);
+        Node childNode = Node.newNode(storage);
+        childNode.setOffset(childNodeOffset);
+
         Mockito.when(storage.read(childNodeOffset))
             .thenReturn(childNode);
 

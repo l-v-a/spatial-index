@@ -38,7 +38,12 @@ public class NodeTest {
         byte[] serialized = serializer.serialize(node);
         Node restoredNode = serializer.deserialize(serialized);
 
-        assertEquals(restoredNode, node);
+        assertEquals(restoredNode.getEntries(), node.getEntries());
+        assertEquals(restoredNode.getParentOffset(), node.getParentOffset());
+        assertEquals(restoredNode.getOffset(), node.getOffset());
+        assertEquals(restoredNode.isLeaf(), node.isLeaf());
+        assertEquals(restoredNode.isFull(), node.isFull());
+
         assertNotSame(restoredNode, node);
     }
 
@@ -60,9 +65,9 @@ public class NodeTest {
         Rectangle mbr = new Rectangle(1, 2, 3, 4);
         long offset = 1;
         Node node = Node.newNode(storage);
-        Node newNode = Node.newNode(storage)
-            .setOffset(offset)
-            .addEntry(new Entry(storage, mbr, 123));
+        Node newNode = Node.newNode(storage);
+        newNode.setOffset(offset);
+        newNode.addEntry(new Entry(storage, mbr, 123));
 
         node.addNode(newNode);
 
@@ -73,10 +78,12 @@ public class NodeTest {
     @Test
     public void should_set_parent_offset_to_this_offset_when_new_node_is_added() {
         long thisOffset = 123;
-        Node node = Node.newNode(storage)
-            .setOffset(thisOffset);
+        Node node = Node.newNode(storage);
+        node.setOffset(thisOffset);
 
-        Node newNode = Node.newNode(storage).setOffset(123L);
+        Node newNode = Node.newNode(storage);
+        newNode.setOffset(123L);
+
         when(storage.read(123L)).thenReturn(newNode);
 
         node.addNode(newNode);
@@ -101,10 +108,12 @@ public class NodeTest {
     @Test
     public void should_save_this_node_when_new_node_is_added() {
         long thisOffset = 123;
-        Node node = Node.newNode(storage)
-            .setOffset(thisOffset);
+        Node node = Node.newNode(storage);
+        node.setOffset(thisOffset);
 
-        Node newNode = Node.newNode(storage).setOffset(111L);
+        Node newNode = Node.newNode(storage);
+        newNode.setOffset(111L);
+
         when(storage.read(111L)).thenReturn(newNode);
 
         node.addNode(newNode);
@@ -117,7 +126,9 @@ public class NodeTest {
         long newNodeOffset = 456;
         Node node = Node.newNode(storage);
 
-        Node newNode = Node.newNode(storage).setOffset(newNodeOffset);
+        Node newNode = Node.newNode(storage);
+        newNode.setOffset(newNodeOffset);
+
         when(storage.read(newNodeOffset)).thenReturn(newNode);
 
         node.addNode(newNode);
@@ -165,8 +176,9 @@ public class NodeTest {
     public void should_reset_parent_offset_for_entry_node_when_new_entry_is_added() {
         long thisOffset = 123;
         long childOffset = 456;
-        Node node = Node.newNode(storage)
-            .setOffset(thisOffset);
+        Node node = Node.newNode(storage);
+        node.setOffset(thisOffset);
+
         Node childNode = Node.newNode(storage);
         when(storage.read(eq(childOffset))).thenReturn(childNode);
 
@@ -180,8 +192,8 @@ public class NodeTest {
         long childOffset = 456;
         long childNodeOffset = 789;
         Node node = Node.newNode(storage);
-        Node childNode = Node.newNode(storage)
-            .setOffset(childNodeOffset);
+        Node childNode = Node.newNode(storage);
+        childNode.setOffset(childNodeOffset);
 
         when(storage.read(eq(childOffset))).thenReturn(childNode);
 
@@ -193,8 +205,8 @@ public class NodeTest {
     @Test
     public void should_save_this_node_when_new_entry_is_added() {
         long thisOffset = 123;
-        Node node = Node.newNode(storage)
-            .setOffset(thisOffset);
+        Node node = Node.newNode(storage);
+        node.setOffset(thisOffset);
 
         node.addEntry(new Entry(storage, new Rectangle(3, 4, 7, 6), -1));
 
@@ -272,8 +284,8 @@ public class NodeTest {
         Entry entry2= new Entry(storage, new Rectangle(0, 0, 1, 1), -1);
         Entry entry3= new Entry(storage, new Rectangle(10, 10, 1, 1), -1);
 
-        Node node = Node.newNode(storage)
-            .setOffset(thisOffset);
+        Node node = Node.newNode(storage);
+        node.setOffset(thisOffset);
 
         node.setEntries(asList(entry2, entry3));
 
