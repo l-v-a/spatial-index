@@ -35,7 +35,7 @@ class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
 
 
     fun insert(offset: Long, newMbr: Rectangle) {
-        check(!newMbr.isEmpty) {"Invalid region"}
+        check(!newMbr.isEmpty) { "Invalid region" }
         insert(root, offset, newMbr)
     }
 
