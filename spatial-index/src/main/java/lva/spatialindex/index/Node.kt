@@ -14,10 +14,10 @@ internal open class Node(private val storage: Storage<Node>, var offset: Long) {
     // TODO: fix open
     private val entries: MutableList<Entry> = ArrayList()
 
+    private var mbr: Rectangle = NULL_RECTANGLE
+
     var parentOffset: Long = -1
         private set
-
-    private var mbr: Rectangle = NULL_RECTANGLE
 
     val isLeaf
         get() = entries.firstOrNull()?.isLeaf ?: true
