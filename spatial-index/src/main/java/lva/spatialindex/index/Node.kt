@@ -39,10 +39,10 @@ internal open class Node(private val storage: Storage<Node>, var offset: Long) {
 
     fun addEntry(entry: Entry) = putEntry(entry).save()
 
-    fun setEntries(newEntries: List<Entry>): Node {
+    fun setEntries(newEntries: List<Entry>) = apply {
         entries.clear()
         newEntries.forEach { putEntry(it) }
-        return save()
+        save()
     }
 
     private fun putEntry(entry: Entry) = apply {
