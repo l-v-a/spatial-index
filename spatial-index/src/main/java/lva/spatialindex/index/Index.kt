@@ -1,12 +1,11 @@
-package lva.spatialindex.index;
+package lva.spatialindex.index
 
-import java.awt.Rectangle;
-import java.util.Collection;
+import java.awt.Rectangle
 
 /**
  * @author vlitvinenko
  */
-public interface Index extends AutoCloseable {
-    Collection<Long> search(Rectangle area);
-    void close();
+interface Index : AutoCloseable {
+    fun search(area: Rectangle): Collection<Long>
+    override fun close()
 }
