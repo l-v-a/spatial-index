@@ -30,13 +30,13 @@ internal open class Node(private val storage: Storage<Node>, var offset: Long) {
         return mbr
     }
 
-    fun resetMbr(): Node = apply { mbr = NULL_RECTANGLE }
+    fun resetMbr() = apply { mbr = NULL_RECTANGLE }
 
-    fun getEntries(): List<Entry> = entries
+    fun getEntries() = entries
 
-    fun addNode(node: Node): Node = addEntry(Entry(storage, node.getMbr(), node.offset))
+    fun addNode(node: Node) = addEntry(Entry(storage, node.getMbr(), node.offset))
 
-    fun addEntry(entry: Entry): Node = putEntry(entry).save()
+    fun addEntry(entry: Entry) = putEntry(entry).save()
 
     fun setEntries(newEntries: List<Entry>): Node {
         entries.clear()
@@ -44,7 +44,7 @@ internal open class Node(private val storage: Storage<Node>, var offset: Long) {
         return save()
     }
 
-    private fun putEntry(entry: Entry): Node = apply {
+    private fun putEntry(entry: Entry) = apply {
         check(!isFull) { "Entries overflow" }
         entries.add(entry)
         resetMbr()
@@ -54,7 +54,7 @@ internal open class Node(private val storage: Storage<Node>, var offset: Long) {
         }
     }
 
-    fun save(): Node = apply { storage.write(offset, this) }
+    fun save() = apply { storage.write(offset, this) }
 
     internal class Ser(private val storage: Storage<Node>) : Serializer<Node>() {
         override fun write(kryo: Kryo, output: Output, node: Node) {
@@ -65,7 +65,7 @@ internal open class Node(private val storage: Storage<Node>, var offset: Long) {
             }
         }
 
-        override fun read(kryo: Kryo, input: Input, type: Class<Node>): Node = Node(storage, -1).apply {
+        override fun read(kryo: Kryo, input: Input, type: Class<Node>) = Node(storage, -1).apply {
             parentOffset = input.readLong()
             val entriesSize = input.readInt()
             repeat(entriesSize) {
@@ -82,6 +82,6 @@ internal open class Node(private val storage: Storage<Node>, var offset: Long) {
         private val NULL_RECTANGLE = Rectangle()
 
         @JvmStatic
-        fun newNode(storage: Storage<Node>): Node = Node(storage, -1).apply { storage.add(this) }
+        fun newNode(storage: Storage<Node>) = Node(storage, -1).apply { storage.add(this) }
     }
 }
