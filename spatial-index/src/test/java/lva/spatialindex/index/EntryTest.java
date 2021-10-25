@@ -12,7 +12,7 @@ import java.awt.Rectangle;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -39,13 +39,13 @@ public class EntryTest {
 
         Entry entry = new Entry(storage, new Rectangle(), childNodeOffset);
 
-        assertEquals(childNode, entry.getChildNode().orElse(null));
+        assertEquals(childNode, entry.getChildNode());
     }
 
     @Test
     public void should_return_null_for_child_node_if_offset_is_negative() {
         Entry entry = new Entry(storage, new Rectangle(), -123);
-        assertFalse(entry.getChildNode().isPresent());
+        assertNull(entry.getChildNode());
     }
 
     @Test

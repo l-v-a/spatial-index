@@ -7,7 +7,6 @@ import com.esotericsoftware.kryo.io.Output
 import io.vavr.control.Either
 import lva.spatialindex.storage.Storage
 import java.awt.Rectangle
-import java.util.*
 
 /**
  * @author vlitvinenko
@@ -22,8 +21,8 @@ internal class Entry(private val storage: Storage<Node>, mbr: Rectangle, childOf
     fun data(): Either<Node, Long> = if (childOffset < 0)
         Either.right(childOffset) else Either.left(storage.read(childOffset))
 
-    val childNode: Optional<Node>
-        get() = data().swap().toJavaOptional()
+    val childNode: Node?
+        get() = data().swap().getOrElseGet { null }
 
     val isLeaf
         get() = childOffset < 0

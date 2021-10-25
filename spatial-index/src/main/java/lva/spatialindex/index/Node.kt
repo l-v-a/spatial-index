@@ -24,7 +24,7 @@ internal class Node(private val storage: Storage<Node>, var offset: Long) {
     val isFull
         get() = entries.size >= MAX_ENTRIES
 
-    fun getMbr(): Rectangle {
+    fun getMbr(): Rectangle { // TODO: refactor as property
         if (mbr === NULL_RECTANGLE)
             mbr = Entry.union(entries)
         return mbr
@@ -32,7 +32,7 @@ internal class Node(private val storage: Storage<Node>, var offset: Long) {
 
     fun resetMbr() = apply { mbr = NULL_RECTANGLE }
 
-    fun getEntries() = entries
+    fun getEntries(): List<Entry> = entries
 
     fun addNode(node: Node) = addEntry(Entry(storage, node.getMbr(), node.offset))
 
@@ -48,7 +48,7 @@ internal class Node(private val storage: Storage<Node>, var offset: Long) {
         check(!isFull) { "Entries overflow" }
         entries.add(entry)
         resetMbr()
-        entry.childNode.ifPresent { childNode ->
+        entry.childNode?. let{ childNode ->
             childNode.parentOffset = offset
             childNode.save()
         }
