@@ -10,8 +10,7 @@ import java.awt.Rectangle
 /**
  * @author vlitvinenko
  */
-internal open class Node(private val storage: Storage<Node>, var offset: Long) {
-    // TODO: fix open
+internal class Node(private val storage: Storage<Node>, var offset: Long) {
     private val entries: MutableList<Entry> = ArrayList()
 
     private var mbr: Rectangle = NULL_RECTANGLE
