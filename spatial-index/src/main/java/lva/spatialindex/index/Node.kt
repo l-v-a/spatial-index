@@ -26,7 +26,8 @@ internal open class Node(private val storage: Storage<Node>, var offset: Long) {
         get() = entries.size >= MAX_ENTRIES
 
     fun getMbr(): Rectangle {
-        mbr = if (mbr === NULL_RECTANGLE) Entry.union(entries) else mbr
+        if (mbr === NULL_RECTANGLE)
+            mbr = Entry.union(entries)
         return mbr
     }
 
