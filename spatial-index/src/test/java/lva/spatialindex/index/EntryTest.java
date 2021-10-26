@@ -78,9 +78,9 @@ public class EntryTest {
         Entry entry1 = new Entry(storage, new Rectangle(0, 0, 1, 1), -1);
         Entry entry2 = new Entry(storage, new Rectangle(1, 1, 1, 1), -1);
 
-        assertEquals(-1, Entry.LEFT_TO_RIGHT_BY_LEFT_COMPARATOR.compare(entry1, entry2));
-        assertEquals(1, Entry.LEFT_TO_RIGHT_BY_LEFT_COMPARATOR.compare(entry2, entry1));
-        assertEquals(0, Entry.LEFT_TO_RIGHT_BY_LEFT_COMPARATOR.compare(entry1, entry1));
+        assertEquals(-1, Entry.Companion.getLEFT_TO_RIGHT_BY_LEFT_COMPARATOR().compare(entry1, entry2));
+        assertEquals(1, Entry.Companion.getLEFT_TO_RIGHT_BY_LEFT_COMPARATOR().compare(entry2, entry1));
+        assertEquals(0, Entry.Companion.getLEFT_TO_RIGHT_BY_LEFT_COMPARATOR().compare(entry1, entry1));
     }
 
     @Test
@@ -88,9 +88,9 @@ public class EntryTest {
         Entry entry1 = new Entry(storage, new Rectangle(0, 0, 1, 1), -1);
         Entry entry2 = new Entry(storage, new Rectangle(1, 1, 1, 1), -1);
 
-        assertEquals(-1, Entry.LEFT_TO_RIGHT_BY_RIGHT_COMPARATOR.compare(entry1, entry2));
-        assertEquals(1, Entry.LEFT_TO_RIGHT_BY_RIGHT_COMPARATOR.compare(entry2, entry1));
-        assertEquals(0, Entry.LEFT_TO_RIGHT_BY_RIGHT_COMPARATOR.compare(entry1, entry1));
+        assertEquals(-1, Entry.Companion.getLEFT_TO_RIGHT_BY_RIGHT_COMPARATOR().compare(entry1, entry2));
+        assertEquals(1, Entry.Companion.getLEFT_TO_RIGHT_BY_RIGHT_COMPARATOR().compare(entry2, entry1));
+        assertEquals(0, Entry.Companion.getLEFT_TO_RIGHT_BY_RIGHT_COMPARATOR().compare(entry1, entry1));
     }
 
     @Test
@@ -98,9 +98,9 @@ public class EntryTest {
         Entry entry1 = new Entry(storage, new Rectangle(0, 0, 1, 1), -1);
         Entry entry2 = new Entry(storage, new Rectangle(1, 1, 1, 1), -1);
 
-        assertEquals(-1, Entry.TOP_TO_BOTTOM_BY_BOTTOM_COMPARATOR.compare(entry1, entry2));
-        assertEquals(1, Entry.TOP_TO_BOTTOM_BY_BOTTOM_COMPARATOR.compare(entry2, entry1));
-        assertEquals(0, Entry.TOP_TO_BOTTOM_BY_BOTTOM_COMPARATOR.compare(entry1, entry1));
+        assertEquals(-1, Entry.Companion.getTOP_TO_BOTTOM_BY_BOTTOM_COMPARATOR().compare(entry1, entry2));
+        assertEquals(1, Entry.Companion.getTOP_TO_BOTTOM_BY_BOTTOM_COMPARATOR().compare(entry2, entry1));
+        assertEquals(0, Entry.Companion.getTOP_TO_BOTTOM_BY_BOTTOM_COMPARATOR().compare(entry1, entry1));
     }
 
     @Test
@@ -108,8 +108,8 @@ public class EntryTest {
         Entry entry1 = new Entry(storage, new Rectangle(0, 0, 1, 1), -1);
         Entry entry2 = new Entry(storage, new Rectangle(1, 1, 1, 1), -1);
 
-        assertEquals(-1, Entry.TOP_TO_BOTTOM_BY_TOP_COMPARATOR.compare(entry1, entry2));
-        assertEquals(1, Entry.TOP_TO_BOTTOM_BY_TOP_COMPARATOR.compare(entry2, entry1));
-        assertEquals(0, Entry.TOP_TO_BOTTOM_BY_TOP_COMPARATOR.compare(entry1, entry1));
+        assertEquals(-1, Entry.Companion.getTOP_TO_BOTTOM_BY_TOP_COMPARATOR().compare(entry1, entry2));
+        assertEquals(1, Entry.Companion.getTOP_TO_BOTTOM_BY_TOP_COMPARATOR().compare(entry2, entry1));
+        assertEquals(0, Entry.Companion.getTOP_TO_BOTTOM_BY_TOP_COMPARATOR().compare(entry1, entry1));
     }
 }
