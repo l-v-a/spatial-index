@@ -85,11 +85,11 @@ class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
         val isContainsLeaf = node.getEntries().firstOrNull()?.childNode?.isLeaf ?: false
 
         if (isContainsLeaf) {
-            candidates = minList(candidates) { area(it.mbr.intersection(newMbr)) } // by cost
+            candidates = candidates.minList { area(it.mbr.intersection(newMbr)) } // by cost
         }
 
-        candidates = minList(candidates) { area(it.mbr.union(newMbr)) } // by enlarge
-        candidates = minList(candidates) { area(it.mbr) } // by size
+        candidates = candidates.minList { area(it.mbr.union(newMbr)) } // by enlarge
+        candidates = candidates.minList { area(it.mbr) } // by size
 
         return candidates.firstOrNull()?.childNode?.let { chooseSubtree(it, newMbr) } ?: node
     }
@@ -112,8 +112,8 @@ class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
 
         // find min overlapped values distribution
        var overlapped = groups.flatten()
-        overlapped = minList(overlapped) { area(union(it.group1).intersection(union(it.group2))) }
-        overlapped = minList(overlapped) { area(union(it.group1)) + area(union(it.group2)) }
+        overlapped = overlapped.minList { area(union(it.group1).intersection(union(it.group2))) }
+        overlapped = overlapped.minList { area(union(it.group1)) + area(union(it.group2)) }
 
         val pair = overlapped.firstOrNull() ?: GroupPair()
         node.setEntries(pair.group1)
@@ -139,18 +139,9 @@ class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
     }
 }
 
-private fun <T> minList(list: List<T>, criteria: (T) -> Long): List<T> {
-    val candidates = arrayListOf<T>()
-    var minValue = Int.MAX_VALUE.toLong()
-    for (e in list) {
-        val ovrArea = criteria(e)
-        if (ovrArea <= minValue) {
-            if (ovrArea < minValue) {
-                candidates.clear()
-                minValue = ovrArea
-            }
-            candidates.add(e)
-        }
-    }
-    return candidates
+
+private inline fun <T> List<T>.minList(criteria: (T) -> Long): List<T> {
+    val min = minOfOrNull(criteria)
+    return min?.let { filter { criteria(it) == min } } ?: arrayListOf()
 }
+
