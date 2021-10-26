@@ -5,6 +5,9 @@ import lva.spatialindex.index.Entry.Companion.margin
 /**
  * @author vlitvinenko
  */
+
+internal typealias GroupPair = Pair<List<Entry>, List<Entry>>
+
 internal fun getGroupMargins(distributionGroups: List<List<GroupPair>>): Int =
     distributionGroups.sumOf { margins(it) }
 
@@ -15,7 +18,7 @@ internal fun getDistributionGroups(entries: List<Entry>, comparators: Collection
         .toList()
 
 private fun margins(groups: List<GroupPair>): Int =
-    groups.sumOf { margin(it.group1) + margin(it.group2) }
+    groups.sumOf { margin(it.first) + margin(it.second) }
 
 private fun distributions(entries: List<Entry>): List<GroupPair> {
     val groups = arrayListOf<GroupPair>()
@@ -28,6 +31,3 @@ private fun distributions(entries: List<Entry>): List<GroupPair> {
     }
     return groups
 }
-
-// TODO: use Pair
-internal class GroupPair(val group1: List<Entry> = arrayListOf(), val group2: List<Entry> = arrayListOf())

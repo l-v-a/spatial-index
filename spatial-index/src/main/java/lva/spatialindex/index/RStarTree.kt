@@ -108,12 +108,13 @@ class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
 
         // find min overlapped values distribution
         var overlapped = groups.flatten()
-        overlapped = overlapped.minList { area(union(it.group1).intersection(union(it.group2))) }
-        overlapped = overlapped.minList { area(union(it.group1)) + area(union(it.group2)) }
+        overlapped = overlapped.minList { area(union(it.first).intersection(union(it.second))) }
+        overlapped = overlapped.minList { area(union(it.first)) + area(union(it.second)) }
 
-        val pair = overlapped.firstOrNull() ?: GroupPair()
-        node.setEntries(pair.group1)
-        newNode.setEntries(pair.group2)
+        val pair = overlapped.firstOrNull() ?: GroupPair(arrayListOf(), arrayListOf())
+        node.setEntries(pair.first)
+        newNode.setEntries(pair.second)
+
         return newNode
     }
 
