@@ -70,6 +70,6 @@ internal class Entry(private val storage: Storage<Node>, mbr: Rectangle, childOf
 
         @JvmStatic
         fun margin(entries: List<Entry>): Int =
-            entries.asSequence().map { Rectangles.margin(it.mbr) }.sum()
+            entries.asSequence().map { margin(it.mbr) }.sum()
     }
 }

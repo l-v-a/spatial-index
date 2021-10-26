@@ -20,11 +20,11 @@ internal fun getDistributionGroups(entries: List<Entry>, comparators: Collection
 private fun margins(groups: List<GroupPair>): Int =
     groups.sumOf { margin(it.first) + margin(it.second) }
 
-private fun distributions(entries: List<Entry>): List<GroupPair> {
-    return (0 until Node.MAX_ENTRIES - 2 * Node.MIN_ENTRIES + 2).map { k ->
+private fun distributions(entries: List<Entry>): List<GroupPair> =
+    (0 until Node.MAX_ENTRIES - 2 * Node.MIN_ENTRIES + 2).map { k ->
         GroupPair(
             entries.subList(0, Node.MIN_ENTRIES + k),
             entries.subList(Node.MIN_ENTRIES + k, entries.size)
         )
     }.toList()
-}
+

@@ -2,7 +2,6 @@ package lva.spatialindex.index
 
 import lva.spatialindex.index.Entry.Companion.union
 import lva.spatialindex.index.Node.Companion.newNode
-import lva.spatialindex.index.Rectangles.area
 import lva.spatialindex.storage.Storage
 import java.awt.Rectangle
 

@@ -1,18 +1,11 @@
-package lva.spatialindex.index;
+package lva.spatialindex.index
 
-import java.awt.Rectangle;
+import java.awt.Rectangle
 
 /**
  * @author vlitvinenko
  */
-class Rectangles {
-    private Rectangles() {}
+fun area(r: Rectangle): Long = (r.width * r.height).toLong()
 
-    static long area(Rectangle r) {
-        return r.width * r.height;
-    }
+fun margin(r: Rectangle): Int = 2 * (r.height + r.width)
 
-    static int margin(Rectangle r) {
-        return 2 * (r.height + r.width);
-    }
-}
