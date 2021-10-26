@@ -5,7 +5,7 @@ import java.awt.Rectangle
 /**
  * @author vlitvinenko
  */
-fun area(r: Rectangle): Long = (r.width * r.height).toLong()
+fun Rectangle.area(): Long = (width * height).toLong()
 
-fun margin(r: Rectangle): Int = 2 * (r.height + r.width)
+fun Rectangle.margin(): Int = 2 * (height + width)
 

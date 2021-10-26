@@ -83,11 +83,11 @@ class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
         val isContainsLeaf = node.getEntries().firstOrNull()?.childNode?.isLeaf ?: false
 
         if (isContainsLeaf) {
-            candidates = candidates.minList { area(it.mbr.intersection(newMbr)) } // by cost
+            candidates = candidates.minList { it.mbr.intersection(newMbr).area() } // by cost
         }
 
-        candidates = candidates.minList { area(it.mbr.union(newMbr)) } // by enlarge
-        candidates = candidates.minList { area(it.mbr) } // by size
+        candidates = candidates.minList { it.mbr.union(newMbr).area() } // by enlarge
+        candidates = candidates.minList { it.mbr.area() } // by size
 
         return candidates.firstOrNull()?.childNode?.let { chooseSubtree(it, newMbr) } ?: node
     }
@@ -107,8 +107,8 @@ class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
 
         // find min overlapped values distribution
         var overlapped = groups.flatten()
-        overlapped = overlapped.minList { area(union(it.first).intersection(union(it.second))) }
-        overlapped = overlapped.minList { area(union(it.first)) + area(union(it.second)) }
+        overlapped = overlapped.minList { union(it.first).intersection(union(it.second)).area() }
+        overlapped = overlapped.minList { union(it.first).area() + union(it.second).area() }
 
         val pair = overlapped.firstOrNull() ?: GroupPair(arrayListOf(), arrayListOf())
         node.setEntries(pair.first)
