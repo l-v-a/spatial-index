@@ -62,14 +62,12 @@ internal class Entry(private val storage: Storage<Node>, mbr: Rectangle, childOf
             listOf(LEFT_TO_RIGHT_BY_LEFT_COMPARATOR, LEFT_TO_RIGHT_BY_RIGHT_COMPARATOR)
         val Y_COMPARATORS: Collection<Comparator<Entry>> =
             listOf(TOP_TO_BOTTOM_BY_BOTTOM_COMPARATOR, TOP_TO_BOTTOM_BY_TOP_COMPARATOR)
-
-        @JvmStatic
-        fun union(entries: List<Entry>): Rectangle =
-            entries.asSequence().map { it.mbr }
-                .reduceOrNull { acc, r -> acc.union(r) } ?: Rectangle()
-
-        @JvmStatic
-        fun margin(entries: List<Entry>): Int =
-            entries.asSequence().map { it.mbr.margin() }.sum()
     }
 }
+
+internal fun List<Entry>.union(): Rectangle =
+    asSequence().map { it.mbr }
+        .reduceOrNull { acc, r -> acc.union(r) } ?: Rectangle()
+
+internal fun List<Entry>.margin(): Int =
+    asSequence().map { it.mbr.margin() }.sum()

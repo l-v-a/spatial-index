@@ -26,7 +26,7 @@ internal class Node(private val storage: Storage<Node>, var offset: Long) {
 
     fun getMbr(): Rectangle { // TODO: refactor as property
         if (mbr === NULL_RECTANGLE)
-            mbr = Entry.union(entries)
+            mbr = entries.union()
         return mbr
     }
 
@@ -81,7 +81,6 @@ internal class Node(private val storage: Storage<Node>, var offset: Long) {
 
         private val NULL_RECTANGLE = Rectangle()
 
-        @JvmStatic
         fun newNode(storage: Storage<Node>) = Node(storage, -1).apply { storage.add(this) }
     }
 }

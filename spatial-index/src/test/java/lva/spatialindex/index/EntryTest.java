@@ -11,6 +11,8 @@ import java.awt.Rectangle;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static lva.spatialindex.index.EntryKt.margin;
+import static lva.spatialindex.index.EntryKt.union;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -31,7 +33,7 @@ public class EntryTest {
     @Test
     public void should_return_child_node_if_offset_is_positive() {
         long childNodeOffset = 123;
-        Node childNode = Node.newNode(storage);
+        Node childNode = Node.Companion.newNode(storage);
         childNode.setOffset(childNodeOffset);
 
         Mockito.when(storage.read(childNodeOffset))
@@ -52,12 +54,12 @@ public class EntryTest {
     public void should_calculate_union_of_entries_lists() {
         Entry entry1 = new Entry(storage, new Rectangle(0, 0, 1, 1), -1);
         Entry entry2 = new Entry(storage, new Rectangle(1, 1, 2, 2), -1);
-        assertEquals(new Rectangle(0, 0, 3, 3), Entry.union(asList(entry1, entry2)));
+        assertEquals(new Rectangle(0, 0, 3, 3), union(asList(entry1, entry2)));
     }
 
     @Test
     public void should_calculate_union_of_empty_list_of_entries() {
-        assertEquals(new Rectangle(0, 0, 0, 0), Entry.union(emptyList()));
+        assertEquals(new Rectangle(0, 0, 0, 0), union(emptyList()));
     }
 
 
@@ -65,12 +67,12 @@ public class EntryTest {
     public void should_calculate_margin_of_entries_lists() {
         Entry entry1 = new Entry(storage, new Rectangle(0, 0, 1, 1), -1);
         Entry entry2 = new Entry(storage, new Rectangle(1, 1, 2, 2), -1);
-        assertEquals(12, Entry.margin(asList(entry1, entry2)));
+        assertEquals(12, margin(asList(entry1, entry2)));
     }
 
     @Test
     public void should_calculate_margin_of_empty_list_of_entries() {
-        assertEquals(0, Entry.margin(emptyList()));
+        assertEquals(0, margin(emptyList()));
     }
 
     @Test

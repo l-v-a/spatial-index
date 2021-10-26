@@ -1,6 +1,5 @@
 package lva.spatialindex.index
 
-import lva.spatialindex.index.Entry.Companion.margin
 
 /**
  * @author vlitvinenko
@@ -18,13 +17,13 @@ internal fun getDistributionGroups(entries: List<Entry>, comparators: Collection
         .toList()
 
 private fun margins(groups: List<GroupPair>): Int =
-    groups.sumOf { margin(it.first) + margin(it.second) }
+    groups.sumOf { it.first.margin() + it.second.margin() }
 
 private fun distributions(entries: List<Entry>): List<GroupPair> =
-    (0 until Node.MAX_ENTRIES - 2 * Node.MIN_ENTRIES + 2).map { k ->
+    (0 until Node.MAX_ENTRIES - 2 * Node.MIN_ENTRIES + 2).map { i ->
         GroupPair(
-            entries.subList(0, Node.MIN_ENTRIES + k),
-            entries.subList(Node.MIN_ENTRIES + k, entries.size)
+            entries.subList(0, Node.MIN_ENTRIES + i),
+            entries.subList(Node.MIN_ENTRIES + i, entries.size)
         )
     }.toList()
 

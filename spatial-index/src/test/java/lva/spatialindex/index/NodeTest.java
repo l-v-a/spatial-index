@@ -50,8 +50,8 @@ public class NodeTest {
     @Test
     public void should_create_entry_with_mbr_when_new_node_is_added() {
         Rectangle mbr = new Rectangle(1, 2, 3, 4);
-        Node node = Node.newNode(storage);
-        Node newNode = Node.newNode(storage)
+        Node node = Node.Companion.newNode(storage);
+        Node newNode = Node.Companion.newNode(storage)
             .addEntry(new Entry(storage, mbr, 1));
 
         node.addNode(newNode);
@@ -64,8 +64,8 @@ public class NodeTest {
     public void should_create_entry_with_mbr_offset_when_new_node_is_added() {
         Rectangle mbr = new Rectangle(1, 2, 3, 4);
         long offset = 1;
-        Node node = Node.newNode(storage);
-        Node newNode = Node.newNode(storage);
+        Node node = Node.Companion.newNode(storage);
+        Node newNode = Node.Companion.newNode(storage);
         newNode.setOffset(offset);
         newNode.addEntry(new Entry(storage, mbr, 123));
 
@@ -78,10 +78,10 @@ public class NodeTest {
     @Test
     public void should_set_parent_offset_to_this_offset_when_new_node_is_added() {
         long thisOffset = 123;
-        Node node = Node.newNode(storage);
+        Node node = Node.Companion.newNode(storage);
         node.setOffset(thisOffset);
 
-        Node newNode = Node.newNode(storage);
+        Node newNode = Node.Companion.newNode(storage);
         newNode.setOffset(123L);
 
         when(storage.read(123L)).thenReturn(newNode);
@@ -93,9 +93,9 @@ public class NodeTest {
 
     @Test
     public void should_recalculate_mbr_when_new_node_is_added() {
-        Node node = Node.newNode(storage)
+        Node node = Node.Companion.newNode(storage)
             .addEntry(new Entry(storage, new Rectangle(0, 0, 3, 4), 1));
-        Node newNode = Node.newNode(storage)
+        Node newNode = Node.Companion.newNode(storage)
             .addEntry(new Entry(storage, new Rectangle(3, 4, 7, 6), 1));
 
         assertEquals(new Rectangle(0, 0, 3, 4), node.getMbr());
@@ -108,10 +108,10 @@ public class NodeTest {
     @Test
     public void should_save_this_node_when_new_node_is_added() {
         long thisOffset = 123;
-        Node node = Node.newNode(storage);
+        Node node = Node.Companion.newNode(storage);
         node.setOffset(thisOffset);
 
-        Node newNode = Node.newNode(storage);
+        Node newNode = Node.Companion.newNode(storage);
         newNode.setOffset(111L);
 
         when(storage.read(111L)).thenReturn(newNode);
@@ -124,9 +124,9 @@ public class NodeTest {
     @Test
     public void should_save_new_node_when_new_node_is_added() {
         long newNodeOffset = 456;
-        Node node = Node.newNode(storage);
+        Node node = Node.Companion.newNode(storage);
 
-        Node newNode = Node.newNode(storage);
+        Node newNode = Node.Companion.newNode(storage);
         newNode.setOffset(newNodeOffset);
 
         when(storage.read(newNodeOffset)).thenReturn(newNode);
@@ -138,11 +138,11 @@ public class NodeTest {
 
     @Test(expected = IllegalStateException.class)
     public void should_throw_exception_if_full_when_new_node_is_added() {
-        Node node = Node.newNode(storage);
+        Node node = Node.Companion.newNode(storage);
         for (int i = 0; i < Node.MAX_ENTRIES; i++) {
             node.addEntry(new Entry(storage, new Rectangle(i, i, i + 1, i + 2), i));
         }
-        Node newNode = Node.newNode(storage);
+        Node newNode = Node.Companion.newNode(storage);
 
         node.addNode(newNode);
 
@@ -151,7 +151,7 @@ public class NodeTest {
 
     @Test
     public void should_add_entry_to_tail() {
-        Node node = Node.newNode(storage)
+        Node node = Node.Companion.newNode(storage)
             .addEntry(new Entry(storage, new Rectangle(0, 0, 3, 4), 1));
 
         Entry newEntry = new Entry(storage, new Rectangle(3, 4, 7, 6), 1);
@@ -163,7 +163,7 @@ public class NodeTest {
 
     @Test
     public void should_recalculate_mbr_when_new_entry_is_added() {
-        Node node = Node.newNode(storage)
+        Node node = Node.Companion.newNode(storage)
             .addEntry(new Entry(storage, new Rectangle(0, 0, 3, 4), 1));
         assertEquals(new Rectangle(0, 0, 3, 4), node.getMbr());
 
@@ -176,10 +176,10 @@ public class NodeTest {
     public void should_reset_parent_offset_for_entry_node_when_new_entry_is_added() {
         long thisOffset = 123;
         long childOffset = 456;
-        Node node = Node.newNode(storage);
+        Node node = Node.Companion.newNode(storage);
         node.setOffset(thisOffset);
 
-        Node childNode = Node.newNode(storage);
+        Node childNode = Node.Companion.newNode(storage);
         when(storage.read(eq(childOffset))).thenReturn(childNode);
 
         node.addEntry(new Entry(storage, new Rectangle(3, 4, 7, 6), childOffset));
@@ -191,8 +191,8 @@ public class NodeTest {
     public void should_save_entry_node_when_new_entry_is_added() {
         long childOffset = 456;
         long childNodeOffset = 789;
-        Node node = Node.newNode(storage);
-        Node childNode = Node.newNode(storage);
+        Node node = Node.Companion.newNode(storage);
+        Node childNode = Node.Companion.newNode(storage);
         childNode.setOffset(childNodeOffset);
 
         when(storage.read(eq(childOffset))).thenReturn(childNode);
@@ -205,7 +205,7 @@ public class NodeTest {
     @Test
     public void should_save_this_node_when_new_entry_is_added() {
         long thisOffset = 123;
-        Node node = Node.newNode(storage);
+        Node node = Node.Companion.newNode(storage);
         node.setOffset(thisOffset);
 
         node.addEntry(new Entry(storage, new Rectangle(3, 4, 7, 6), -1));
@@ -215,7 +215,7 @@ public class NodeTest {
 
     @Test(expected = IllegalStateException.class)
     public void should_throw_exception_if_full_when_new_entry_is_added() {
-        Node node = Node.newNode(storage);
+        Node node = Node.Companion.newNode(storage);
         for (int i = 0; i < Node.MAX_ENTRIES; i++) {
             node.addEntry(new Entry(storage, new Rectangle(i, i, i + 1, i + 2), i));
         }
@@ -227,7 +227,7 @@ public class NodeTest {
 
     @Test
     public void should_be_leaf_node_if_have_no_entries() {
-        Node node = Node.newNode(storage);
+        Node node = Node.Companion.newNode(storage);
 
         assertEquals(0, node.getEntries().size());
         assertTrue(node.isLeaf());
@@ -236,7 +236,7 @@ public class NodeTest {
     @Test
     public void should_be_leaf_node_if_first_entry_is_leaf() {
         Entry entry = new Entry(storage, new Rectangle(3, 4, 7, 6), -1);
-        Node node = Node.newNode(storage)
+        Node node = Node.Companion.newNode(storage)
             .addEntry(entry);
 
         assertTrue(entry.isLeaf());
@@ -250,7 +250,7 @@ public class NodeTest {
         Entry entry3= new Entry(storage, new Rectangle(11, 12, 13, 14), -1);
         Entry entry4= new Entry(storage, new Rectangle(15, 16, 17, 18), -1);
 
-        Node node = Node.newNode(storage)
+        Node node = Node.Companion.newNode(storage)
             .addEntry(entry1)
             .addEntry(entry2);
         assertEquals(asList(entry1, entry2), node.getEntries());
@@ -267,7 +267,7 @@ public class NodeTest {
         Entry entry2= new Entry(storage, new Rectangle(0, 0, 1, 1), -1);
         Entry entry3= new Entry(storage, new Rectangle(10, 10, 1, 1), -1);
 
-        Node node = Node.newNode(storage)
+        Node node = Node.Companion.newNode(storage)
             .addEntry(entry1);
 
         assertEquals(new Rectangle(3, 4, 7, 6), node.getMbr());
@@ -284,7 +284,7 @@ public class NodeTest {
         Entry entry2= new Entry(storage, new Rectangle(0, 0, 1, 1), -1);
         Entry entry3= new Entry(storage, new Rectangle(10, 10, 1, 1), -1);
 
-        Node node = Node.newNode(storage);
+        Node node = Node.Companion.newNode(storage);
         node.setOffset(thisOffset);
 
         node.setEntries(asList(entry2, entry3));

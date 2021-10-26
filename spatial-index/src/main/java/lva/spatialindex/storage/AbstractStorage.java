@@ -88,7 +88,7 @@ public abstract class AbstractStorage<T> implements Storage<T> {
     }
 
     private long roundToRecordSize(long size) {
-        return (size + (recordSize - 1)) & ~(recordSize - 1);
+        return (size + (recordSize - 1)) & -recordSize;
     }
 }
 

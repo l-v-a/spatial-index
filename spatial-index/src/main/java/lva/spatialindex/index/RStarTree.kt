@@ -1,6 +1,5 @@
 package lva.spatialindex.index
 
-import lva.spatialindex.index.Entry.Companion.union
 import lva.spatialindex.index.Node.Companion.newNode
 import lva.spatialindex.storage.Storage
 import java.awt.Rectangle
@@ -102,8 +101,8 @@ class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
 
         // find min overlapped values distribution
         var overlapped = groups.flatten()
-        overlapped = overlapped.minList { union(it.first).intersection(union(it.second)).area() }
-        overlapped = overlapped.minList { union(it.first).area() + union(it.second).area() }
+        overlapped = overlapped.minList { it.first.union().intersection(it.second.union()).area() }
+        overlapped = overlapped.minList { it.first.union().area() + it.second.union().area() }
 
         val pair = overlapped.firstOrNull() ?: GroupPair(arrayListOf(), arrayListOf())
         node.setEntries(pair.first)

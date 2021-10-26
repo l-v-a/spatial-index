@@ -6,7 +6,11 @@ import lva.spatialindex.utils.Exceptions;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 
-import static lva.spatialindex.memory.unsafe.Native.*;
+import static lva.spatialindex.memory.unsafe.Native.BYTE_ARRAY_OFFSET;
+import static lva.spatialindex.memory.unsafe.Native.MAP_RW;
+import static lva.spatialindex.memory.unsafe.Native.UNSAFE;
+import static lva.spatialindex.memory.unsafe.Native.map;
+import static lva.spatialindex.memory.unsafe.Native.unmap;
 
 
 /**
@@ -92,7 +96,7 @@ public class MemoryMappedFile implements StorageSpace {
     }
 
     private static long roundToPage(long i) {
-        return (i + (PAGE_SIZE - 1)) & ~(PAGE_SIZE - 1);
+        return (i + (PAGE_SIZE - 1)) & -PAGE_SIZE;
     }
 }
 
