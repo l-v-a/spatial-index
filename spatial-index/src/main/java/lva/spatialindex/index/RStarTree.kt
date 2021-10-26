@@ -1,6 +1,5 @@
 package lva.spatialindex.index
 
-import lva.spatialindex.index.Distributions.GroupPair
 import lva.spatialindex.index.Entry.Companion.union
 import lva.spatialindex.index.Node.Companion.newNode
 import lva.spatialindex.index.Rectangles.area
@@ -102,13 +101,13 @@ class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
         // distribute entries between nodes
         val allEntries = node.getEntries() + newNode.getEntries()
 
-        val groupsX = Distributions.getDistributionGroups(allEntries, Entry.X_COMPARATORS)
-        val groupsY = Distributions.getDistributionGroups(allEntries, Entry.Y_COMPARATORS)
-        val groups = if (Distributions.getGroupMargins(groupsX) < Distributions.getGroupMargins(groupsY))
+        val groupsX = getDistributionGroups(allEntries, Entry.X_COMPARATORS)
+        val groupsY = getDistributionGroups(allEntries, Entry.Y_COMPARATORS)
+        val groups = if (getGroupMargins(groupsX) < getGroupMargins(groupsY))
             groupsX else groupsY
 
         // find min overlapped values distribution
-       var overlapped = groups.flatten()
+        var overlapped = groups.flatten()
         overlapped = overlapped.minList { area(union(it.group1).intersection(union(it.group2))) }
         overlapped = overlapped.minList { area(union(it.group1)) + area(union(it.group2)) }
 
@@ -135,7 +134,6 @@ class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
         private const val SIZE_DEFAULT = 64 * 1024L * 1024L
     }
 }
-
 
 private inline fun <T> List<T>.minList(criteria: (T) -> Long): List<T> {
     val min = minOfOrNull(criteria)
