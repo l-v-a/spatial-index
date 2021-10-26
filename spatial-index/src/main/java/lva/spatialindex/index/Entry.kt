@@ -70,4 +70,4 @@ internal fun List<Entry>.union(): Rectangle =
         .reduceOrNull { acc, r -> acc.union(r) } ?: Rectangle()
 
 internal fun List<Entry>.margin(): Int =
-    asSequence().map { it.mbr.margin() }.sum()
+    asSequence().sumOf { it.mbr.margin() }
