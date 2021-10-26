@@ -100,10 +100,7 @@ class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
         }
 
         // distribute entries between nodes
-        val allEntries = arrayListOf<Entry>().apply {
-            addAll(node.getEntries())
-            addAll(newNode.getEntries())
-        }
+        val allEntries = node.getEntries() + newNode.getEntries()
 
         val groupsX = Distributions.getDistributionGroups(allEntries, Entry.X_COMPARATORS)
         val groupsY = Distributions.getDistributionGroups(allEntries, Entry.Y_COMPARATORS)
