@@ -3,6 +3,9 @@ package lva.spatialindex.index
 import lva.spatialindex.index.Node.Companion.newNode
 import lva.spatialindex.storage.Storage
 import java.awt.Rectangle
+import java.util.concurrent.locks.ReentrantReadWriteLock
+import kotlin.concurrent.read
+import kotlin.concurrent.write
 
 /**
  * @author vlitvinenko
@@ -10,9 +13,13 @@ import java.awt.Rectangle
 class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
     private val storage: Storage<Node> = NodeStorage(storageFileName, SIZE_DEFAULT) // TODO: move out creation
     private var root: Node = newNode(storage)
+    private val lock = ReentrantReadWriteLock()
 
-    override fun search(area: Rectangle): Collection<Long> =
-        search(root, area).toList()
+    override fun search(area: Rectangle): Collection<Long> {
+        lock.read {
+            return search(root, area).toList()
+        }
+    }
 
     private fun search(node: Node, area: Rectangle): Sequence<Long> =
         node.getEntries().asSequence()
@@ -25,10 +32,11 @@ class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
                     .getOrElseGet { childNode -> search(childNode, area) }
             }
 
-
     fun insert(offset: Long, newMbr: Rectangle) {
         check(!newMbr.isEmpty) { "Invalid region" }
-        insert(root, offset, newMbr)
+        lock.write {
+            insert(root, offset, newMbr)
+        }
     }
 
     private fun insert(node: Node, offset: Long, newMbr: Rectangle) {
