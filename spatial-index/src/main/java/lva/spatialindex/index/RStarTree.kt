@@ -9,16 +9,11 @@ import java.awt.Rectangle
  * @author vlitvinenko
  */
 class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
-    private val storage: Storage<Node>
-    private var root: Node
+    private val storage: Storage<Node> = NodeStorage(storageFileName, SIZE_DEFAULT) // TODO: move out creation
+    private var root: Node = newNode(storage)
 
-    init {
-        val size = SIZE_DEFAULT // TODO: make it as func (maxNumberOfElements)
-        storage = NodeStorage(storageFileName, size) // TODO: move out creation
-        root = newNode(storage)
-    }
-
-    override fun search(area: Rectangle): Collection<Long> = search(root, area).toList()
+    override fun search(area: Rectangle): Collection<Long> =
+        search(root, area).toList()
 
     private fun search(node: Node, area: Rectangle): Sequence<Long> =
         node.getEntries().asSequence()
