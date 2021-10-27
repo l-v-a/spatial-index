@@ -12,8 +12,8 @@ import kotlin.concurrent.write
  */
 class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
     private val storage: Storage<Node> = NodeStorage(storageFileName, SIZE_DEFAULT) // TODO: move out creation
-    private var root: Node = newNode(storage)
     private val lock = ReentrantReadWriteLock()
+    private var root: Node = newNode(storage)
 
     override fun search(area: Rectangle): Collection<Long> {
         lock.read {

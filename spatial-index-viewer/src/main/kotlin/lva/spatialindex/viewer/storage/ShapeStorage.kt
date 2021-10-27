@@ -46,8 +46,8 @@ class ShapeStorage(fileName: String, initialSize: Long) :
         super.add(shape).also { shape.offset = it }
     }
 
-    override fun write(offset: Long, t: Shape) =  lock.write {
-        super.write(offset, t)
+    override fun write(offset: Long, shape: Shape) =  lock.write {
+        super.write(offset, shape)
     }
 
     override fun read(offset: Long): Shape = lock.read {
