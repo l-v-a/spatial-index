@@ -26,16 +26,16 @@ import kotlin.math.min
 /**
  * @author vlitvinenko
  */
-private data class IndexData(val offset: Long, val mbr: Rectangle)
-
 object ShapesRepositoryBuilder {
     private const val MAX_ELEMENTS_IN_TREE = 1000 * 1000
-    private const val STORAGE_INITIAL_SIZE = 64 * 1024L * 1024L
+    private const val STORAGE_INITIAL_SIZE = 64L * 1024 * 1024
     private const val SHAPES_QUEUE_CAPACITY = 1000 * 1000
     private const val SIZE_OF_SHAPE_BYTES_AVG = 26
     private const val DB_FILE_NAME = "shapes.bin"
 
     private val log = LoggerFactory.getLogger(ShapesRepositoryBuilder::class.java)
+
+    private data class IndexData(val offset: Long, val mbr: Rectangle)
 
     suspend fun build(shapesFile: Path, onProgress: suspend (Int) -> Unit): ShapeRepository {
         val shapeStorage = ShapeStorage(shapesFile.resolveSibling(DB_FILE_NAME).toString(), STORAGE_INITIAL_SIZE)

@@ -23,6 +23,10 @@ class RepositoryBuilderFrame : JFrame() {
     private val messageLabel = JLabel()
 
     init {
+        title = "Shape Viewer"
+        isResizable = false
+        defaultCloseOperation = EXIT_ON_CLOSE
+
         val panel = JPanel()
         with(panel) {
             layout = BorderLayout()
@@ -30,13 +34,8 @@ class RepositoryBuilderFrame : JFrame() {
             add(messageLabel, BorderLayout.NORTH)
             add(progressBar, BorderLayout.CENTER)
         }
-
-        defaultCloseOperation = EXIT_ON_CLOSE
-
-        progressBar.isStringPainted = true
-        isResizable = false
-        title = "Shape Viewer"
         contentPane = panel
+        progressBar.isStringPainted = true
 
         setBounds(0, 0, 500, 70)
         val dim = Toolkit.getDefaultToolkit().screenSize
