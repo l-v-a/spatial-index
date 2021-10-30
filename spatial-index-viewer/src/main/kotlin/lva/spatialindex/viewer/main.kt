@@ -4,7 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import lva.spatialindex.viewer.repository.buildShapesRepository
-import lva.spatialindex.viewer.ui.showShapesRepository
+import lva.spatialindex.viewer.ui.ShapesViewController.Companion.showShapesRepository
 
 /**
  * @author vlitvinenko

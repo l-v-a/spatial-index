@@ -11,7 +11,6 @@ import kotlinx.coroutines.withContext
 import lva.spatialindex.index.Index
 import lva.spatialindex.index.RStarTree
 import lva.spatialindex.storage.Storage
-import lva.spatialindex.viewer.index.MultiIndex
 import lva.spatialindex.viewer.storage.AbstractShape
 import lva.spatialindex.viewer.storage.Shape
 import lva.spatialindex.viewer.storage.ShapeStorage
@@ -40,8 +39,8 @@ object ShapesRepositoryBuilder {
     suspend fun build(shapesFile: Path, onProgress: suspend (Int) -> Unit): ShapeRepository {
         val shapeStorage = ShapeStorage(shapesFile.resolveSibling(DB_FILE_NAME).toString(), STORAGE_INITIAL_SIZE)
         return try {
-            val index = MultiIndex(buildIndexes(shapeStorage, shapesFile, onProgress))
-            ShapeRepository(shapeStorage, index)
+            val indexes = buildIndexes(shapeStorage, shapesFile, onProgress)
+            ShapeRepository(shapeStorage, indexes)
         } catch (e: Exception) {
             log.error("Unable to create repository for $shapesFile", e)
             close(listOf(shapeStorage))
@@ -126,7 +125,7 @@ object ShapesRepositoryBuilder {
             indexTree
         } catch (e: Exception) {
             log.error("task $taskNumber closed by exception", e)
-            close(setOf(indexTree))
+            close(listOf(indexTree))
             Files.deleteIfExists(storageFile)
             throw e;
         }

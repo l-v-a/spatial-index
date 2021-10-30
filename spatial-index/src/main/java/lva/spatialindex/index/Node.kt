@@ -12,7 +12,6 @@ import java.awt.Rectangle
  */
 internal class Node(private val storage: Storage<Node>, var offset: Long) {
     private val entries: MutableList<Entry> = ArrayList()
-
     private var mbr: Rectangle = NULL_RECTANGLE
 
     var parentOffset: Long = -1

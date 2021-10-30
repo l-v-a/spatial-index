@@ -22,6 +22,9 @@ class ShapesViewFrame : JFrame() {
     private val vbar = JScrollBar(JScrollBar.VERTICAL)
     private var viewportChanged: () -> Unit = {  }
 
+    val viewport
+        get() = Rectangle(hbar.value, vbar.value, hbar.visibleAmount, vbar.visibleAmount)
+
     init {
         title = "Shape Viewer"
         defaultCloseOperation = EXIT_ON_CLOSE
@@ -69,9 +72,6 @@ class ShapesViewFrame : JFrame() {
     fun onViewportChanged(block: () -> Unit) {
         viewportChanged = block
     }
-
-    val viewport
-        get() = Rectangle(hbar.value, vbar.value, hbar.visibleAmount, vbar.visibleAmount)
 
     fun setShapes(shapes: Collection<ShapeUI>) {
         canvas.shapes = shapes

@@ -1,24 +1,28 @@
 package lva.spatialindex.viewer.ui
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import lva.spatialindex.viewer.repository.ShapeRepository
 import lva.spatialindex.viewer.storage.AbstractShape.Companion.maxOrder
 import java.awt.event.MouseEvent
 
+
 /**
  * @author vlitvinenko
  */
-class ShapesViewController(private val shapeRepository: ShapeRepository) {
+class ShapesViewController private constructor(private val shapeRepository: ShapeRepository) {
     private val view = ShapesViewFrame()
     private val visibleShapes = arrayListOf<ShapeUI>()
 
     init {
         view.onClicked(this::onShapesViewClicked)
-        view.onViewportChanged(this::onViewPortChanged)
         view.onClose(this::onClose)
-    }
-
-    fun show() {
-        view.isVisible = true
+        view.onViewportChanged {
+            GlobalScope.launch(Dispatchers.Main) {
+                update()
+            }
+        }
     }
 
     private fun onShapesViewClicked(event: MouseEvent) {
@@ -42,9 +46,8 @@ class ShapesViewController(private val shapeRepository: ShapeRepository) {
         }
     }
 
-    private fun onViewPortChanged() {
-        val viewport = view.viewport
-        val foundShapes = shapeRepository.search(viewport).asSequence()
+    private suspend fun update() {
+        val foundShapes = shapeRepository.search(view.viewport).asSequence()
             .sortedBy { it.order }
             .map { it.asUI() }
             .toList()
@@ -58,7 +61,9 @@ class ShapesViewController(private val shapeRepository: ShapeRepository) {
 
     private fun onClose() = shapeRepository.close()
 
+    companion object {
+        fun showShapesRepository(shapeRepository: ShapeRepository) =
+            ShapesViewController(shapeRepository).apply { view.isVisible = true }
+    }
 }
 
-fun showShapesRepository(shapeRepository: ShapeRepository) =
-    ShapesViewController(shapeRepository).show()
