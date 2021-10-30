@@ -69,16 +69,13 @@ object ShapesRepositoryBuilder {
 
         val shapes = readShapes(shapesFile)
         val shapesToIndex = commitShapes(shapes, storage)
-        val deferIndexes = (1..numOfTasks).map {
+        val indexes = (1..numOfTasks).map {
             async(Dispatchers.IO) {
                 indexShapes(it, shapesFile.parent, shapesToIndex) { onItemIndexed() }
             }
         }
 
-        val indexes = deferIndexes.awaitAll()
-        onProgress(100)
-
-        indexes
+        indexes.awaitAll().also { onProgress(100) }
     }
 
     private fun CoroutineScope.readShapes(shapesFile: Path): ReceiveChannel<Shape> = produce(capacity = SHAPES_QUEUE_CAPACITY) {

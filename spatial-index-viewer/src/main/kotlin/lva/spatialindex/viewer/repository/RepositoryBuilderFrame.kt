@@ -54,7 +54,7 @@ class RepositoryBuilderFrame private constructor(): JFrame() {
                 messageLabel.text = "indexing..."
                 isVisible = true
 
-                val buildResult = async {
+                val repository = async {
                     ShapesRepositoryBuilder.build(Paths.get(shapesFile)) { progress ->
                         withContext(Dispatchers.Main) {
                             progressBar.value = progress
@@ -63,13 +63,10 @@ class RepositoryBuilderFrame private constructor(): JFrame() {
                 }
 
                 onClose {
-                    buildResult.cancel()
+                    repository.cancel()
                 }
 
-                val repository = buildResult.await()
-                isVisible = false
-
-                repository
+                repository.await().also { isVisible = false }
             }
         }
     }
