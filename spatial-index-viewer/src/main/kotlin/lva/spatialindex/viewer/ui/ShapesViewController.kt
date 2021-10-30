@@ -23,7 +23,7 @@ class ShapesViewController private constructor(private val shapeRepository: Shap
 
     private suspend fun run() = coroutineScope {
         view.viewportChanges()
-            .debounce(100)
+            .debounce(50)
             .onEach { update() }
             .launchIn(this)
         view.isVisible = true
@@ -68,6 +68,6 @@ class ShapesViewController private constructor(private val shapeRepository: Shap
 
     companion object {
         suspend fun showShapesRepository(shapeRepository: ShapeRepository) =
-            ShapesViewController(shapeRepository).apply { run() }
+            ShapesViewController(shapeRepository).run()
     }
 }
