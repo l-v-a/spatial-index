@@ -1,39 +1,19 @@
-package lva.spatialindex.viewer.utils;
-
-import lombok.NonNull;
-
-import java.util.Collection;
+package lva.spatialindex.viewer.utils
 
 /**
  * Eliminates lack of AutoCloseable support in Guava's Closer class
  *
  * @author vlitvinenko
  */
-public class AutoCloseables {
-    private AutoCloseables() {}
-
-    public static <T extends AutoCloseable> void close(@NonNull Collection<T> closeables, Exception wasThrown) throws Exception {
-        Exception exception = wasThrown;
-        for (T closeable: closeables) {
-            try {
-                if (closeable != null) {
-                    closeable.close();
-                }
-            } catch (Exception e) {
-                if (exception == null) {
-                    exception = e;
-                } else {
-                    exception.addSuppressed(e);
-                }
-            }
-        }
-
-        if (exception != null) {
-            throw exception;
+fun <T : AutoCloseable> close(closeables: Collection<T>, wasThrown: Exception? = null) {
+    var exception = wasThrown
+    closeables.forEach { closeable ->
+        try {
+            closeable.close()
+        } catch (e: Exception) {
+            exception?.addSuppressed(e) ?: run { exception = e }
         }
     }
 
-    public static <T extends AutoCloseable>  void close(@NonNull Collection<T> closeables) throws Exception {
-        close(closeables, null);
-    }
+    exception?.let { throw it }
 }

@@ -14,7 +14,6 @@ import lva.spatialindex.storage.Storage
 import lva.spatialindex.viewer.storage.AbstractShape
 import lva.spatialindex.viewer.storage.Shape
 import lva.spatialindex.viewer.storage.ShapeStorage
-import lva.spatialindex.viewer.utils.AutoCloseables.close
 import org.slf4j.LoggerFactory
 import java.awt.Rectangle
 import java.nio.file.Files
@@ -43,7 +42,7 @@ object ShapesRepositoryBuilder {
             ShapeRepository(shapeStorage, indexes)
         } catch (e: Exception) {
             log.error("Unable to create repository for $shapesFile", e)
-            close(listOf(shapeStorage))
+            shapeStorage.close()
             throw e
         }
     }
@@ -125,7 +124,7 @@ object ShapesRepositoryBuilder {
             indexTree
         } catch (e: Exception) {
             log.error("task $taskNumber closed by exception", e)
-            close(listOf(indexTree))
+            indexTree.close()
             Files.deleteIfExists(storageFile)
             throw e;
         }

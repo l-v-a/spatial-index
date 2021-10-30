@@ -7,7 +7,7 @@ import kotlinx.coroutines.coroutineScope
 import lva.spatialindex.index.Index
 import lva.spatialindex.storage.Storage
 import lva.spatialindex.viewer.storage.Shape
-import lva.spatialindex.viewer.utils.AutoCloseables.close
+import lva.spatialindex.viewer.utils.close
 import java.awt.Rectangle
 /**
  * @author vlitvinenko
@@ -24,8 +24,10 @@ class ShapeRepository(private val shapeStorage: Storage<Shape>, private val inde
         offsets.map { shapeStorage.read(it) }.toList()
     }
 
-    fun update(shape: Shape) = shapeStorage.write(shape.offset, shape)
+    fun update(shape: Shape) =
+        shapeStorage.write(shape.offset, shape)
 
-    override fun close() = close(indexes + shapeStorage)
+    override fun close() =
+        close(indexes + shapeStorage)
 }
 
