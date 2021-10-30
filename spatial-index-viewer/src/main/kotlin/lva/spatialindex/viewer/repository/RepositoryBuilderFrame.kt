@@ -1,8 +1,8 @@
 package lva.spatialindex.viewer.repository
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import java.awt.BorderLayout
 import java.awt.Toolkit
@@ -18,7 +18,7 @@ import javax.swing.JProgressBar
 /**
  * @author vlitvinenko
  */
-class RepositoryBuilderFrame : JFrame() {
+class RepositoryBuilderFrame private constructor(): JFrame() {
     private val progressBar = JProgressBar()
     private val messageLabel = JLabel()
 
@@ -42,37 +42,35 @@ class RepositoryBuilderFrame : JFrame() {
         setLocation(dim.width / 2 - size.width / 2, dim.height / 2 - size.height / 2)
     }
 
-    fun onClose(block: () -> Unit) = addWindowListener(object : WindowAdapter() {
+    private fun onClose(block: () -> Unit) = addWindowListener(object : WindowAdapter() {
         override fun windowClosing(e: WindowEvent?) {
             block()
         }
     })
 
-    fun setProgress(value: Int) {
-        progressBar.value = value
-    }
+    companion object {
+        suspend fun buildShapesRepository(shapesFile: String): ShapeRepository = coroutineScope {
+            with(RepositoryBuilderFrame()) {
+                messageLabel.text = "indexing..."
+                isVisible = true
 
-    fun setMessage(message: String) {
-        messageLabel.text = message
-    }
-}
+                val buildResult = async {
+                    ShapesRepositoryBuilder.build(Paths.get(shapesFile)) { progress ->
+                        withContext(Dispatchers.Main) {
+                            progressBar.value = progress
+                        }
+                    }
+                }
 
-fun CoroutineScope.buildShapesRepository(shapesFile: String, onComplete: suspend (ShapeRepository) -> Unit) = with(RepositoryBuilderFrame()) {
-    setMessage("indexing...")
-    isVisible = true
+                onClose {
+                    buildResult.cancel()
+                }
 
-    val job = launch {
-        val repository = ShapesRepositoryBuilder.build(Paths.get(shapesFile)) {
-            withContext(Dispatchers.Main) {
-                setProgress(it)
+                val repository = buildResult.await()
+                isVisible = false
+
+                repository
             }
         }
-
-        isVisible = false
-        onComplete(repository)
-    }
-
-    onClose {
-        job.cancel()
     }
 }
