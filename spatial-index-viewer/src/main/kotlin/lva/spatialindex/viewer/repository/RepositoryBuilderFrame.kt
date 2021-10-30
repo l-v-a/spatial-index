@@ -57,7 +57,7 @@ class RepositoryBuilderFrame : JFrame() {
     }
 }
 
-fun CoroutineScope.buildShapesRepository(shapesFile: String, onComplete: (ShapeRepository) -> Unit) = with(RepositoryBuilderFrame()) {
+fun CoroutineScope.buildShapesRepository(shapesFile: String, onComplete: suspend (ShapeRepository) -> Unit) = with(RepositoryBuilderFrame()) {
     setMessage("indexing...")
     isVisible = true
 
@@ -68,8 +68,8 @@ fun CoroutineScope.buildShapesRepository(shapesFile: String, onComplete: (ShapeR
             }
         }
 
-        onComplete(repository)
         isVisible = false
+        onComplete(repository)
     }
 
     onClose {

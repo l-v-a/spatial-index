@@ -35,7 +35,7 @@ class CircleShapeUI(private val circle: CircleShape) : AbstractShapeUI(), Shape 
         drawOval(boundRect.x, boundRect.y, boundRect.width, boundRect.height)
     }
 
-    override fun hitTest(x: Int, y: Int) = with(circle) {
+    override fun hitTest(x: Int, y: Int): Boolean = with(circle) {
         (x - this.x) * (x - this.x) + (y - this.y) * (y - this.y) <= radius * radius
     }
 }

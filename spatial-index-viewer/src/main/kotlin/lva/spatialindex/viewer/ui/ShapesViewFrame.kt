@@ -1,5 +1,8 @@
 package lva.spatialindex.viewer.ui
 
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.Graphics
@@ -20,7 +23,7 @@ class ShapesViewFrame : JFrame() {
     private val canvas = Canvas()
     private val hbar = JScrollBar(JScrollBar.HORIZONTAL)
     private val vbar = JScrollBar(JScrollBar.VERTICAL)
-    private var viewportChanged: () -> Unit = {  }
+    private var onViewportChanged: () -> Unit = {  }
 
     val viewport
         get() = Rectangle(hbar.value, vbar.value, hbar.visibleAmount, vbar.visibleAmount)
@@ -69,15 +72,20 @@ class ShapesViewFrame : JFrame() {
         }
     })
 
-    fun onViewportChanged(block: () -> Unit) {
-        viewportChanged = block
+    fun viewportChanges(): Flow<Unit> = callbackFlow {
+        onViewportChanged = {
+            trySend(Unit)
+        }
+
+        awaitClose {}
     }
 
     fun setShapes(shapes: Collection<ShapeUI>) {
         canvas.shapes = shapes
     }
 
-    fun update() = canvas.repaint()
+    fun update() =
+        canvas.repaint()
 
     private fun handleCanvasResized() {
         val size = canvas.size
@@ -88,7 +96,7 @@ class ShapesViewFrame : JFrame() {
 
     private fun handleViewportChanged() {
         canvas.viewport = viewport
-        viewportChanged()
+        onViewportChanged()
     }
 
     private class Canvas : JComponent() {

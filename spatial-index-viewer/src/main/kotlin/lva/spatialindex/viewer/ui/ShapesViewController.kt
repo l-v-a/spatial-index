@@ -1,8 +1,9 @@
 package lva.spatialindex.viewer.ui
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import lva.spatialindex.viewer.repository.ShapeRepository
 import lva.spatialindex.viewer.storage.AbstractShape.Companion.maxOrder
 import java.awt.event.MouseEvent
@@ -18,11 +19,14 @@ class ShapesViewController private constructor(private val shapeRepository: Shap
     init {
         view.onClicked(this::onShapesViewClicked)
         view.onClose(this::onClose)
-        view.onViewportChanged {
-            GlobalScope.launch(Dispatchers.Main) {
-                update()
-            }
-        }
+    }
+
+    private suspend fun run() = coroutineScope {
+        view.viewportChanges()
+            .debounce(100)
+            .onEach { update() }
+            .launchIn(this)
+        view.isVisible = true
     }
 
     private fun onShapesViewClicked(event: MouseEvent) {
@@ -63,8 +67,7 @@ class ShapesViewController private constructor(private val shapeRepository: Shap
         shapeRepository.close()
 
     companion object {
-        fun showShapesRepository(shapeRepository: ShapeRepository) =
-            ShapesViewController(shapeRepository).apply { view.isVisible = true }
+        suspend fun showShapesRepository(shapeRepository: ShapeRepository) =
+            ShapesViewController(shapeRepository).apply { run() }
     }
 }
-
