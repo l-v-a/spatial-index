@@ -2,6 +2,7 @@ package lva.spatialindex.viewer.repository
 
 import lva.spatialindex.viewer.storage.CircleShape
 import lva.spatialindex.viewer.storage.RectangleShape
+import lva.spatialindex.viewer.storage.Shape
 import org.slf4j.LoggerFactory
 
 /**
@@ -10,8 +11,8 @@ import org.slf4j.LoggerFactory
 internal object ShapeParser {
     private val log = LoggerFactory.getLogger(ShapeParser::class.java)
 
-    fun parseShape(str: String) =
-        parse(str) ?: run { log.warn("Unable to parse shape from $str"); null }
+    fun parseShape(str: String): Shape? =
+        parse(str) ?: null.also { log.warn("Unable to parse shape from $str") }
 
     private fun parse(str: String) = Regex("(\\w+):(.+)").find(str)?.let {
         val (type, params) = it.destructured

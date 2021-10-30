@@ -44,7 +44,7 @@ class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
         val entry = Entry(storage, newMbr, -(offset + 1))
         val newNode = when {
             leafNode.isFull -> splitNode(leafNode, newNode(storage).addEntry(entry))
-            else -> { leafNode.addEntry(entry); null }
+            else -> null.also { leafNode.addEntry(entry) }
         }
 
         adjust(leafNode, newNode)
