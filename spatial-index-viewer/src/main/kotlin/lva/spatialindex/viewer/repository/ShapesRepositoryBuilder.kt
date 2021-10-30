@@ -11,7 +11,7 @@ import kotlinx.coroutines.withContext
 import lva.spatialindex.index.Index
 import lva.spatialindex.index.RStarTree
 import lva.spatialindex.storage.Storage
-import lva.spatialindex.viewer.storage.AbstractShape
+import lva.spatialindex.viewer.storage.AbstractShape.Companion.maxOrder
 import lva.spatialindex.viewer.storage.Shape
 import lva.spatialindex.viewer.storage.ShapeStorage
 import org.slf4j.LoggerFactory
@@ -96,8 +96,7 @@ object ShapesRepositoryBuilder {
         storage: Storage<Shape>
     ): ReceiveChannel<IndexData> = produce(capacity = SHAPES_QUEUE_CAPACITY) {
         for (shape in shapes) {
-            AbstractShape.maxOrder += 1
-            shape.order = AbstractShape.maxOrder
+            shape.order = ++maxOrder
             send(IndexData(storage.add(shape), shape.mbr))
         }
     }

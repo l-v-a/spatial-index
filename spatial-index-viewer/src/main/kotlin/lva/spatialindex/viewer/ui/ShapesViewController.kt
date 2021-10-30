@@ -35,8 +35,7 @@ class ShapesViewController private constructor(private val shapeRepository: Shap
 
         val clickedShape = visibleShapes.lastOrNull { it.hitTest(x, y) }
         clickedShape?.let { shape ->
-            maxOrder += 1
-            shape.order = maxOrder
+            shape.order = ++maxOrder
             shape.isActive = !shape.isActive
 
             shapeRepository.update(shape.unwrapped)
