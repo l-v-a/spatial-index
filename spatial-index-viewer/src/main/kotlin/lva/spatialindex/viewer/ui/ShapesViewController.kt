@@ -14,7 +14,7 @@ import java.awt.event.MouseEvent
  */
 class ShapesViewController private constructor(private val shapeRepository: ShapeRepository) {
     private val view = ShapesViewFrame()
-    private val visibleShapes = arrayListOf<ShapeUI>()
+    private var visibleShapes = mutableListOf<ShapeUI>()
 
     init {
         view.onClicked(this::onShapesViewClicked)
@@ -22,8 +22,7 @@ class ShapesViewController private constructor(private val shapeRepository: Shap
     }
 
     private suspend fun run() = coroutineScope {
-        view.viewportChanges()
-            .debounce(50)
+        view.viewportChanges().debounce(50)
             .onEach { update() }
             .launchIn(this)
         view.isVisible = true
@@ -51,13 +50,10 @@ class ShapesViewController private constructor(private val shapeRepository: Shap
     }
 
     private suspend fun update() {
-        val foundShapes = shapeRepository.search(view.viewport).asSequence()
+        visibleShapes = shapeRepository.search(view.viewport).asSequence()
             .sortedBy { it.order }
             .map { it.asUI() }
-            .toList()
-
-        visibleShapes.clear()
-        visibleShapes.addAll(foundShapes)
+            .toMutableList()
 
         view.setShapes(visibleShapes)
         view.update()

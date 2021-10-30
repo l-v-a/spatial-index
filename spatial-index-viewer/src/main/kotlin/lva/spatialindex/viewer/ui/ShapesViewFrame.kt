@@ -73,10 +73,7 @@ class ShapesViewFrame : JFrame() {
     })
 
     fun viewportChanges(): Flow<Unit> = callbackFlow {
-        onViewportChanged = {
-            trySend(Unit)
-        }
-
+        onViewportChanged = { trySend(Unit) }
         awaitClose {}
     }
 
@@ -101,7 +98,7 @@ class ShapesViewFrame : JFrame() {
 
     private class Canvas : JComponent() {
         var viewport = Rectangle()
-        var shapes: Collection<ShapeUI> = arrayListOf()
+        var shapes: Collection<ShapeUI> = listOf()
 
         override fun paint(graphics: Graphics) {
             graphics.translate(-viewport.x, -viewport.y)
