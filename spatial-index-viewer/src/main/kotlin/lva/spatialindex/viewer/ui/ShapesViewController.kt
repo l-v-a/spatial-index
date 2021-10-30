@@ -59,7 +59,8 @@ class ShapesViewController private constructor(private val shapeRepository: Shap
         view.update()
     }
 
-    private fun onClose() = shapeRepository.close()
+    private fun onClose() =
+        shapeRepository.close()
 
     companion object {
         fun showShapesRepository(shapeRepository: ShapeRepository) =

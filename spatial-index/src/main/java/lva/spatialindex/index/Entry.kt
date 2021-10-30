@@ -27,8 +27,11 @@ internal class Entry(private val storage: Storage<Node>, mbr: Rectangle, childOf
     val isLeaf
         get() = childOffset < 0
 
-    override fun equals(other: Any?) = if (other is Entry) body == other.body else false
-    override fun hashCode() = body.hashCode()
+    override fun equals(other: Any?) =
+        if (other is Entry) body == other.body else false
+
+    override fun hashCode() =
+        body.hashCode()
 
     internal class Ser(private val storage: Storage<Node>) : Serializer<Entry>() {
         override fun write(kryo: Kryo, output: Output, entry: Entry) = with(output) {
@@ -69,4 +72,5 @@ internal fun List<Entry>.union(): Rectangle =
     asSequence().map { it.mbr }
         .reduceOrNull { acc, r -> acc.union(r) } ?: Rectangle()
 
-internal fun List<Entry>.margin(): Int = sumOf { it.mbr.margin() }
+internal fun List<Entry>.margin(): Int =
+    sumOf { it.mbr.margin() }

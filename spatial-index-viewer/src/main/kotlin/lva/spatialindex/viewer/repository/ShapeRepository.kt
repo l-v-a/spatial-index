@@ -9,6 +9,8 @@ import lva.spatialindex.storage.Storage
 import lva.spatialindex.viewer.storage.Shape
 import lva.spatialindex.viewer.utils.close
 import java.awt.Rectangle
+
+
 /**
  * @author vlitvinenko
  */

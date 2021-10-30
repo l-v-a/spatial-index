@@ -130,7 +130,8 @@ class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
         }
     }
 
-    override fun close() = storage.close()
+    override fun close() =
+        storage.close()
 
     companion object {
         private const val SIZE_DEFAULT = 64L * 1024 * 1024

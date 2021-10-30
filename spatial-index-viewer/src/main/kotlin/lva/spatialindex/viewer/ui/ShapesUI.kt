@@ -52,7 +52,8 @@ class RectangleShapeUI(private val rectShape: RectangleShape) : AbstractShapeUI(
         }
     }
 
-    override fun hitTest(x: Int, y: Int) = Point(x, y) in rectShape.rectangle
+    override fun hitTest(x: Int, y: Int): Boolean =
+        Point(x, y) in rectShape.rectangle
 }
 
 fun Shape.asUI(): ShapeUI = when (this) {

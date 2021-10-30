@@ -10,7 +10,8 @@ import org.slf4j.LoggerFactory
 internal object ShapeParser {
     private val log = LoggerFactory.getLogger(ShapeParser::class.java)
 
-    fun parseShape(str: String) = parse(str) ?: run { log.warn("Unable to parse shape from $str"); null }
+    fun parseShape(str: String) =
+        parse(str) ?: run { log.warn("Unable to parse shape from $str"); null }
 
     private fun parse(str: String) = Regex("(\\w+):(.+)").find(str)?.let {
         val (type, params) = it.destructured
