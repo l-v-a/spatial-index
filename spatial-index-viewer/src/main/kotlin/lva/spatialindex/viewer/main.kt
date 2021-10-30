@@ -10,14 +10,12 @@ import lva.spatialindex.viewer.ui.ShapesViewController.Companion.showShapesRepos
  * @author vlitvinenko
  */
 suspend fun main(vararg args: String): Unit = coroutineScope {
-    if (args.isNotEmpty()) {
-        val shapesFile = args[0]
+    args.firstOrNull()?.let { shapesFile ->
         launch(Dispatchers.Main) {
             val repository = buildShapesRepository(shapesFile)
             showShapesRepository(repository)
         }
-    } else {
+    } ?: run {
         System.err.println("shapes file path is required")
     }
 }
-
