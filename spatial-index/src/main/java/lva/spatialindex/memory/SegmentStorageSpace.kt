@@ -38,7 +38,7 @@ class SegmentStorageSpace(segmentsRoot: String, private val segmentSize: Long) :
         }
 
         val offset = segment.allocate(sizeOf)
-        return position((segments.size - 1).toLong(), offset)
+        return position(segments.size - 1, offset)
     }
 
     override fun clear() {
@@ -54,8 +54,8 @@ class SegmentStorageSpace(segmentsRoot: String, private val segmentSize: Long) :
     companion object {
         private val log = LoggerFactory.getLogger(SegmentStorageSpace::class.java)
 
-        private fun position(segment: Long, offset: Long): Long =
-            segment shl 32 or (0xFFFF_FFFFL and offset)
+        private fun position(segment: Int, offset: Long): Long =
+            segment.toLong() shl 32 or (0xFFFF_FFFFL and offset)
 
         private fun segnum(pos: Long): Int =
             (pos ushr 32).toInt()
