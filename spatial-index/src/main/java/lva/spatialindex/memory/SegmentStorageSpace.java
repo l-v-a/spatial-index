@@ -13,7 +13,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 /**
  * @author vlitvinenko
  */
-public class SegmentStorageSpace implements StorageSpace  {
+public class SegmentStorageSpace implements StorageSpace {
     private final Path segmentsRoot;
     private final long segmentSize;
     private final List<Segment> segments = new ArrayList<>();

@@ -1,97 +1,70 @@
-package lva.spatialindex.memory;
+package lva.spatialindex.memory
 
-import lva.spatialindex.storage.StorageSpace;
-import lva.spatialindex.utils.Exceptions;
-
-import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileChannel.MapMode;
-
-import static com.google.common.base.Preconditions.checkArgument;
+import lva.spatialindex.storage.StorageSpace
+import java.io.RandomAccessFile
+import java.nio.ByteBuffer
+import java.nio.channels.FileChannel.MapMode
 
 /**
  * @author vlitvinenko
  */
-class Segment implements StorageSpace  {
-    static int PAGE_SIZE = 4096;
+internal class Segment(val filePath: String,  capacity: Long) : StorageSpace {
+    private val dataTLS: ThreadLocal<ByteBuffer>
+    private var _size = 0L
+    private var _capacity = capacity
 
-    private long size;
-    private final long capacity;
-    private final String filePath;
-
-    private final ThreadLocal<ByteBuffer> dataTLS;
-
-    public Segment(String filePath, long capacity) {
-        this.filePath = filePath;
-        this.capacity = roundToPage(capacity);
-
-        ByteBuffer data = mapBackingFile(this.filePath, this.capacity);
-        this.dataTLS = ThreadLocal.withInitial(data::duplicate);
+    init {
+        _capacity = roundToPage(_capacity)
+        val data = mapBackingFile(filePath, this.capacity)
+        dataTLS = ThreadLocal.withInitial { data.duplicate() }
     }
 
-    @Override
-    public byte[] readBytes(long pos, int size) {
-        byte [] data = new byte[size];
-        readBytes(pos, data);
-        return data;
-    }
+    override val size: Long
+        get() = _size
 
-    @Override
-    public void readBytes(long pos, byte[] buff) {
+    override val capacity: Long
+        get() = _capacity
+
+    override fun readBytes(pos: Long, size: Int): ByteArray =
+        ByteArray(size).also { readBytes(pos, it) }
+
+    override fun readBytes(pos: Long, buff: ByteArray) {
         dataTLS.get()
-                .position((int) pos)
-                .get(buff);
+            .position(pos.toInt()).get(buff)
     }
 
-    @Override
-    public void writeBytes(long pos, byte[] buff) {
+    override fun writeBytes(pos: Long, buff: ByteArray) {
         dataTLS.get()
-                .position((int) pos)
-                .put(buff);
+            .position(pos.toInt()).put(buff)
     }
 
-    @Override
-    public long allocate(long sizeOf) {
-        checkArgument(size + sizeOf <= capacity, String.format("Out of segment space. " +
-                        "capacity: %d, size: %d, sizeOf: %d", capacity, size, sizeOf));
+    override fun allocate(sizeOf: Long): Long {
+        check(size + sizeOf <= capacity) {
+            "Out of segment space. capacity: $capacity, size: $size, sizeOf: $sizeOf"
+        }
 
-        long offset = size;
-        size += sizeOf;
-        return offset;
+        val offset = _size
+        _size += sizeOf
+        return offset
     }
 
-    @Override
-    public long getSize() {
-        return size;
+    override fun clear() {
+        _size = 0
     }
 
-    @Override
-    public long getCapacity() {
-        return capacity;
-    }
+    companion object {
+        private const val PAGE_SIZE = 4096
 
-    String getFilePath() {
-        return filePath;
-    }
-
-    @Override
-    public void clear() {
-        size = 0;
-    }
-
-    private static ByteBuffer mapBackingFile(String filePath, long capacity) {
-        return Exceptions.toRuntime(() -> {
-            try (RandomAccessFile backingFile = new RandomAccessFile(filePath, "rw")) {
-                backingFile.setLength(capacity);
-                try (FileChannel channel = backingFile.getChannel()) {
-                    return channel.map(MapMode.READ_WRITE, 0L, capacity);
+        private fun mapBackingFile(filePath: String, capacity: Long): ByteBuffer =
+            RandomAccessFile(filePath, "rw").use { backingFile ->
+                backingFile.setLength(capacity)
+                backingFile.channel.use {
+                    it.map(MapMode.READ_WRITE, 0L, capacity)
                 }
             }
-        });
-    }
 
-    private static long roundToPage(long i) {
-        return (i + (PAGE_SIZE - 1)) & -PAGE_SIZE;
+        private fun roundToPage(i: Long): Long =
+            i + (PAGE_SIZE - 1) and (-PAGE_SIZE).toLong()
+
     }
 }

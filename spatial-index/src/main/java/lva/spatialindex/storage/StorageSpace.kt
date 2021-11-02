@@ -1,14 +1,14 @@
-package lva.spatialindex.storage;
+package lva.spatialindex.storage
 
 /**
  * @author vlitvinenko
  */
-public interface StorageSpace {
-    byte[] readBytes(long pos, int size);
-    void readBytes(long pos, byte[] buff);
-    void writeBytes(long pos, byte[] data);
-    long allocate(long sizeOf);
-    long getSize();
-    long getCapacity();
-    void clear();
+interface StorageSpace {
+    val size: Long
+    val capacity: Long
+    fun readBytes(pos: Long, size: Int): ByteArray
+    fun readBytes(pos: Long, buff: ByteArray)
+    fun writeBytes(pos: Long, data: ByteArray)
+    fun allocate(sizeOf: Long): Long
+    fun clear()
 }

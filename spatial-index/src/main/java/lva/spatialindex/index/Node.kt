@@ -29,25 +29,25 @@ internal class Node(private val storage: Storage<Node>, var offset: Long) {
         return mbr
     }
 
-    fun resetMbr() = apply {
+    fun resetMbr(): Node = apply {
         mbr = NULL_RECTANGLE
     }
 
     fun getEntries(): List<Entry> = entries
 
-    fun addNode(node: Node) =
+    fun addNode(node: Node): Node =
         addEntry(Entry(storage, node.getMbr(), node.offset))
 
-    fun addEntry(entry: Entry) =
+    fun addEntry(entry: Entry): Node =
         putEntry(entry).save()
 
-    fun setEntries(newEntries: List<Entry>) = apply {
+    fun setEntries(newEntries: List<Entry>): Node = apply {
         entries.clear()
         newEntries.forEach { putEntry(it) }
         save()
     }
 
-    private fun putEntry(entry: Entry) = apply {
+    private fun putEntry(entry: Entry): Node = apply {
         check(!isFull) { "Entries overflow" }
         entries.add(entry)
         resetMbr()
@@ -57,11 +57,11 @@ internal class Node(private val storage: Storage<Node>, var offset: Long) {
         }
     }
 
-    fun save() = apply {
+    fun save(): Node = apply {
         storage.write(offset, this)
     }
 
-    fun reset() {
+    fun reset(): Node = apply {
         parentOffset = -1
         resetMbr()
         entries.clear()
