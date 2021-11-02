@@ -42,7 +42,7 @@ object ShapesRepositoryBuilder {
             ShapeRepository(shapeStorage, indexes)
         } catch (e: Exception) {
             log.error("Unable to create repository for $shapesFile", e)
-            shapeStorage.close()
+            shapeStorage.clear()
             throw e
         }
     }
@@ -120,8 +120,7 @@ object ShapesRepositoryBuilder {
             indexTree
         } catch (e: Exception) {
             log.error("task $taskNumber closed by exception", e)
-            indexTree.close()
-            Files.deleteIfExists(storageFile)
+            indexTree.clear()
             throw e;
         }
     }

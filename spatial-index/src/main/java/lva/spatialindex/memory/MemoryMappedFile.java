@@ -16,7 +16,7 @@ import static lva.spatialindex.memory.unsafe.Native.unmap;
 /**
  * @author vlitvinenko
  */
-public class MemoryMappedFile implements StorageSpace {
+public class MemoryMappedFile implements StorageSpace, AutoCloseable {
     static int PAGE_SIZE = 4096;
 
     private long baseAddress;
@@ -67,6 +67,11 @@ public class MemoryMappedFile implements StorageSpace {
     @Override
     public long getCapacity() {
         return capacity;
+    }
+
+    @Override
+    public void clear() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

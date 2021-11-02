@@ -7,14 +7,13 @@ import kotlinx.coroutines.coroutineScope
 import lva.spatialindex.index.Index
 import lva.spatialindex.storage.Storage
 import lva.spatialindex.viewer.storage.Shape
-import lva.spatialindex.viewer.utils.close
 import java.awt.Rectangle
 
 
 /**
  * @author vlitvinenko
  */
-class ShapeRepository(private val shapeStorage: Storage<Shape>, private val indexes: Collection<Index>) : AutoCloseable {
+class ShapeRepository(private val shapeStorage: Storage<Shape>, private val indexes: Collection<Index>) {
     suspend fun search(area: Rectangle) : Collection<Shape> = coroutineScope {
         val searchResults = indexes.map { index ->
             async(Dispatchers.IO) {
@@ -28,8 +27,5 @@ class ShapeRepository(private val shapeStorage: Storage<Shape>, private val inde
 
     fun update(shape: Shape) =
         shapeStorage.write(shape.offset, shape)
-
-    override fun close() =
-        close(indexes + shapeStorage)
 }
 

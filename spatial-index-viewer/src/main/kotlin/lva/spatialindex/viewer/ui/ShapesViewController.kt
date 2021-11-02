@@ -18,7 +18,6 @@ class ShapesViewController private constructor(private val shapeRepository: Shap
 
     init {
         view.onClicked(this::onShapesViewClicked)
-        view.onClose(this::onClose)
     }
 
     private suspend fun run() = coroutineScope {
@@ -57,9 +56,6 @@ class ShapesViewController private constructor(private val shapeRepository: Shap
         view.setShapes(visibleShapes)
         view.update()
     }
-
-    private fun onClose() =
-        shapeRepository.close()
 
     companion object {
         suspend fun showShapesRepository(shapeRepository: ShapeRepository) =

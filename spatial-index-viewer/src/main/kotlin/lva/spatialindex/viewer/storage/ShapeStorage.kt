@@ -3,7 +3,7 @@ package lva.spatialindex.viewer.storage
 import com.esotericsoftware.kryo.Kryo
 import com.esotericsoftware.kryo.io.Input
 import com.esotericsoftware.kryo.io.Output
-import lva.spatialindex.memory.MemoryMappedFile
+import lva.spatialindex.memory.SegmentStorageSpace
 import lva.spatialindex.storage.AbstractStorage
 import java.awt.Rectangle
 import java.io.InputStream
@@ -16,7 +16,7 @@ import kotlin.concurrent.write
  * @author vlitvinenko
  */
 class ShapeStorage(fileName: String, initialSize: Long) :
-    AbstractStorage<Shape>(MemoryMappedFile(fileName, initialSize), RECORD_SIZE) {
+    AbstractStorage<Shape>(SegmentStorageSpace(fileName, initialSize), RECORD_SIZE) {
     private val lock = ReentrantReadWriteLock()
 
     private val serializer = object : AbstractSerializer<Shape>() {

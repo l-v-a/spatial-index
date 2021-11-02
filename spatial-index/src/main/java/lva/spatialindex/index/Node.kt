@@ -61,6 +61,12 @@ internal class Node(private val storage: Storage<Node>, var offset: Long) {
         storage.write(offset, this)
     }
 
+    fun reset() {
+        parentOffset = -1
+        resetMbr()
+        entries.clear()
+    }
+
     internal class Ser(private val storage: Storage<Node>) : Serializer<Node>() {
         override fun write(kryo: Kryo, output: Output, node: Node) {
             output.writeLong(node.parentOffset)

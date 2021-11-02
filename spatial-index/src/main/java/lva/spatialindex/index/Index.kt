@@ -5,7 +5,6 @@ import java.awt.Rectangle
 /**
  * @author vlitvinenko
  */
-interface Index : AutoCloseable {
+interface Index {
     fun search(area: Rectangle): Collection<Long>
-    override fun close()
 }

@@ -185,10 +185,10 @@ public class NodeStorageTest {
     }
 
     @Test
-    public void should_close_storage_space_when_closing() {
+    public void should_clear_storage_space_when_clearing() {
         NodeStorage nodeStorage = new NodeStorage(storageSpace);
-        nodeStorage.close();
-        verify(storageSpace, times(1)).close();
+        nodeStorage.clear();
+        verify(storageSpace, times(1)).clear();
     }
 
 

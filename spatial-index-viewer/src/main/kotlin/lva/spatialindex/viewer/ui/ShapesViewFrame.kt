@@ -12,8 +12,6 @@ import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import java.awt.event.WindowAdapter
-import java.awt.event.WindowEvent
 import javax.swing.JComponent
 import javax.swing.JFrame
 import javax.swing.JPanel
@@ -59,12 +57,6 @@ class ShapesViewFrame : JFrame() {
             }
         })
     }
-
-    fun onClose(block: () -> Unit) = addWindowListener(object : WindowAdapter() {
-        override fun windowClosing(e: WindowEvent?) {
-            block()
-        }
-    })
 
     fun onClicked(block: (e: MouseEvent) -> Unit) = canvas.addMouseListener(object : MouseAdapter() {
         override fun mouseClicked(e: MouseEvent) {

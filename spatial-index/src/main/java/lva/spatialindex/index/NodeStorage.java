@@ -6,7 +6,7 @@ import com.esotericsoftware.kryo.io.Output;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import lva.spatialindex.memory.MemoryMappedFile;
+import lva.spatialindex.memory.SegmentStorageSpace;
 import lva.spatialindex.storage.AbstractStorage;
 import lva.spatialindex.storage.Storage;
 import lva.spatialindex.storage.StorageSpace;
@@ -50,7 +50,7 @@ class NodeStorage extends AbstractStorage<Node> {
     private final LoadingCache<Long, Node> cache;
 
     NodeStorage(String fileName, long initialSize) {
-        this(new MemoryMappedFile(fileName, initialSize), RECORD_SIZE);
+        this(new SegmentStorageSpace(fileName, initialSize), RECORD_SIZE);
     }
 
     NodeStorage(StorageSpace storageSpace) {
