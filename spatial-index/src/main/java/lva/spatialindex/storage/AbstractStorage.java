@@ -1,6 +1,6 @@
 package lva.spatialindex.storage;
 
-import lva.spatialindex.utils.Exceptions;
+import lombok.SneakyThrows;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -21,26 +21,24 @@ public abstract class AbstractStorage<T> implements Storage<T> {
 
     abstract protected static class AbstractSerializer<T> implements Serializer<T> {
         @Override
+        @SneakyThrows
         public byte[] serialize(T t) {
-            return Exceptions.toRuntime(() -> {
-                try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-                    write(os, t);
-                    return os.toByteArray();
-                }
-            });
+            try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                write(os, t);
+                return os.toByteArray();
+            }
         }
 
         @Override
+        @SneakyThrows
         public T deserialize(byte[] bytes) {
-            return Exceptions.toRuntime(() -> {
-                try (ByteArrayInputStream is = new ByteArrayInputStream(bytes)) {
-                    return read(is);
-                }
-            });
+            try (ByteArrayInputStream is = new ByteArrayInputStream(bytes)) {
+                return read(is);
+            }
         }
 
-        abstract public void write(OutputStream os, T t) throws Exception;
-        abstract public T read(InputStream is) throws Exception;
+        abstract public void write(OutputStream os, T t);
+        abstract public T read(InputStream is);
     }
 
 
