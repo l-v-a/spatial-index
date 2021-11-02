@@ -69,6 +69,8 @@ public abstract class AbstractStorage<T> implements Storage<T> {
     public void write(long offset, T t) {
         byte[] buff = getSerializer().serialize(t);
         checkArgument(buff.length <= recordSize, "record max size exceeds");
+        checkArgument(offset >= 0, "out of bounds");
+
         storageSpace.writeBytes(offset, buff);
     }
 

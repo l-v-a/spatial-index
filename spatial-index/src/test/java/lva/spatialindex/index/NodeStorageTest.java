@@ -110,27 +110,13 @@ public class NodeStorageTest {
 
     @Test
     public void should_write_to_storage() {
-        when(storageSpace.getSize())
-            .thenReturn((long)NodeStorage.RECORD_SIZE);
-
         storage.write(0, node);
-
         verify(storageSpace).writeBytes(anyLong(), eq(serializedNode));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void should_throw_for_negative_offset_when_writing() {
         storage.write(-1, node);
-        fail();
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void should_throw_if_space_size_exceeds_when_writing() {
-            when(storageSpace.getSize())
-            .thenReturn((long)serializedNode.length - 1);
-
-        storage.write(0, node);
-
         fail();
     }
 
@@ -148,8 +134,6 @@ public class NodeStorageTest {
         long offset = node.getOffset();
         NodeStorage nodeStorage = new NodeStorage(storageSpace);
 
-        when(storageSpace.getSize())
-            .thenReturn((long) NodeStorage.RECORD_SIZE + offset);
         when(storageSpace.readBytes(eq(offset), eq(NodeStorage.RECORD_SIZE)))
             .thenReturn(serializedNode);
 
@@ -165,8 +149,6 @@ public class NodeStorageTest {
     @Test(expected = UncheckedExecutionException.class)
     public void should_throw_if_out_of_bounds_when_reading() {
         NodeStorage nodeStorage = new NodeStorage(storageSpace);
-        when(storageSpace.getSize())
-            .thenReturn((long) NodeStorage.RECORD_SIZE - 1);
 
         nodeStorage.read(0L);
 
