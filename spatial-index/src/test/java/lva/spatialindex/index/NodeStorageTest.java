@@ -108,7 +108,6 @@ public class NodeStorageTest {
         fail();
     }
 
-
     @Test
     public void should_write_to_storage() {
         storage.write(0, node);
