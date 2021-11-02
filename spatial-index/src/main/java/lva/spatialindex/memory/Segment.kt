@@ -9,21 +9,16 @@ import java.nio.channels.FileChannel.MapMode
  * @author vlitvinenko
  */
 internal class Segment(val filePath: String,  capacity: Long) : StorageSpace {
+    override val capacity: Long = roundToPage(capacity)
+    override var size = 0L
+        private set
+
     private val dataTLS: ThreadLocal<ByteBuffer>
-    private var _size = 0L
-    private var _capacity = capacity
 
     init {
-        _capacity = roundToPage(_capacity)
         val data = mapBackingFile(filePath, this.capacity)
         dataTLS = ThreadLocal.withInitial { data.duplicate() }
     }
-
-    override val size: Long
-        get() = _size
-
-    override val capacity: Long
-        get() = _capacity
 
     override fun readBytes(pos: Long, size: Int): ByteArray =
         ByteArray(size).also { readBytes(pos, it) }
@@ -33,9 +28,9 @@ internal class Segment(val filePath: String,  capacity: Long) : StorageSpace {
             .position(pos.toInt()).get(buff)
     }
 
-    override fun writeBytes(pos: Long, buff: ByteArray) {
+    override fun writeBytes(pos: Long, data: ByteArray) {
         dataTLS.get()
-            .position(pos.toInt()).put(buff)
+            .position(pos.toInt()).put(data)
     }
 
     override fun allocate(sizeOf: Long): Long {
@@ -43,13 +38,13 @@ internal class Segment(val filePath: String,  capacity: Long) : StorageSpace {
             "Out of segment space. capacity: $capacity, size: $size, sizeOf: $sizeOf"
         }
 
-        val offset = _size
-        _size += sizeOf
+        val offset = size
+        size += sizeOf
         return offset
     }
 
     override fun clear() {
-        _size = 0
+        size = 0
     }
 
     companion object {

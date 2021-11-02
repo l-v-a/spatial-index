@@ -1,115 +1,82 @@
-package lva.spatialindex.memory;
+package lva.spatialindex.memory
 
-import lva.spatialindex.storage.StorageSpace;
-import lva.spatialindex.utils.Exceptions;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.google.common.base.Preconditions.checkArgument;
+import lva.spatialindex.storage.StorageSpace
+import org.slf4j.LoggerFactory
+import java.nio.file.Files
+import java.nio.file.Path
 
 /**
  * @author vlitvinenko
  */
-public class SegmentStorageSpace implements StorageSpace {
-    private final Path segmentsRoot;
-    private final long segmentSize;
-    private final List<Segment> segments = new ArrayList<>();
+class SegmentStorageSpace(segmentsRoot: String, private val segmentSize: Long) : StorageSpace {
+    private val segmentsRoot = Path.of(segmentsRoot)
+    private val segments = mutableListOf<Segment>()
 
-    public SegmentStorageSpace(String segmentsRoot, long segmentSize) {
-        this.segmentsRoot = Path.of(segmentsRoot);
-        this.segmentSize = segmentSize;
-
-        Exceptions.toRuntime(() ->
-            Files.createDirectories(this.segmentsRoot)
-        );
+    init {
+        Files.createDirectories(this.segmentsRoot)
     }
 
-    @Override
-    public byte[] readBytes(long pos, int size) {
-        return segments.get(toSegment(pos)).readBytes(toOffset(pos), size);
-    }
+    override fun readBytes(pos: Long, size: Int): ByteArray =
+        segments[segnum(pos)].readBytes(offset(pos), size)
 
-    @Override
-    public void readBytes(long pos, byte[] buff) {
-        segments.get(toSegment(pos)).readBytes(toOffset(pos), buff);
-    }
+    override fun readBytes(pos: Long, buff: ByteArray) =
+        segments[segnum(pos)].readBytes(offset(pos), buff)
 
-    @Override
-    public void writeBytes(long pos, byte[] data) {
-        segments.get(toSegment(pos)).writeBytes(toOffset(pos), data);
-    }
+    override fun writeBytes(pos: Long, data: ByteArray) =
+        segments[segnum(pos)].writeBytes(offset(pos), data)
 
-    @Override
-    public long allocate(long sizeOf) {
-        checkArgument(sizeOf <= segmentSize, String.format("Unable to allocate more than segment size. " +
-                "Segment size: %d, sizeOf: %d", segmentSize, sizeOf));
-
-        Segment segment = null;
-        if (!segments.isEmpty()) {
-            Segment current = segments.get(segments.size() - 1);
-            if (current.getSize() + sizeOf <= current.getCapacity()) {
-                segment = current;
-            }
+    override fun allocate(sizeOf: Long): Long {
+        check(sizeOf <= segmentSize) {
+            "Unable to allocate more than segment size. Segment size: $segmentSize, sizeOf: $sizeOf"
         }
 
-        if (segment == null) {
-            Path segmentFile = segmentsRoot.resolve(String.format("segment_%d.bin", segments.size()));
-            segment = new Segment(segmentFile.toString(), segmentSize);
-            segments.add(segment);
+        val segment = segments.lastOrNull()?.takeIf {
+            it.size + sizeOf <= it.capacity
+        } ?: run {
+            val segmentFileName = segmentsRoot.resolve("segment_${segments.size}.bin")
+            Segment(segmentFileName.toString(), segmentSize).also { segments += it }
         }
 
-
-        long offset = segment.allocate(sizeOf);
-        return toPosition(segments.size() - 1, offset);
+        val offset = segment.allocate(sizeOf)
+        return position((segments.size - 1).toLong(), offset)
     }
 
-    @Override
-    public long getSize() {
-        long size = 0;
-        if (!segments.isEmpty()) {
-            long fullCapacity = getCapacity();
-            Segment current = segments.get(segments.size() - 1);
-            size = fullCapacity - current.getCapacity() + current.getSize();
+    override val size: Long
+        get() = segments.lastOrNull()?.let { current ->
+            this.capacity - current.capacity + current.size
+        } ?: 0
+
+    override val capacity: Long
+        get() = segments.sumOf { it.capacity }
+
+    override fun clear() {
+        segments.forEach { segment ->
+            segment.clear()
+            Path.of(segment.filePath).safeDelete()
         }
-        return size;
+
+        segments.clear()
+        segmentsRoot.safeDelete()
     }
 
-    @Override
-    public long getCapacity() {
-        return segments.stream()
-                .mapToLong(Segment::getCapacity).sum();
-    }
+    companion object {
+        private val log = LoggerFactory.getLogger(SegmentStorageSpace::class.java)
 
-    @Override
-    public void clear() {
-        segments.forEach(segment -> {
+        private fun position(segment: Long, offset: Long): Long =
+            segment shl 32 or (0xFFFF_FFFFL and offset)
+
+        private fun segnum(pos: Long): Int =
+            (pos ushr 32).toInt()
+
+        private fun offset(pos: Long): Long =
+            0xFFFF_FFFFL and pos
+
+        private fun Path.safeDelete() {
             try {
-                segment.clear();
-                Files.deleteIfExists(Path.of(segment.getFilePath()));
-            } catch (Exception e) {
-                e.printStackTrace(); // TODO: add logging
+                Files.deleteIfExists(this)
+            } catch (e: Exception) {
+                log.warn("Unable to delete file $this", e)
             }
-        });
-
-        segments.clear();
-
-        Exceptions.toRuntime(() ->
-            Files.deleteIfExists(segmentsRoot)
-        );
-    }
-
-    private static long toPosition(long segment, long offset) {
-        return (segment << 32) | (0xFFFF_FFFFL & offset);
-    }
-
-    private static int toSegment(long pos) {
-        return (int) (pos >>> 32);
-    }
-
-    private static long toOffset(long pos) {
-        return 0xFFFF_FFFFL & pos;
+        }
     }
 }
