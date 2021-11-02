@@ -10,6 +10,7 @@ import lva.spatialindex.memory.SegmentStorageSpace;
 import lva.spatialindex.storage.AbstractStorage;
 import lva.spatialindex.storage.Storage;
 import lva.spatialindex.storage.StorageSpace;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.io.InputStream;
@@ -29,15 +30,15 @@ class NodeStorage extends AbstractStorage<Node> {
         }
 
         @Override
-        public void write(OutputStream out, Node node) {
-            try (Output output = new Output(out)) {
+        public void write(OutputStream outputStream, @NotNull Node node) {
+            try (Output output = new Output(outputStream)) {
                 kryo.writeObject(output, node);
                 output.flush();
             }
         }
 
         @Override
-        public Node read(InputStream in) {
+        public @NotNull Node read(InputStream in) {
             try (Input input = new Input(in)) {
                 return kryo.readObject(input, Node.class);
             }
@@ -73,12 +74,12 @@ class NodeStorage extends AbstractStorage<Node> {
     }
 
     @Override
-    protected Serializer<Node> getSerializer() {
+    protected @NotNull Serializer<Node> getSerializer() {
         return serializer;
     }
 
     @Override
-    public long add(Node node) {
+    public long add(@NotNull Node node) {
         long offset = super.add(node);
         node.setOffset(offset);
         cache.put(offset, node);
@@ -86,12 +87,12 @@ class NodeStorage extends AbstractStorage<Node> {
     }
 
     @Override
-    public void write(long offset, Node node) {
+    public void write(long offset, @NotNull Node node) {
         super.write(offset, node);
     }
 
     @Override
-    public Node read(long offset) {
+    public @NotNull Node read(long offset) {
         return cache.getUnchecked(offset);
     }
 

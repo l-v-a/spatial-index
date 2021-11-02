@@ -2,6 +2,7 @@ package lva.spatialindex.index;
 
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import lva.spatialindex.storage.StorageSpace;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,7 +49,7 @@ public class NodeStorageTest {
 
         storage = new NodeStorage(storageSpace) {
             @Override
-            public NodeSerializer getSerializer() {
+            public @NotNull NodeSerializer getSerializer() {
                 return nodeSerializer;
             }
         };
@@ -98,7 +99,7 @@ public class NodeStorageTest {
         assertEquals(node.getOffset(), 123L);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = IllegalStateException.class)
     public void should_throw_if_allocation_size_exceeds_record_size() {
         Node bigNode = mock(Node.class);
         when(nodeSerializer.serialize(bigNode)).thenReturn(new byte[NodeStorage.RECORD_SIZE + 1]);
@@ -114,13 +115,13 @@ public class NodeStorageTest {
         verify(storageSpace).writeBytes(anyLong(), eq(serializedNode));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = IllegalStateException.class)
     public void should_throw_for_negative_offset_when_writing() {
         storage.write(-1, node);
         fail();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = IllegalStateException.class)
     public void should_throw_if_node_size_exceeds_record_size_when_writing() {
         Node bigNode = mock(Node.class);
         when(nodeSerializer.serialize(bigNode)).thenReturn(new byte[NodeStorage.RECORD_SIZE + 1]);

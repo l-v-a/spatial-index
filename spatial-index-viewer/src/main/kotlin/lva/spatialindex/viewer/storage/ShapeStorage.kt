@@ -19,7 +19,7 @@ class ShapeStorage(fileName: String, initialSize: Long) :
     AbstractStorage<Shape>(SegmentStorageSpace(fileName, initialSize), RECORD_SIZE) {
     private val lock = ReentrantReadWriteLock()
 
-    private val serializer = object : AbstractSerializer<Shape>() {
+    override val serializer: Serializer<Shape> = object : AbstractSerializer<Shape>() {
         private val kryo = Kryo()
 
         init {
@@ -30,17 +30,15 @@ class ShapeStorage(fileName: String, initialSize: Long) :
             kryo.register(Rectangle::class.java)
         }
 
-        override fun write(os: OutputStream, shape: Shape) = Output(os).use {
+        override fun write(outputStream: OutputStream, shape: Shape) = Output(outputStream).use {
             kryo.writeClassAndObject(it, shape)
             it.flush()
         }
 
-        override fun read(input: InputStream) = Input(input).use {
+        override fun read(inputStream: InputStream) = Input(inputStream).use {
             kryo.readClassAndObject(it) as Shape
         }
     }
-
-    override fun getSerializer(): Serializer<Shape> = serializer
 
     override fun add(shape: Shape): Long = lock.write {
         super.add(shape).also { shape.offset = it }

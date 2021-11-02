@@ -1,90 +1,60 @@
-package lva.spatialindex.storage;
+package lva.spatialindex.storage
 
-import lombok.SneakyThrows;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import static com.google.common.base.Preconditions.checkArgument;
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
+import java.io.OutputStream
 
 /**
  * @author vlitvinenko
  */
-public abstract class AbstractStorage<T> implements Storage<T> {
-
-    protected interface Serializer<T> {
-        byte[] serialize(T t);
-        T deserialize(byte[] bytes);
+abstract class AbstractStorage<T : Any>(private val storageSpace: StorageSpace, private val recordSize: Int) : Storage<T> {
+    protected interface Serializer<T : Any> {
+        fun serialize(t: T): ByteArray
+        fun deserialize(bytes: ByteArray): T
     }
 
-    abstract protected static class AbstractSerializer<T> implements Serializer<T> {
-        @Override
-        @SneakyThrows
-        public byte[] serialize(T t) {
-            try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-                write(os, t);
-                return os.toByteArray();
+    protected abstract class AbstractSerializer<T : Any> : Serializer<T> {
+        override fun serialize(t: T): ByteArray =
+            ByteArrayOutputStream().use {
+                write(it, t)
+                it.toByteArray()
             }
-        }
 
-        @Override
-        @SneakyThrows
-        public T deserialize(byte[] bytes) {
-            try (ByteArrayInputStream is = new ByteArrayInputStream(bytes)) {
-                return read(is);
-            }
-        }
+        override fun deserialize(bytes: ByteArray): T =
+            ByteArrayInputStream(bytes).use { read(it) }
 
-        abstract public void write(OutputStream os, T t);
-        abstract public T read(InputStream is);
+        abstract fun write(outputStream: OutputStream, t: T)
+        abstract fun read(inputStream: InputStream): T
     }
 
+    protected abstract val serializer: Serializer<T>
 
-    private final int recordSize;
-    private final StorageSpace storageSpace;
+    override fun add(t: T): Long {
+        val buff = serializer.serialize(t)
+        check(buff.size <= recordSize) { "record max size exceeds" }
 
-    public AbstractStorage(StorageSpace storageSpace, int recordSize) {
-        this.storageSpace = storageSpace;
-        this.recordSize = recordSize;
+        val offset = storageSpace.allocate(roundToRecordSize(buff.size).toLong())
+        storageSpace.writeBytes(offset, buff)
+        return offset
     }
 
-    protected abstract Serializer<T> getSerializer();
+    override fun write(offset: Long, t: T) {
+        val buff = serializer.serialize(t)
+        check(buff.size <= recordSize)  { "record max size exceeds" }
+        check(offset >= 0) { "out of bounds" }
 
-    @Override
-    public long add(T t) {
-        byte[] buff = getSerializer().serialize(t);
-        checkArgument(buff.length <= recordSize, "record max size exceeds");
-
-        long offset = storageSpace.allocate(roundToRecordSize(buff.length));
-        storageSpace.writeBytes(offset, buff);
-        return offset;
-
+        storageSpace.writeBytes(offset, buff)
     }
 
-    @Override
-    public void write(long offset, T t) {
-        byte[] buff = getSerializer().serialize(t);
-        checkArgument(buff.length <= recordSize, "record max size exceeds");
-        checkArgument(offset >= 0, "out of bounds");
-
-        storageSpace.writeBytes(offset, buff);
+    override fun read(offset: Long): T {
+        val buff = storageSpace.readBytes(offset, recordSize)
+        return serializer.deserialize(buff)
     }
 
-    @Override
-    public T read(long offset) {
-        byte[] buff = storageSpace.readBytes(offset, recordSize);
-        return getSerializer().deserialize(buff);
-    }
+    override fun clear() =
+        storageSpace.clear()
 
-    @Override
-    public void clear() {
-        storageSpace.clear();
-    }
-
-    private long roundToRecordSize(long size) {
-        return (size + (recordSize - 1)) & -recordSize;
-    }
+    private fun roundToRecordSize(size: Int): Int =
+        size + (recordSize - 1) and -recordSize
 }
-

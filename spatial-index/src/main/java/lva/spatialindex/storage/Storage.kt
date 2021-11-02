@@ -1,11 +1,11 @@
-package lva.spatialindex.storage;
+package lva.spatialindex.storage
 
 /**
  * @author vlitvinenko
  */
-public interface Storage<T> {
-    long add(T t);
-    void write(long offset, T t);
-    T read(long offset);
-    void clear();
+interface Storage<T : Any> {
+    fun add(t: T): Long
+    fun write(offset: Long, t: T)
+    fun read(offset: Long): T
+    fun clear()
 }
