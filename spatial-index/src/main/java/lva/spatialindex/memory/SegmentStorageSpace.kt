@@ -41,14 +41,6 @@ class SegmentStorageSpace(segmentsRoot: String, private val segmentSize: Long) :
         return position((segments.size - 1).toLong(), offset)
     }
 
-    override val size: Long
-        get() = segments.lastOrNull()?.let { current ->
-            this.capacity - current.capacity + current.size
-        } ?: 0
-
-    override val capacity: Long
-        get() = segments.sumOf { it.capacity }
-
     override fun clear() {
         segments.forEach { segment ->
             segment.clear()

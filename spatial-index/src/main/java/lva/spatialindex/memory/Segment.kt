@@ -9,11 +9,10 @@ import java.nio.channels.FileChannel.MapMode
  * @author vlitvinenko
  */
 internal class Segment(val filePath: String,  capacity: Long) : StorageSpace {
-    override val capacity: Long = roundToPage(capacity)
-    override var size = 0L
-        private set
-
     private val dataTLS: ThreadLocal<ByteBuffer>
+    val capacity: Long = roundToPage(capacity)
+    var size = 0L
+        private set
 
     init {
         val data = mapBackingFile(filePath, this.capacity)
