@@ -1,104 +1,69 @@
-package lva.spatialindex.index;
+package lva.spatialindex.index
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import lva.spatialindex.memory.SegmentStorageSpace;
-import lva.spatialindex.storage.AbstractStorage;
-import lva.spatialindex.storage.Storage;
-import lva.spatialindex.storage.StorageSpace;
-import org.jetbrains.annotations.NotNull;
-
-import javax.annotation.Nonnull;
-import java.io.InputStream;
-import java.io.OutputStream;
+import com.esotericsoftware.kryo.Kryo
+import com.esotericsoftware.kryo.io.Input
+import com.esotericsoftware.kryo.io.Output
+import com.google.common.cache.CacheBuilder
+import com.google.common.cache.CacheLoader
+import lva.spatialindex.memory.SegmentStorageSpace
+import lva.spatialindex.storage.AbstractStorage
+import lva.spatialindex.storage.Storage
+import lva.spatialindex.storage.StorageSpace
+import java.io.InputStream
+import java.io.OutputStream
 
 /**
  * @author vlitvinenko
  */
-class NodeStorage extends AbstractStorage<Node> {
+internal open class NodeStorage constructor(storageSpace: StorageSpace, recordSize: Int) :
+    AbstractStorage<Node>(storageSpace, recordSize) {
 
-    static class NodeSerializer extends AbstractSerializer<Node> {
-        private final Kryo kryo = new Kryo();
+    constructor(fileName: String, initialSize: Long) :
+            this(SegmentStorageSpace(fileName, initialSize))
 
-        NodeSerializer(Storage<Node> storage) {
-            kryo.addDefaultSerializer(Node.class, new Node.Ser(storage));
-            kryo.addDefaultSerializer(Entry.class, new Entry.Ser(storage));
+    // TODO: remove it
+    internal constructor(storageSpace: StorageSpace) :
+            this(storageSpace, RECORD_SIZE)
+
+    class NodeSerializer(storage: Storage<Node>) : AbstractSerializer<Node>() {
+        private val kryo = Kryo()
+        init {
+            kryo.addDefaultSerializer(Node::class.java, Node.Ser(storage))
+            kryo.addDefaultSerializer(Entry::class.java, Entry.Ser(storage))
         }
 
-        @Override
-        public void write(OutputStream outputStream, @NotNull Node node) {
-            try (Output output = new Output(outputStream)) {
-                kryo.writeObject(output, node);
-                output.flush();
+        override fun write(outputStream: OutputStream, node: Node) =
+            Output(outputStream).use {
+                kryo.writeObject(it, node)
+                it.flush()
             }
+
+        override fun read(inputStream: InputStream): Node =
+            Input(inputStream).use { kryo.readObject(it, Node::class.java) }
+    }
+
+    override val serializer: Serializer<Node> = NodeSerializer(this)
+
+    private val cache = CacheBuilder.newBuilder()
+            .softValues()
+            .build(object : CacheLoader<Long, Node>() {
+                override fun load(offset: Long): Node =
+                    this@NodeStorage.load(offset)
+            })
+
+    override fun add(node: Node): Long =
+        super.add(node).also { offset ->
+            node.offset = offset
+            cache.put(offset, node)
         }
 
-        @Override
-        public @NotNull Node read(InputStream in) {
-            try (Input input = new Input(in)) {
-                return kryo.readObject(input, Node.class);
-            }
-        }
-    }
+    override fun read(offset: Long): Node =
+        cache.getUnchecked(offset)
 
-    static final int RECORD_SIZE = 4096 * 2;
+    private fun load(offset: Long): Node =
+        super.read(offset).also { it.offset = offset }
 
-    private final Serializer<Node> serializer;
-    private final LoadingCache<Long, Node> cache;
-
-    NodeStorage(String fileName, long initialSize) {
-        this(new SegmentStorageSpace(fileName, initialSize), RECORD_SIZE);
-    }
-
-    NodeStorage(StorageSpace storageSpace) {
-        this(storageSpace, RECORD_SIZE);
-    }
-
-    private NodeStorage(StorageSpace storageSpace, int recordSize) {
-        super(storageSpace, recordSize);
-        cache = CacheBuilder.newBuilder()
-                .softValues()
-//                .maximumSize(100)
-                //.expireAfterWrite(10, TimeUnit.MINUTES)
-                .build(new CacheLoader<Long, Node>() {
-                    @Override
-                    public Node load(@Nonnull Long offset) {
-                        return NodeStorage.this.load(offset);
-                    }
-                });
-        this.serializer = new NodeSerializer(this);
-    }
-
-    @Override
-    protected @NotNull Serializer<Node> getSerializer() {
-        return serializer;
-    }
-
-    @Override
-    public long add(@NotNull Node node) {
-        long offset = super.add(node);
-        node.setOffset(offset);
-        cache.put(offset, node);
-        return offset;
-    }
-
-    @Override
-    public void write(long offset, @NotNull Node node) {
-        super.write(offset, node);
-    }
-
-    @Override
-    public @NotNull Node read(long offset) {
-        return cache.getUnchecked(offset);
-    }
-
-    private Node load(long offset) {
-        Node node = super.read(offset);
-        node.setOffset(offset);
-        return node;
+    companion object {
+        const val RECORD_SIZE = 4096 * 2
     }
 }

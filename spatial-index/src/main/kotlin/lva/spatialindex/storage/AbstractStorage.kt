@@ -9,12 +9,12 @@ import java.io.OutputStream
  * @author vlitvinenko
  */
 abstract class AbstractStorage<T : Any>(private val storageSpace: StorageSpace, private val recordSize: Int) : Storage<T> {
-    protected interface Serializer<T : Any> {
+    interface Serializer<T : Any> {
         fun serialize(t: T): ByteArray
         fun deserialize(bytes: ByteArray): T
     }
 
-    protected abstract class AbstractSerializer<T : Any> : Serializer<T> {
+    abstract class AbstractSerializer<T : Any> : Serializer<T> {
         override fun serialize(t: T): ByteArray =
             ByteArrayOutputStream().use {
                 write(it, t)
@@ -28,7 +28,7 @@ abstract class AbstractStorage<T : Any>(private val storageSpace: StorageSpace, 
         abstract fun read(inputStream: InputStream): T
     }
 
-    protected abstract val serializer: Serializer<T>
+    abstract val serializer: Serializer<T>
 
     override fun add(t: T): Long {
         val buff = serializer.serialize(t)
