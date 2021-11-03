@@ -15,7 +15,7 @@ import java.io.OutputStream
 /**
  * @author vlitvinenko
  */
-internal open class NodeStorage constructor(storageSpace: StorageSpace, recordSize: Int) :
+internal open class NodeStorage(storageSpace: StorageSpace, recordSize: Int) :
     AbstractStorage<Node>(storageSpace, recordSize) {
 
     constructor(fileName: String, initialSize: Long) :
