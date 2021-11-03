@@ -1,7 +1,7 @@
 package lva.spatialindex.index
 
 import com.google.common.util.concurrent.UncheckedExecutionException
-import lva.spatialindex.index.NodeStorage.NodeSerializer
+import lva.spatialindex.storage.AbstractStorage.Serializer
 import lva.spatialindex.storage.StorageSpace
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
@@ -9,10 +9,12 @@ import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.reset
+import org.mockito.kotlin.spy
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -34,22 +36,23 @@ class NodeStorageTest {
     private lateinit var serializedNode: ByteArray
 
     private val storageSpace: StorageSpace = mock()
-    private val nodeSerializer: NodeSerializer = mock()
+    private val nodeSerializer: Serializer<Node> = mock()
 
     @BeforeTest
     fun setUp() {
         reset(storageSpace)
         reset(nodeSerializer)
 
-        storage = object : NodeStorage(storageSpace) {
-            override val serializer: NodeSerializer
-                get() = nodeSerializer
-        }
+        storage = NodeStorage(storageSpace)
 
         node = Node(mock<NodeStorage>(), -1).also {
             it.offset = 123
             it.addEntry(Entry(mock<NodeStorage>(), Rectangle(1, 2, 3, 4), -1))
-            serializedNode = NodeSerializer(storage).serialize(it)
+            serializedNode = storage.serializer.serialize(it)
+        }
+
+        storage = spy(storage) {
+            on { serializer }.doReturn(nodeSerializer)
         }
 
         whenever(nodeSerializer.serialize(any())).thenReturn(serializedNode)

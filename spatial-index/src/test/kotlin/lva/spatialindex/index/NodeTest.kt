@@ -1,7 +1,6 @@
 package lva.spatialindex.index
 
 import lva.spatialindex.index.Node.Companion.newNode
-import lva.spatialindex.index.NodeStorage.NodeSerializer
 import lva.spatialindex.storage.Storage
 import org.junit.runner.RunWith
 import org.mockito.junit.MockitoJUnitRunner
@@ -27,7 +26,7 @@ class NodeTest {
 
     @Test
     fun should_serialize_deserialize() {
-        val serializer = NodeSerializer(storage)
+        val serializer = NodeStorage(mock()).serializer
         val node = Node(storage, -1)
             .addEntry(Entry(storage, Rectangle(1, 2, 3, 4), -1))
             .addEntry(Entry(storage, Rectangle(2, 3, 4, 5), -1))

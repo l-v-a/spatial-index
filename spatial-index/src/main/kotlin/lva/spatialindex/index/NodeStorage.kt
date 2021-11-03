@@ -7,7 +7,6 @@ import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import lva.spatialindex.memory.SegmentStorageSpace
 import lva.spatialindex.storage.AbstractStorage
-import lva.spatialindex.storage.Storage
 import lva.spatialindex.storage.StorageSpace
 import java.io.InputStream
 import java.io.OutputStream
@@ -15,22 +14,36 @@ import java.io.OutputStream
 /**
  * @author vlitvinenko
  */
-internal open class NodeStorage(storageSpace: StorageSpace, recordSize: Int) :
+internal class NodeStorage(storageSpace: StorageSpace, recordSize: Int = RECORD_SIZE) :
     AbstractStorage<Node>(storageSpace, recordSize) {
 
     constructor(fileName: String, initialSize: Int) :
             this(SegmentStorageSpace(fileName, initialSize))
+//
+//    class NodeSerializer(storage: Storage<Node>) : AbstractSerializer<Node>() {
+//        private val kryo = Kryo()
+//
+//        init {
+//            kryo.addDefaultSerializer(Node::class.java, Node.Ser(storage))
+//            kryo.addDefaultSerializer(Entry::class.java, Entry.Ser(storage))
+//        }
+//
+//        override fun serializeTo(outputStream: OutputStream, node: Node) =
+//            Output(outputStream).use {
+//                kryo.writeObject(it, node)
+//                it.flush()
+//            }
+//
+//        override fun deserializeFrom(inputStream: InputStream): Node =
+//            Input(inputStream).use { kryo.readObject(it, Node::class.java) }
+//    }
 
-    // TODO: remove it
-    internal constructor(storageSpace: StorageSpace) :
-            this(storageSpace, RECORD_SIZE)
-
-    class NodeSerializer(storage: Storage<Node>) : AbstractSerializer<Node>() {
+    override var serializer: Serializer<Node> = object : AbstractSerializer<Node>() {
         private val kryo = Kryo()
 
         init {
-            kryo.addDefaultSerializer(Node::class.java, Node.Ser(storage))
-            kryo.addDefaultSerializer(Entry::class.java, Entry.Ser(storage))
+            kryo.addDefaultSerializer(Node::class.java, Node.Ser(this@NodeStorage))
+            kryo.addDefaultSerializer(Entry::class.java, Entry.Ser(this@NodeStorage))
         }
 
         override fun serializeTo(outputStream: OutputStream, node: Node) =
@@ -42,8 +55,6 @@ internal open class NodeStorage(storageSpace: StorageSpace, recordSize: Int) :
         override fun deserializeFrom(inputStream: InputStream): Node =
             Input(inputStream).use { kryo.readObject(it, Node::class.java) }
     }
-
-    override val serializer: Serializer<Node> = NodeSerializer(this)
 
     private val cache = CacheBuilder.newBuilder()
         .softValues()
