@@ -1,178 +1,155 @@
-package lva.spatialindex.index;
+package lva.spatialindex.index
 
-import com.google.common.util.concurrent.UncheckedExecutionException;
-import lva.spatialindex.storage.StorageSpace;
-import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
-import java.awt.Rectangle;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import com.google.common.util.concurrent.UncheckedExecutionException
+import lva.spatialindex.index.NodeStorage.NodeSerializer
+import lva.spatialindex.storage.StorageSpace
+import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyLong
+import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.reset
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import java.awt.Rectangle
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertSame
+import kotlin.test.assertTrue
+import kotlin.test.fail
 
 /**
  * @author vlitvinenko
  */
-@RunWith(MockitoJUnitRunner.class)
-public class NodeStorageTest {
-    private NodeStorage storage;
-    private Node node;
-    private byte[] serializedNode;
+@RunWith(MockitoJUnitRunner::class)
+class NodeStorageTest {
+    private lateinit var storage: NodeStorage
+    private lateinit var node: Node
+    private lateinit var serializedNode: ByteArray
 
-    @Mock
-    private StorageSpace storageSpace;
+    private val storageSpace: StorageSpace = mock()
+    private val nodeSerializer: NodeSerializer = mock()
 
-    @Mock
-    private NodeStorage.NodeSerializer nodeSerializer;
+    @BeforeTest
+    fun setUp() {
+        reset(storageSpace)
+        reset(nodeSerializer)
 
-    @Before
-    public void setUp() {
-        reset(storageSpace);
-        reset(nodeSerializer);
+        storage = object : NodeStorage(storageSpace) {
+            override val serializer: NodeSerializer
+                get() = nodeSerializer
+        }
 
-        storage = new NodeStorage(storageSpace) {
-            @Override
-            public @NotNull NodeSerializer getSerializer() {
-                return nodeSerializer;
-            }
-        };
+        node = Node(mock<NodeStorage>(), -1).also {
+            it.offset = 123
+            it.addEntry(Entry(mock<NodeStorage>(), Rectangle(1, 2, 3, 4), -1))
+            serializedNode = NodeSerializer(storage).serialize(it)
+        }
 
-
-        node = new Node(mock(NodeStorage.class), -1);
-        node.setOffset(123);
-        node.addEntry(new Entry(mock(NodeStorage.class), new Rectangle(1, 2, 3, 4), -1));
-
-        serializedNode = new NodeStorage.NodeSerializer(storage)
-                .serialize(node);
-
-        when(nodeSerializer.serialize(any())).thenReturn(serializedNode);
+        whenever(nodeSerializer.serialize(any())).thenReturn(serializedNode)
     }
 
     @Test
-    public void should_add_to_storage() {
-        storage.add(node);
-        verify(storageSpace).writeBytes(anyLong(), eq(serializedNode));
+    fun should_add_to_storage() {
+        storage.add(node)
+        verify(storageSpace).writeBytes(anyLong(), eq(serializedNode))
     }
 
     @Test
-    public void should_allocate_space_rounded_to_record_size() {
-        storage.add(node);
-
-        ArgumentCaptor<Integer> allocatedSizeCaptor = ArgumentCaptor.forClass(Integer.class);
-        verify(storageSpace).allocate(allocatedSizeCaptor.capture());
-
-        assertTrue(allocatedSizeCaptor.getValue() % NodeStorage.RECORD_SIZE == 0);
+    fun should_allocate_space_rounded_to_record_size() {
+        storage.add(node)
+        argumentCaptor<Int>().apply {
+            verify(storageSpace).allocate(capture())
+            assertTrue(firstValue % NodeStorage.RECORD_SIZE == 0)
+        }
     }
 
     @Test
-    public void should_return_allocated_offset() {
-        when(storageSpace.allocate(anyInt()))
-            .thenReturn(123L);
-
-        assertEquals(storage.add(node), 123L);
+    fun should_return_allocated_offset() {
+        whenever(storageSpace.allocate(anyInt()))
+            .thenReturn(123L)
+        assertEquals(storage.add(node), 123L)
     }
 
     @Test
-    public void should_set_allocated_offset_to_node() {
-        when(storageSpace.allocate(anyInt()))
-            .thenReturn(123L);
-
-        storage.add(node);
-
-        assertEquals(node.getOffset(), 123L);
+    fun should_set_allocated_offset_to_node() {
+        whenever(storageSpace.allocate(anyInt()))
+            .thenReturn(123L)
+        storage.add(node)
+        assertEquals(node.offset, 123L)
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void should_throw_if_allocation_size_exceeds_record_size() {
-        Node bigNode = mock(Node.class);
-        when(nodeSerializer.serialize(bigNode)).thenReturn(new byte[NodeStorage.RECORD_SIZE + 1]);
-        storage.add(bigNode);
-
-        fail();
-    }
-
-    @Test
-    public void should_write_to_storage() {
-        storage.write(0, node);
-        verify(storageSpace).writeBytes(anyLong(), eq(serializedNode));
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void should_throw_for_negative_offset_when_writing() {
-        storage.write(-1, node);
-        fail();
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void should_throw_if_node_size_exceeds_record_size_when_writing() {
-        Node bigNode = mock(Node.class);
-        when(nodeSerializer.serialize(bigNode)).thenReturn(new byte[NodeStorage.RECORD_SIZE + 1]);
-        storage.write(0, bigNode);
-
-        fail();
+    @Test(expected = IllegalStateException::class)
+    fun should_throw_if_allocation_size_exceeds_record_size() {
+        val bigNode = mock<Node>()
+        whenever(nodeSerializer.serialize(bigNode))
+            .thenReturn(ByteArray(NodeStorage.RECORD_SIZE + 1))
+        storage.add(bigNode)
+        fail()
     }
 
     @Test
-    public void should_read_from_storage() {
-        long offset = node.getOffset();
-        NodeStorage nodeStorage = new NodeStorage(storageSpace);
-
-        when(storageSpace.readBytes(eq(offset), eq(NodeStorage.RECORD_SIZE)))
-            .thenReturn(serializedNode);
-
-        Node newNode  = nodeStorage.read(offset);
-
-        assertEquals(newNode.getEntries(), node.getEntries());
-        assertEquals(newNode.getParentOffset(), node.getParentOffset());
-        assertEquals(newNode.getOffset(), node.getOffset());
-        assertEquals(newNode.isLeaf(), node.isLeaf());
-        assertEquals(newNode.isFull(), node.isFull());
+    fun should_write_to_storage() {
+        storage.write(0, node)
+        verify(storageSpace).writeBytes(anyLong(), eq(serializedNode))
     }
 
-    @Test(expected = UncheckedExecutionException.class)
-    public void should_throw_if_out_of_bounds_when_reading() {
-        NodeStorage nodeStorage = new NodeStorage(storageSpace);
+    @Test(expected = IllegalStateException::class)
+    fun should_throw_for_negative_offset_when_writing() {
+        storage.write(-1, node)
+        fail()
+    }
 
-        nodeStorage.read(0L);
-
-        fail();
+    @Test(expected = IllegalStateException::class)
+    fun should_throw_if_node_size_exceeds_record_size_when_writing() {
+        val bigNode = mock<Node>()
+        whenever(nodeSerializer.serialize(bigNode)).thenReturn(ByteArray(NodeStorage.RECORD_SIZE + 1))
+        storage.write(0, bigNode)
+        fail()
     }
 
     @Test
-    public void should_use_cache_when_reading() {
-        NodeStorage nodeStorage = new NodeStorage(storageSpace);
+    fun should_read_from_storage() {
+        val offset = node.offset
+        val nodeStorage = NodeStorage(storageSpace)
+        whenever(storageSpace.readBytes(eq(offset), eq(NodeStorage.RECORD_SIZE)))
+            .thenReturn(serializedNode)
+        val newNode = nodeStorage.read(offset)
 
-        nodeStorage.add(node);
-        Node newNode = nodeStorage.read(node.getOffset());
+        assertEquals(newNode.getEntries(), node.getEntries())
+        assertEquals(newNode.parentOffset, node.parentOffset)
+        assertEquals(newNode.offset, node.offset)
+        assertEquals(newNode.isLeaf, node.isLeaf)
+        assertEquals(newNode.isFull, node.isFull)
+    }
 
-        assertSame(newNode, node);
-        verify(storageSpace, never()).readBytes(anyLong(), anyInt());
+    @Test(expected = UncheckedExecutionException::class)
+    fun should_throw_if_out_of_bounds_when_reading() {
+        val nodeStorage = NodeStorage(storageSpace)
+        nodeStorage.read(0L)
+        fail()
     }
 
     @Test
-    public void should_clear_storage_space_when_clearing() {
-        NodeStorage nodeStorage = new NodeStorage(storageSpace);
-        nodeStorage.clear();
-        verify(storageSpace, times(1)).clear();
+    fun should_use_cache_when_reading() {
+        val nodeStorage = NodeStorage(storageSpace)
+        nodeStorage.add(node)
+        val newNode = nodeStorage.read(node.offset)
+
+        assertSame(newNode, node)
+        verify(storageSpace, never()).readBytes(anyLong(), anyInt())
     }
 
-
-
+    @Test
+    fun should_clear_storage_space_when_clearing() {
+        val nodeStorage = NodeStorage(storageSpace)
+        nodeStorage.clear()
+        verify(storageSpace, times(1)).clear()
+    }
 }
