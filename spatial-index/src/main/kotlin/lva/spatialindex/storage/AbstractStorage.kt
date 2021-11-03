@@ -32,7 +32,7 @@ abstract class AbstractStorage<T : Any>(private val storageSpace: StorageSpace, 
 
     override fun add(t: T): Long {
         val buff = serializer.serialize(t)
-        check(buff.size <= recordSize) { "record max size exceeds" }
+        check(buff.size <= recordSize) { "record max size exceeds. Max size: $recordSize" }
 
         val offset = storageSpace.allocate(roundToRecordSize(buff.size).toLong())
         storageSpace.writeBytes(offset, buff)
@@ -41,8 +41,8 @@ abstract class AbstractStorage<T : Any>(private val storageSpace: StorageSpace, 
 
     override fun write(offset: Long, t: T) {
         val buff = serializer.serialize(t)
-        check(buff.size <= recordSize)  { "record max size exceeds" }
-        check(offset >= 0) { "out of bounds" }
+        check(buff.size <= recordSize)  { "record max size exceeds. Max size: $recordSize" }
+        check(offset >= 0) { "out of bounds. Offset: $offset" }
 
         storageSpace.writeBytes(offset, buff)
     }
