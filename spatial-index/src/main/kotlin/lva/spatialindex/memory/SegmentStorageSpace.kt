@@ -30,8 +30,11 @@ class SegmentStorageSpace(segmentsRoot: String, private val segmentSize: Long) :
             "Unable to allocate more than segment size. Segment size: $segmentSize, sizeOf: $sizeOf"
         }
 
+        fun Segment.hasEnoughFreeSpace(sizeOf: Long) =
+            size + sizeOf <= capacity
+
         val segment = segments.lastOrNull()?.takeIf {
-            it.size + sizeOf <= it.capacity
+            it.hasEnoughFreeSpace(sizeOf)
         } ?: run {
             val segmentFileName = segmentsRoot.resolve("segment_${segments.size}.bin")
             Segment(segmentFileName.toString(), segmentSize).also { segments += it }
