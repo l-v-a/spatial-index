@@ -8,7 +8,7 @@ import java.nio.file.Path
 /**
  * @author vlitvinenko
  */
-class SegmentStorageSpace(segmentsRoot: String, private val segmentSize: Long) : StorageSpace {
+class SegmentStorageSpace(segmentsRoot: String, private val segmentCapacity: Long) : StorageSpace {
     private val segmentsRoot = Path.of(segmentsRoot)
     private val segments = mutableListOf<Segment>()
 
@@ -26,8 +26,8 @@ class SegmentStorageSpace(segmentsRoot: String, private val segmentSize: Long) :
         segments[segnum(pos)].writeBytes(offset(pos), data)
 
     override fun allocate(sizeOf: Long): Long {
-        check(sizeOf <= segmentSize) {
-            "Unable to allocate more than segment size. Segment size: $segmentSize, sizeOf: $sizeOf"
+        check(sizeOf <= segmentCapacity) {
+            "Unable to allocate more than segment size. Segment size: $segmentCapacity, sizeOf: $sizeOf"
         }
 
         fun Segment.hasEnoughFreeSpace(sizeOf: Long) =
@@ -37,7 +37,7 @@ class SegmentStorageSpace(segmentsRoot: String, private val segmentSize: Long) :
             it.hasEnoughFreeSpace(sizeOf)
         } ?: run {
             val segmentFileName = segmentsRoot.resolve("segment_${segments.size}.bin")
-            Segment(segmentFileName.toString(), segmentSize).also { segments += it }
+            Segment(segmentFileName.toString(), segmentCapacity).also { segments += it }
         }
 
         val offset = segment.allocate(sizeOf)
