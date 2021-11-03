@@ -8,17 +8,10 @@ package lva.spatialindex.index
 internal typealias GroupPair = Pair<List<Entry>, List<Entry>>
 internal typealias SideSelector = (Entry) -> Int
 
-internal val Entry.left: Int
-    get() = mbr.x
-
-internal val Entry.right: Int
-    get() = mbr.x + mbr.width
-
-internal val Entry.bottom: Int
-    get() = mbr.y + mbr.height
-
-internal val Entry.top: Int
-    get() = mbr.y
+internal val Entry.left: Int get() = mbr.x
+internal val Entry.right: Int get() = mbr.x + mbr.width
+internal val Entry.bottom: Int get() = mbr.y + mbr.height
+internal val Entry.top: Int get() = mbr.y
 
 internal fun getGroupMargins(distributionGroups: List<List<GroupPair>>): Int =
     distributionGroups.sumOf { margins(it) }
