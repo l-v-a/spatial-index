@@ -33,12 +33,11 @@ class SegmentStorageSpace(segmentsRoot: String, private val segmentCapacity: Lon
         fun Segment.hasEnoughFreeSpace(sizeOf: Long) =
             size + sizeOf <= capacity
 
-        val segment = segments.lastOrNull()?.takeIf {
-            it.hasEnoughFreeSpace(sizeOf)
-        } ?: run {
-            val segmentFileName = segmentsRoot.resolve("segment_${segments.size}.bin")
-            Segment(segmentFileName.toString(), segmentCapacity).also { segments += it }
-        }
+        val segment = segments.lastOrNull()?.takeIf { it.hasEnoughFreeSpace(sizeOf) }
+            ?: run {
+                val segmentFileName = segmentsRoot.resolve("segment_${segments.size}.bin")
+                Segment(segmentFileName.toString(), segmentCapacity).also { segments += it }
+            }
 
         val offset = segment.allocate(sizeOf)
         return position(segments.size - 1, offset)
