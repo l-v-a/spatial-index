@@ -4,11 +4,12 @@ import lva.spatialindex.storage.StorageSpace
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel.MapMode
+import java.nio.file.Path
 
 /**
  * @author vlitvinenko
  */
-internal class Segment(val filePath: String,  capacity: Long) : StorageSpace {
+internal class Segment(val filePath: Path, capacity: Long) : StorageSpace {
     private val dataTLS: ThreadLocal<ByteBuffer>
     val capacity: Long = roundToPage(capacity)
     var size = 0L
@@ -49,8 +50,8 @@ internal class Segment(val filePath: String,  capacity: Long) : StorageSpace {
     companion object {
         private const val PAGE_SIZE = 4096L
 
-        private fun mapBackingFile(filePath: String, capacity: Long): ByteBuffer =
-            RandomAccessFile(filePath, "rw").use { backingFile ->
+        private fun mapBackingFile(filePath: Path, capacity: Long): ByteBuffer =
+            RandomAccessFile(filePath.toString(), "rw").use { backingFile ->
                 backingFile.setLength(capacity)
                 backingFile.channel.use {
                     it.map(MapMode.READ_WRITE, 0L, capacity)
