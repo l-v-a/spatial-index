@@ -56,5 +56,5 @@ abstract class AbstractStorage<T : Any>(private val storageSpace: StorageSpace, 
         storageSpace.clear()
 
     private fun roundToRecordSize(size: Int): Int =
-        size + (recordSize - 1) and -recordSize
+        (size + (recordSize - 1)) and -recordSize
 }

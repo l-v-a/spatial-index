@@ -47,7 +47,7 @@ internal class Segment(val filePath: String,  capacity: Long) : StorageSpace {
     }
 
     companion object {
-        private const val PAGE_SIZE = 4096
+        private const val PAGE_SIZE = 4096L
 
         private fun mapBackingFile(filePath: String, capacity: Long): ByteBuffer =
             RandomAccessFile(filePath, "rw").use { backingFile ->
@@ -58,7 +58,7 @@ internal class Segment(val filePath: String,  capacity: Long) : StorageSpace {
             }
 
         private fun roundToPage(i: Long): Long =
-            i + (PAGE_SIZE - 1) and (-PAGE_SIZE).toLong()
+            (i + (PAGE_SIZE - 1)) and (-PAGE_SIZE)
 
     }
 }
