@@ -102,8 +102,8 @@ class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
         // distribute entries between nodes
         val allEntries = node.getEntries() + newNode.getEntries()
 
-        val groupsX = getDistributionGroups(allEntries, Entry.X_COMPARATORS)
-        val groupsY = getDistributionGroups(allEntries, Entry.Y_COMPARATORS)
+        val groupsX = getDistributionGroups(allEntries, listOf(Entry::left, Entry::right))
+        val groupsY = getDistributionGroups(allEntries, listOf(Entry::bottom, Entry::top))
         val groups = if (getGroupMargins(groupsX) < getGroupMargins(groupsY))
             groupsX else groupsY
 

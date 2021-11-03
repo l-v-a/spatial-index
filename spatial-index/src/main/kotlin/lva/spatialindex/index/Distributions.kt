@@ -6,13 +6,26 @@ package lva.spatialindex.index
  */
 
 internal typealias GroupPair = Pair<List<Entry>, List<Entry>>
+internal typealias SideSelector = (Entry) -> Int
+
+internal val Entry.left: Int
+    get() = mbr.x
+
+internal val Entry.right: Int
+    get() = mbr.x + mbr.width
+
+internal val Entry.bottom: Int
+    get() = mbr.y + mbr.height
+
+internal val Entry.top: Int
+    get() = mbr.y
 
 internal fun getGroupMargins(distributionGroups: List<List<GroupPair>>): Int =
     distributionGroups.sumOf { margins(it) }
 
-internal fun getDistributionGroups(entries: List<Entry>, comparators: Collection<Comparator<Entry>>): List<List<GroupPair>> =
-    comparators.asSequence()
-        .map { entries.sortedWith(it) }
+internal fun getDistributionGroups(entries: List<Entry>, sides: Collection<SideSelector>): List<List<GroupPair>> =
+    sides.asSequence()
+        .map { entries.sortedBy(it) }
         .map { distributions(it) }
         .toList()
 

@@ -55,16 +55,6 @@ internal class Entry(private val storage: Storage<Node>, mbr: Rectangle, childOf
 
     companion object {
         const val SIZE = 24
-
-        val LEFT_TO_RIGHT_BY_LEFT_COMPARATOR: Comparator<Entry> = Comparator.comparingInt { it.mbr.x }
-        val LEFT_TO_RIGHT_BY_RIGHT_COMPARATOR: Comparator<Entry> = Comparator.comparingInt { it.mbr.x + it.mbr.width }
-        val TOP_TO_BOTTOM_BY_BOTTOM_COMPARATOR: Comparator<Entry> = Comparator.comparingInt { it.mbr.y + it.mbr.height }
-        val TOP_TO_BOTTOM_BY_TOP_COMPARATOR: Comparator<Entry> = Comparator.comparingInt { it.mbr.y }
-
-        val X_COMPARATORS: Collection<Comparator<Entry>> =
-            listOf(LEFT_TO_RIGHT_BY_LEFT_COMPARATOR, LEFT_TO_RIGHT_BY_RIGHT_COMPARATOR)
-        val Y_COMPARATORS: Collection<Comparator<Entry>> =
-            listOf(TOP_TO_BOTTOM_BY_BOTTOM_COMPARATOR, TOP_TO_BOTTOM_BY_TOP_COMPARATOR)
     }
 }
 
