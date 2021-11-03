@@ -32,7 +32,7 @@ abstract class AbstractStorage<T : Any>(private val storageSpace: StorageSpace, 
 
     override fun add(t: T): Long {
         val bytes = toBytes(t)
-        return storageSpace.allocate(roundToRecordSize(bytes.size).toLong())
+        return storageSpace.allocate(roundToRecordSize(bytes.size))
             .also { writeBytes(it, bytes) }
     }
 

@@ -19,18 +19,18 @@ class SegmentStorageSpace(segmentsRoot: String, private val segmentCapacity: Int
     override fun readBytes(pos: Long, size: Int): ByteArray =
         ByteArray(size).also { readBytes(pos, it) }
 
-    override fun readBytes(pos: Long, buff: ByteArray) =
-        segments[segnum(pos)].readBytes(offset(pos), buff)
+    override fun readBytes(pos: Long, bytes: ByteArray) =
+        segments[segnum(pos)].readBytes(offset(pos), bytes)
 
-    override fun writeBytes(pos: Long, data: ByteArray) =
-        segments[segnum(pos)].writeBytes(offset(pos), data)
+    override fun writeBytes(pos: Long, bytes: ByteArray) =
+        segments[segnum(pos)].writeBytes(offset(pos), bytes)
 
-    override fun allocate(sizeOf: Long): Long {
+    override fun allocate(sizeOf: Int): Long {
         check(sizeOf <= segmentCapacity) {
             "Unable to allocate more than segment size. Segment size: $segmentCapacity, sizeOf: $sizeOf"
         }
 
-        fun Segment.hasEnoughFreeSpace(sizeOf: Long) =
+        fun Segment.hasEnoughFreeSpace(sizeOf: Int) =
             size + sizeOf <= capacity
 
         val segment = segments.lastOrNull()?.takeIf {
@@ -40,7 +40,7 @@ class SegmentStorageSpace(segmentsRoot: String, private val segmentCapacity: Int
             Segment(segmentFilePath, segmentCapacity).also { segments += it }
         }
 
-        val offset = segment.allocate(sizeOf.toInt())
+        val offset = segment.allocate(sizeOf)
         return position(segments.size - 1, offset)
     }
 

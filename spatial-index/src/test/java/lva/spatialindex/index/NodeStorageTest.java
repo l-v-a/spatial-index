@@ -75,7 +75,7 @@ public class NodeStorageTest {
     public void should_allocate_space_rounded_to_record_size() {
         storage.add(node);
 
-        ArgumentCaptor<Long> allocatedSizeCaptor = ArgumentCaptor.forClass(Long.class);
+        ArgumentCaptor<Integer> allocatedSizeCaptor = ArgumentCaptor.forClass(Integer.class);
         verify(storageSpace).allocate(allocatedSizeCaptor.capture());
 
         assertTrue(allocatedSizeCaptor.getValue() % NodeStorage.RECORD_SIZE == 0);
@@ -83,7 +83,7 @@ public class NodeStorageTest {
 
     @Test
     public void should_return_allocated_offset() {
-        when(storageSpace.allocate(anyLong()))
+        when(storageSpace.allocate(anyInt()))
             .thenReturn(123L);
 
         assertEquals(storage.add(node), 123L);
@@ -91,7 +91,7 @@ public class NodeStorageTest {
 
     @Test
     public void should_set_allocated_offset_to_node() {
-        when(storageSpace.allocate(anyLong()))
+        when(storageSpace.allocate(anyInt()))
             .thenReturn(123L);
 
         storage.add(node);
