@@ -11,12 +11,8 @@ internal class Node(private val storage: Storage<Node>, var offset: Long) {
     internal val entries: MutableList<Entry> = ArrayList()
 
     var parentOffset: Long = -1
-
-    val isLeaf
-        get() = entries.firstOrNull()?.isLeaf ?: true
-
-    val isFull
-        get() = entries.size >= MAX_ENTRIES
+    val isLeaf get() = entries.firstOrNull()?.isLeaf ?: true
+    val isFull get() = entries.size >= MAX_ENTRIES
 
     fun getMbr(): Rectangle { // TODO: refactor as property
         if (mbr === NULL_RECTANGLE)

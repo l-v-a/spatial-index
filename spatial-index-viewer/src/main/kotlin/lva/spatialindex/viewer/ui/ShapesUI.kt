@@ -18,9 +18,7 @@ interface ShapeUI : Shape {
 }
 
 abstract class AbstractShapeUI : ShapeUI {
-    val bgColor: Color
-        get() = if (isActive) Color.GRAY else Color.LIGHT_GRAY
-
+    val bgColor: Color get() = if (isActive) Color.GRAY else Color.LIGHT_GRAY
     val borderColor: Color = Color.BLACK
 }
 

@@ -24,14 +24,12 @@ abstract class AbstractShape : Shape {
 }
 
 class CircleShape(val x: Int = 0, val y: Int = 0, val radius: Int = 0) : AbstractShape() {
-    override val mbr: Rectangle
-        get() = Rectangle(x - radius, y - radius, radius * 2, radius * 2)
+    override val mbr get() = Rectangle(x - radius, y - radius, radius * 2, radius * 2)
 }
 
 class RectangleShape(val rectangle: Rectangle = Rectangle(0, 0, 0, 0)) : AbstractShape() {
     constructor(x: Int, y: Int, width: Int, height: Int) :
             this(Rectangle(x, y, width, height))
 
-    override val mbr: Rectangle
-        get() = Rectangle(rectangle)
+    override val mbr get() = Rectangle(rectangle)
 }
