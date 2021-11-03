@@ -17,15 +17,15 @@ abstract class AbstractStorage<T : Any>(private val storageSpace: StorageSpace, 
     abstract class AbstractSerializer<T : Any> : Serializer<T> {
         override fun serialize(t: T): ByteArray =
             ByteArrayOutputStream().use {
-                write(it, t)
+                serializeTo(it, t)
                 it.toByteArray()
             }
 
         override fun deserialize(bytes: ByteArray): T =
-            ByteArrayInputStream(bytes).use { read(it) }
+            ByteArrayInputStream(bytes).use { deserializeFrom(it) }
 
-        abstract fun write(outputStream: OutputStream, t: T)
-        abstract fun read(inputStream: InputStream): T
+        abstract fun serializeTo(outputStream: OutputStream, t: T)
+        abstract fun deserializeFrom(inputStream: InputStream): T
     }
 
     abstract val serializer: Serializer<T>

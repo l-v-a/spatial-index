@@ -30,12 +30,12 @@ class ShapeStorage(fileName: String, initialSize: Long) :
             kryo.register(Rectangle::class.java)
         }
 
-        override fun write(outputStream: OutputStream, shape: Shape) = Output(outputStream).use {
+        override fun serializeTo(outputStream: OutputStream, shape: Shape) = Output(outputStream).use {
             kryo.writeClassAndObject(it, shape)
             it.flush()
         }
 
-        override fun read(inputStream: InputStream) = Input(inputStream).use {
+        override fun deserializeFrom(inputStream: InputStream) = Input(inputStream).use {
             kryo.readClassAndObject(it) as Shape
         }
     }

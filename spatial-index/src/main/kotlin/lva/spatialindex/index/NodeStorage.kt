@@ -33,13 +33,13 @@ internal open class NodeStorage(storageSpace: StorageSpace, recordSize: Int) :
             kryo.addDefaultSerializer(Entry::class.java, Entry.Ser(storage))
         }
 
-        override fun write(outputStream: OutputStream, node: Node) =
+        override fun serializeTo(outputStream: OutputStream, node: Node) =
             Output(outputStream).use {
                 kryo.writeObject(it, node)
                 it.flush()
             }
 
-        override fun read(inputStream: InputStream): Node =
+        override fun deserializeFrom(inputStream: InputStream): Node =
             Input(inputStream).use { kryo.readObject(it, Node::class.java) }
     }
 
