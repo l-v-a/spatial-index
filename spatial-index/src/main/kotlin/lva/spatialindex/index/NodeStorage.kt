@@ -19,26 +19,8 @@ internal class NodeStorage(storageSpace: StorageSpace, recordSize: Int = RECORD_
 
     constructor(fileName: String, initialSize: Int) :
             this(SegmentStorageSpace(fileName, initialSize))
-//
-//    class NodeSerializer(storage: Storage<Node>) : AbstractSerializer<Node>() {
-//        private val kryo = Kryo()
-//
-//        init {
-//            kryo.addDefaultSerializer(Node::class.java, Node.Ser(storage))
-//            kryo.addDefaultSerializer(Entry::class.java, Entry.Ser(storage))
-//        }
-//
-//        override fun serializeTo(outputStream: OutputStream, node: Node) =
-//            Output(outputStream).use {
-//                kryo.writeObject(it, node)
-//                it.flush()
-//            }
-//
-//        override fun deserializeFrom(inputStream: InputStream): Node =
-//            Input(inputStream).use { kryo.readObject(it, Node::class.java) }
-//    }
 
-    override var serializer: Serializer<Node> = object : AbstractSerializer<Node>() {
+    override val serializer: Serializer<Node> = object : AbstractSerializer<Node>() {
         private val kryo = Kryo()
 
         init {
