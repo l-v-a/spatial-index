@@ -15,7 +15,7 @@ import kotlin.concurrent.write
 /**
  * @author vlitvinenko
  */
-class ShapeStorage(fileName: String, initialSize: Long) :
+class ShapeStorage(fileName: String, initialSize: Int) :
     AbstractStorage<Shape>(SegmentStorageSpace(fileName, initialSize), RECORD_SIZE) {
     private val lock = ReentrantReadWriteLock()
 

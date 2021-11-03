@@ -1,6 +1,5 @@
 package lva.spatialindex.memory
 
-import lva.spatialindex.storage.StorageSpace
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel.MapMode
@@ -9,31 +8,26 @@ import java.nio.file.Path
 /**
  * @author vlitvinenko
  */
-internal class Segment(val filePath: Path, capacity: Long) : StorageSpace {
+internal class Segment(val filePath: Path, capacity: Int) {
     private val dataTLS: ThreadLocal<ByteBuffer>
-    val capacity: Long = roundToPage(capacity)
-    var size = 0L
+    val capacity: Int = roundToPage(capacity)
+    var size: Int = 0
         private set
 
     init {
-        val data = mapBackingFile(filePath, this.capacity)
+        val data = mapBackingFile(filePath, this.capacity.toLong())
         dataTLS = ThreadLocal.withInitial { data.duplicate() }
     }
 
-    override fun readBytes(pos: Long, size: Int): ByteArray =
-        ByteArray(size).also { readBytes(pos, it) }
-
-    override fun readBytes(pos: Long, buff: ByteArray) {
-        dataTLS.get()
-            .position(pos.toInt()).get(buff)
+    fun readBytes(pos: Int, bytes: ByteArray) {
+        dataTLS.get().position(pos).get(bytes)
     }
 
-    override fun writeBytes(pos: Long, data: ByteArray) {
-        dataTLS.get()
-            .position(pos.toInt()).put(data)
+    fun writeBytes(pos: Int, bytes: ByteArray) {
+        dataTLS.get().position(pos).put(bytes)
     }
 
-    override fun allocate(sizeOf: Long): Long {
+    fun allocate(sizeOf: Int): Int {
         check(size + sizeOf <= capacity) {
             "Out of segment space. capacity: $capacity, size: $size, sizeOf: $sizeOf"
         }
@@ -43,12 +37,12 @@ internal class Segment(val filePath: Path, capacity: Long) : StorageSpace {
         return offset
     }
 
-    override fun clear() {
+    fun clear() {
         size = 0
     }
 
     companion object {
-        private const val PAGE_SIZE = 4096L
+        private const val PAGE_SIZE = 4096
 
         private fun mapBackingFile(filePath: Path, capacity: Long): ByteBuffer =
             RandomAccessFile(filePath.toString(), "rw").use { backingFile ->
@@ -58,7 +52,7 @@ internal class Segment(val filePath: Path, capacity: Long) : StorageSpace {
                 }
             }
 
-        private fun roundToPage(i: Long): Long =
+        private fun roundToPage(i: Int): Int =
             (i + (PAGE_SIZE - 1)) and (-PAGE_SIZE)
 
     }

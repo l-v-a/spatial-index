@@ -136,7 +136,7 @@ class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
     }
 
     companion object {
-        private const val SIZE_DEFAULT = 64L * 1024 * 1024
+        private const val SIZE_DEFAULT = 64 * 1024 * 1024
     }
 }
 

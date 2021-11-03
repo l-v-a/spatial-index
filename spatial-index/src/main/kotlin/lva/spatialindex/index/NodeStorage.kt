@@ -18,7 +18,7 @@ import java.io.OutputStream
 internal open class NodeStorage(storageSpace: StorageSpace, recordSize: Int) :
     AbstractStorage<Node>(storageSpace, recordSize) {
 
-    constructor(fileName: String, initialSize: Long) :
+    constructor(fileName: String, initialSize: Int) :
             this(SegmentStorageSpace(fileName, initialSize))
 
     // TODO: remove it

@@ -8,7 +8,7 @@ import java.nio.file.Path
 /**
  * @author vlitvinenko
  */
-class SegmentStorageSpace(segmentsRoot: String, private val segmentCapacity: Long) : StorageSpace {
+class SegmentStorageSpace(segmentsRoot: String, private val segmentCapacity: Int) : StorageSpace {
     private val segmentsRoot = Path.of(segmentsRoot)
     private val segments = mutableListOf<Segment>()
 
@@ -17,7 +17,7 @@ class SegmentStorageSpace(segmentsRoot: String, private val segmentCapacity: Lon
     }
 
     override fun readBytes(pos: Long, size: Int): ByteArray =
-        segments[segnum(pos)].readBytes(offset(pos), size)
+        ByteArray(size).also { readBytes(pos, it) }
 
     override fun readBytes(pos: Long, buff: ByteArray) =
         segments[segnum(pos)].readBytes(offset(pos), buff)
@@ -40,7 +40,7 @@ class SegmentStorageSpace(segmentsRoot: String, private val segmentCapacity: Lon
             Segment(segmentFilePath, segmentCapacity).also { segments += it }
         }
 
-        val offset = segment.allocate(sizeOf)
+        val offset = segment.allocate(sizeOf.toInt())
         return position(segments.size - 1, offset)
     }
 
@@ -57,14 +57,14 @@ class SegmentStorageSpace(segmentsRoot: String, private val segmentCapacity: Lon
     companion object {
         private val log = LoggerFactory.getLogger(SegmentStorageSpace::class.java)
 
-        private fun position(segment: Int, offset: Long): Long =
-            segment.toLong() shl 32 or (0xFFFF_FFFFL and offset)
+        private fun position(segment: Int, offset: Int): Long =
+            (segment.toLong() shl 32) or (0xFFFF_FFFFL and offset.toLong())
 
         private fun segnum(pos: Long): Int =
             (pos ushr 32).toInt()
 
-        private fun offset(pos: Long): Long =
-            0xFFFF_FFFFL and pos
+        private fun offset(pos: Long): Int =
+            (0xFFFF_FFFFL and pos).toInt()
 
         private fun Path.safeDelete() {
             try {

@@ -26,7 +26,7 @@ import kotlin.math.min
  */
 object ShapesRepositoryBuilder {
     private const val MAX_ELEMENTS_IN_TREE = 1000 * 1000
-    private const val STORAGE_INITIAL_SIZE = 64L * 1024 * 1024
+    private const val STORAGE_INITIAL_SIZE = 64 * 1024 * 1024
     private const val SHAPES_QUEUE_CAPACITY = 1000 * 1000
     private const val SIZE_OF_SHAPE_BYTES_AVG = 26
     private const val DB_FILE_NAME = "shapes.bin"
@@ -55,7 +55,7 @@ object ShapesRepositoryBuilder {
 
         val itemsEstimated = max(Files.size(shapesFile) / SIZE_OF_SHAPE_BYTES_AVG, 100).toInt()
         val numOfTasks = (itemsEstimated + MAX_ELEMENTS_IN_TREE - 1) / MAX_ELEMENTS_IN_TREE
-        var itemsProcessed = 0;
+        var itemsProcessed = 0
 
         suspend fun onItemIndexed() {
             withContext(coroutineContext) {
@@ -121,7 +121,7 @@ object ShapesRepositoryBuilder {
         } catch (e: Exception) {
             log.error("task $taskNumber closed by exception", e)
             indexTree.clear()
-            throw e;
+            throw e
         }
     }
 }
