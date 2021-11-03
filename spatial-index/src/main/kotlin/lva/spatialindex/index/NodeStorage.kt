@@ -45,11 +45,12 @@ internal open class NodeStorage constructor(storageSpace: StorageSpace, recordSi
     override val serializer: Serializer<Node> = NodeSerializer(this)
 
     private val cache = CacheBuilder.newBuilder()
-            .softValues()
-            .build(object : CacheLoader<Long, Node>() {
-                override fun load(offset: Long): Node =
-                    this@NodeStorage.load(offset)
-            })
+        .softValues()
+        .build(object : CacheLoader<Long, Node>() {
+            override fun load(offset: Long): Node {
+                return this@NodeStorage.load(offset)
+            }
+        })
 
     override fun add(node: Node): Long =
         super.add(node).also { offset ->
