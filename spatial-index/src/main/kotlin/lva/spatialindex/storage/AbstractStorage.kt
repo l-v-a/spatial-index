@@ -39,15 +39,19 @@ abstract class AbstractStorage<T : Any>(private val storageSpace: StorageSpace, 
     override fun write(offset: Long, t: T) =
         writeBytes(offset, toBytes(t))
 
-    override fun read(offset: Long): T {
-        val bytes = storageSpace.readBytes(offset, recordSize)
-        return serializer.deserialize(bytes)
-    }
+    override fun read(offset: Long): T  =
+        readBytes(offset)
 
     private fun writeBytes(offset: Long, bytes: ByteArray) {
         check(offset >= 0) { "out of bounds. Offset: $offset" }
         storageSpace.writeBytes(offset, bytes)
     }
+
+    private fun readBytes(offset: Long): T =
+        fromBytes(storageSpace.readBytes(offset, recordSize))
+
+    private fun fromBytes(bytes: ByteArray): T =
+        serializer.deserialize(bytes)
 
     private fun toBytes(t: T): ByteArray = serializer.serialize(t).also {
         check(it.size <= recordSize) { "record max size exceeds. Max size: $recordSize" }

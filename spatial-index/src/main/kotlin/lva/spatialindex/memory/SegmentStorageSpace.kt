@@ -16,11 +16,9 @@ class SegmentStorageSpace(segmentsRoot: String, private val segmentCapacity: Int
         Files.createDirectories(this.segmentsRoot)
     }
 
-    override fun readBytes(pos: Long, size: Int): ByteArray =
-        ByteArray(size).also { readBytes(pos, it) }
-
-    override fun readBytes(pos: Long, bytes: ByteArray) =
-        segments[segnum(pos)].readBytes(offset(pos), bytes)
+    override fun readBytes(pos: Long, size: Int): ByteArray = ByteArray(size).also {
+        segments[segnum(pos)].readBytes(offset(pos), it)
+    }
 
     override fun writeBytes(pos: Long, bytes: ByteArray) =
         segments[segnum(pos)].writeBytes(offset(pos), bytes)
