@@ -1,9 +1,5 @@
 package lva.spatialindex.index
 
-import com.esotericsoftware.kryo.Kryo
-import com.esotericsoftware.kryo.Serializer
-import com.esotericsoftware.kryo.io.Input
-import com.esotericsoftware.kryo.io.Output
 import lva.spatialindex.storage.Storage
 import java.awt.Rectangle
 
@@ -11,11 +7,10 @@ import java.awt.Rectangle
  * @author vlitvinenko
  */
 internal class Node(private val storage: Storage<Node>, var offset: Long) {
-    private val entries: MutableList<Entry> = ArrayList()
     private var mbr: Rectangle = NULL_RECTANGLE
+    internal val entries: MutableList<Entry> = ArrayList()
 
     var parentOffset: Long = -1
-        private set
 
     val isLeaf
         get() = entries.firstOrNull()?.isLeaf ?: true
@@ -65,24 +60,6 @@ internal class Node(private val storage: Storage<Node>, var offset: Long) {
         parentOffset = -1
         resetMbr()
         entries.clear()
-    }
-
-    internal class Ser(private val storage: Storage<Node>) : Serializer<Node>() {
-        override fun write(kryo: Kryo, output: Output, node: Node) {
-            output.writeLong(node.parentOffset)
-            output.writeInt(node.entries.size)
-            node.entries.forEach {
-                kryo.writeObject(output, it)
-            }
-        }
-
-        override fun read(kryo: Kryo, input: Input, type: Class<Node>) = Node(storage, -1).apply {
-            parentOffset = input.readLong()
-            val entriesSize = input.readInt()
-            repeat(entriesSize) {
-                entries.add(kryo.readObject(input, Entry::class.java))
-            }
-        }
     }
 
     companion object {

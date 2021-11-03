@@ -24,8 +24,8 @@ internal class NodeStorage(storageSpace: StorageSpace, recordSize: Int = RECORD_
         private val kryo = Kryo()
 
         init {
-            kryo.addDefaultSerializer(Node::class.java, Node.Ser(this@NodeStorage))
-            kryo.addDefaultSerializer(Entry::class.java, Entry.Ser(this@NodeStorage))
+            kryo.addDefaultSerializer(Node::class.java, NodeKryoSerializer(this@NodeStorage))
+            kryo.addDefaultSerializer(Entry::class.java, EntryKryoSerializer(this@NodeStorage))
         }
 
         override fun serializeTo(outputStream: OutputStream, node: Node) =

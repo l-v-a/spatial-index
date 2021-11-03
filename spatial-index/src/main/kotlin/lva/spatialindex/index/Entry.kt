@@ -1,9 +1,5 @@
 package lva.spatialindex.index
 
-import com.esotericsoftware.kryo.Kryo
-import com.esotericsoftware.kryo.Serializer
-import com.esotericsoftware.kryo.io.Input
-import com.esotericsoftware.kryo.io.Output
 import io.vavr.control.Either
 import lva.spatialindex.storage.Storage
 import java.awt.Rectangle
@@ -32,26 +28,6 @@ internal class Entry(private val storage: Storage<Node>, mbr: Rectangle, childOf
 
     override fun hashCode() =
         body.hashCode()
-
-    internal class Ser(private val storage: Storage<Node>) : Serializer<Entry>() {
-        override fun write(kryo: Kryo, output: Output, entry: Entry) = with(output) {
-            val mbr = entry.mbr
-            writeInt(mbr.x)
-            writeInt(mbr.y)
-            writeInt(mbr.width)
-            writeInt(mbr.height)
-            writeLong(entry.childOffset)
-        }
-
-        override fun read(kryo: Kryo, input: Input, type: Class<Entry>): Entry = with(input) {
-            val x = readInt()
-            val y = readInt()
-            val width = readInt()
-            val height = readInt()
-            val childOffset = readLong()
-            Entry(storage, Rectangle(x, y, width, height), childOffset)
-        }
-    }
 
     companion object {
         const val SIZE = 24
