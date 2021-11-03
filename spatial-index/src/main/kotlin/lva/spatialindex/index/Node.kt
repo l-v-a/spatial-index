@@ -7,27 +7,24 @@ import java.awt.Rectangle
  * @author vlitvinenko
  */
 internal class Node(private val storage: Storage<Node>, var offset: Long) {
-    private var mbr: Rectangle = NULL_RECTANGLE
     internal val entries: MutableList<Entry> = ArrayList()
 
     var parentOffset: Long = -1
     val isLeaf get() = entries.firstOrNull()?.isLeaf ?: true
     val isFull get() = entries.size >= MAX_ENTRIES
+    var mbr: Rectangle = NULL_RECTANGLE
+        private set
+        get() = when {
+            field.isNull -> entries.union().also { field = it }
+            else -> field
+        }
 
-    fun getMbr(): Rectangle { // TODO: refactor as property
-        if (mbr === NULL_RECTANGLE)
-            mbr = entries.union()
-        return mbr
-    }
-
-    fun resetMbr(): Node = apply {
-        mbr = NULL_RECTANGLE
-    }
+    fun resetMbr(): Node = apply { mbr = NULL_RECTANGLE }
 
     fun getEntries(): List<Entry> = entries
 
     fun addNode(node: Node): Node =
-        addEntry(Entry(storage, node.getMbr(), node.offset))
+        addEntry(Entry(storage, node.mbr, node.offset))
 
     fun addEntry(entry: Entry): Node =
         putEntry(entry).save()
@@ -48,9 +45,7 @@ internal class Node(private val storage: Storage<Node>, var offset: Long) {
         }
     }
 
-    fun save(): Node = apply {
-        storage.write(offset, this)
-    }
+    fun save(): Node = apply { storage.write(offset, this) }
 
     fun reset(): Node = apply {
         parentOffset = -1
@@ -63,10 +58,10 @@ internal class Node(private val storage: Storage<Node>, var offset: Long) {
         const val MAX_ENTRIES = PAGE_SIZE / Entry.SIZE - 1
         const val MIN_ENTRIES = MAX_ENTRIES * 2 / 5
 
-        private val NULL_RECTANGLE = Rectangle()
-
-        fun newNode(storage: Storage<Node>) = Node(storage, -1).apply {
-            storage.add(this)
-        }
+        fun newNode(storage: Storage<Node>) =
+            Node(storage, -1).also { storage.add(it) }
     }
 }
+
+private val NULL_RECTANGLE = Rectangle()
+private val Rectangle.isNull: Boolean get() = this === NULL_RECTANGLE

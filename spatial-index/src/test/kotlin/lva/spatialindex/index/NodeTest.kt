@@ -86,10 +86,10 @@ class NodeTest {
             .addEntry(Entry(storage, Rectangle(0, 0, 3, 4), 1))
         val newNode = newNode(storage)
             .addEntry(Entry(storage, Rectangle(3, 4, 7, 6), 1))
-        assertEquals(Rectangle(0, 0, 3, 4), node.getMbr())
+        assertEquals(Rectangle(0, 0, 3, 4), node.mbr)
 
         node.addNode(newNode)
-        assertEquals(Rectangle(0, 0, 10, 10), node.getMbr())
+        assertEquals(Rectangle(0, 0, 10, 10), node.mbr)
     }
 
     @Test
@@ -142,10 +142,10 @@ class NodeTest {
     fun should_recalculate_mbr_when_new_entry_is_added() {
         val node = newNode(storage)
             .addEntry(Entry(storage, Rectangle(0, 0, 3, 4), 1))
-        assertEquals(Rectangle(0, 0, 3, 4), node.getMbr())
+        assertEquals(Rectangle(0, 0, 3, 4), node.mbr)
 
         node.addEntry(Entry(storage, Rectangle(3, 4, 7, 6), 1))
-        assertEquals(Rectangle(0, 0, 10, 10), node.getMbr())
+        assertEquals(Rectangle(0, 0, 10, 10), node.mbr)
     }
 
     @Test
@@ -234,10 +234,10 @@ class NodeTest {
         val node = newNode(storage)
             .addEntry(entry1)
         
-        assertEquals(Rectangle(3, 4, 7, 6), node.getMbr())
+        assertEquals(Rectangle(3, 4, 7, 6), node.mbr)
 
         node.setEntries(listOf(entry2, entry3))
-        assertEquals(Rectangle(0, 0, 11, 11), node.getMbr())
+        assertEquals(Rectangle(0, 0, 11, 11), node.mbr)
     }
 
     @Test

@@ -125,7 +125,7 @@ class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
         }
 
         targetEntry?.let { entry ->
-            entry.mbr = sourceNode.getMbr()
+            entry.mbr = sourceNode.mbr
             targetNode.resetMbr().save()
         }
     }
