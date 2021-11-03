@@ -35,4 +35,4 @@ internal fun List<Entry>.union(): Rectangle =
         .reduceOrNull { acc, r -> acc.union(r) } ?: Rectangle()
 
 internal fun List<Entry>.margin(): Int =
-    sumOf { it.mbr.margin() }
+    sumOf { it.mbr.margin }
