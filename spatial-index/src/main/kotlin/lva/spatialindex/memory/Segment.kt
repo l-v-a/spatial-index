@@ -1,5 +1,6 @@
 package lva.spatialindex.memory
 
+import lva.spatialindex.memory.SegmentStorageSpace.Companion.safeDelete
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel.MapMode
@@ -8,7 +9,7 @@ import java.nio.file.Path
 /**
  * @author vlitvinenko
  */
-internal class Segment(val filePath: Path, capacity: Int) {
+internal class Segment(private val filePath: Path, capacity: Int) {
     private val dataTLS: ThreadLocal<ByteBuffer>
     val capacity: Int = roundToPage(capacity)
     var size: Int = 0
@@ -37,9 +38,8 @@ internal class Segment(val filePath: Path, capacity: Int) {
         return offset
     }
 
-    fun clear() {
-        size = 0
-    }
+    fun remove() =
+        filePath.safeDelete()
 
     companion object {
         private const val PAGE_SIZE = 4096

@@ -43,12 +43,9 @@ class SegmentStorageSpace(segmentsRoot: String, private val segmentCapacity: Int
     }
 
     override fun clear() {
-        segments.forEach { segment ->
-            segment.clear()
-            segment.filePath.safeDelete()
-        }
-
+        segments.forEach { it.remove() }
         segments.clear()
+
         segmentsRoot.safeDelete()
     }
 
@@ -64,7 +61,7 @@ class SegmentStorageSpace(segmentsRoot: String, private val segmentCapacity: Int
         private fun offset(pos: Long): Int =
             (0xFFFF_FFFFL and pos).toInt()
 
-        private fun Path.safeDelete() {
+        fun Path.safeDelete() {
             try {
                 Files.deleteIfExists(this)
             } catch (e: Exception) {
