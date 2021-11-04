@@ -33,7 +33,7 @@ class NodeTest {
         val serialized = serializer.serialize(node)
         val restoredNode = serializer.deserialize(serialized)
 
-        assertEquals(restoredNode.getEntries(), node.getEntries())
+        assertEquals(restoredNode.entries, node.entries)
         assertEquals(restoredNode.parentOffset, node.parentOffset)
         assertEquals(restoredNode.offset, node.offset)
         assertEquals(restoredNode.isLeaf, node.isLeaf)
@@ -49,8 +49,8 @@ class NodeTest {
             .addEntry(Entry(storage, mbr, 1))
         node.addNode(newNode)
 
-        assertEquals(1, node.getEntries().size)
-        assertEquals(mbr, node.getEntries().first().mbr)
+        assertEquals(1, node.entries.size)
+        assertEquals(mbr, node.entries.first().mbr)
     }
 
     @Test
@@ -63,8 +63,8 @@ class NodeTest {
         newNode.addEntry(Entry(storage, mbr, 123))
         node.addNode(newNode)
 
-        assertEquals(1, node.getEntries().size)
-        assertEquals(offset, node.getEntries().first().childOffset)
+        assertEquals(1, node.entries.size)
+        assertEquals(offset, node.entries.first().childOffset)
     }
 
     @Test
@@ -135,7 +135,7 @@ class NodeTest {
         val newEntry = Entry(storage, Rectangle(3, 4, 7, 6), 1)
 
         node.addEntry(newEntry)
-        assertEquals(newEntry, node.getEntries().last())
+        assertEquals(newEntry, node.entries.last())
     }
 
     @Test
@@ -197,7 +197,7 @@ class NodeTest {
     @Test
     fun should_be_leaf_node_if_have_no_entries() {
         val node = newNode(storage)
-        assertEquals(0, node.getEntries().size)
+        assertEquals(0, node.entries.size)
         assertTrue(node.isLeaf)
     }
 
@@ -220,10 +220,10 @@ class NodeTest {
             .addEntry(entry1)
             .addEntry(entry2)
         
-        assertEquals(listOf(entry1, entry2), node.getEntries())
+        assertEquals(listOf(entry1, entry2), node.entries)
         node.setEntries(listOf(entry3, entry4))
-        assertNotEquals(listOf(entry1, entry2), node.getEntries())
-        assertEquals(listOf(entry3, entry4), node.getEntries())
+        assertNotEquals(listOf(entry1, entry2), node.entries)
+        assertEquals(listOf(entry3, entry4), node.entries)
     }
 
     @Test

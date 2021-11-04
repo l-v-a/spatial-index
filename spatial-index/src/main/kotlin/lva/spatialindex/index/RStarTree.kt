@@ -22,7 +22,7 @@ class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
     }
 
     private fun search(node: Node, area: Rectangle): Sequence<Long> =
-        node.getEntries().asSequence()
+        node.entries.asSequence()
             .filter { entry ->
                 area.intersects(entry.mbr)
             }
@@ -81,8 +81,8 @@ class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
             return node
         }
 
-        var candidates = node.getEntries()
-        val isContainsLeaf = node.getEntries().firstOrNull()?.childNode?.isLeaf ?: false
+        var candidates: List<Entry> = node.entries
+        val isContainsLeaf = node.entries.firstOrNull()?.childNode?.isLeaf ?: false
 
         if (isContainsLeaf) {
             candidates = candidates.minList { it.mbr.intersection(newMbr).area } // by cost
@@ -100,7 +100,7 @@ class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
         }
 
         // distribute entries between nodes
-        val allEntries = node.getEntries() + newNode.getEntries()
+        val allEntries = node.entries + newNode.entries
 
         val groupsX = getDistributionGroups(allEntries, listOf(Entry::left, Entry::right))
         val groupsY = getDistributionGroups(allEntries, listOf(Entry::bottom, Entry::top))
@@ -120,7 +120,7 @@ class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
     }
 
     private fun syncMbr(targetNode: Node, sourceNode: Node) {
-        val targetEntry = targetNode.getEntries().firstOrNull { entry ->
+        val targetEntry = targetNode.entries.firstOrNull { entry ->
             entry.childNode?.offset == sourceNode.offset
         }
 

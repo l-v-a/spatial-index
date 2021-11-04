@@ -125,7 +125,7 @@ class NodeStorageTest {
             .thenReturn(serializedNode)
         val newNode = nodeStorage.read(offset)
 
-        assertEquals(newNode.getEntries(), node.getEntries())
+        assertEquals(newNode.entries, node.entries)
         assertEquals(newNode.parentOffset, node.parentOffset)
         assertEquals(newNode.offset, node.offset)
         assertEquals(newNode.isLeaf, node.isLeaf)
