@@ -20,7 +20,7 @@ internal class EntryKryoSerializer(private val storage: Storage<Node>) : Seriali
         writeLong(entry.childOffset)
     }
 
-    override fun read(kryo: Kryo, input: Input, type: Class<Entry>): Entry = with(input) {
+    override fun read(kryo: Kryo, input: Input, type: Class<out Entry>): Entry = with(input) {
         val x = readInt()
         val y = readInt()
         val width = readInt()
@@ -39,7 +39,7 @@ internal class NodeKryoSerializer(private val storage: Storage<Node>) : Serializ
         }
     }
 
-    override fun read(kryo: Kryo, input: Input, type: Class<Node>) = Node(storage, -1).apply {
+    override fun read(kryo: Kryo, input: Input, type: Class<out Node>) = Node(storage, -1).apply {
         parentOffset = input.readLong()
         val entriesSize = input.readInt()
         repeat(entriesSize) {

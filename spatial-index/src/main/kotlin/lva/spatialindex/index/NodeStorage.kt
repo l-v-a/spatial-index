@@ -24,6 +24,7 @@ internal class NodeStorage(storageSpace: StorageSpace, recordSize: Int = RECORD_
         private val kryo = Kryo()
 
         init {
+            kryo.isRegistrationRequired = false;
             kryo.addDefaultSerializer(Node::class.java, NodeKryoSerializer(this@NodeStorage))
             kryo.addDefaultSerializer(Entry::class.java, EntryKryoSerializer(this@NodeStorage))
         }
