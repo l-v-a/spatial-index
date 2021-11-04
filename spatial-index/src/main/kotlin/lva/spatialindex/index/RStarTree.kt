@@ -1,5 +1,6 @@
 package lva.spatialindex.index
 
+import arrow.core.getOrHandle
 import lva.spatialindex.index.Node.Companion.newNode
 import lva.spatialindex.storage.Storage
 import java.awt.Rectangle
@@ -29,7 +30,7 @@ class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
             .flatMap { entry ->
                 entry.data()
                     .map { value -> sequenceOf(-(value + 1)) }
-                    .getOrElseGet { childNode -> search(childNode, area) }
+                    .getOrHandle { childNode -> search(childNode, area) }
             }
 
     fun insert(offset: Long, newMbr: Rectangle) {

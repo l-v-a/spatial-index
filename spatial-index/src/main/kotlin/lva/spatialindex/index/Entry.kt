@@ -1,8 +1,9 @@
 package lva.spatialindex.index
 
-import io.vavr.control.Either
+import arrow.core.Either
 import lva.spatialindex.storage.Storage
 import java.awt.Rectangle
+
 
 /**
  * @author vlitvinenko
@@ -13,11 +14,11 @@ internal class Entry(private val storage: Storage<Node>, mbr: Rectangle, childOf
 
     var mbr: Rectangle by body::mbr
     val childOffset: Long by body::childOffset
-    val childNode: Node? get() = data().swap().getOrElseGet { null }
+    val childNode: Node? get() = data().swap().orNull()
     val isLeaf get() = childOffset < 0
 
-    fun data(): Either<Node, Long> = if (childOffset < 0)
-        Either.right(childOffset) else Either.left(storage.read(childOffset))
+    fun data(): Either<Node, Long> = if (childOffset >= 0)
+        Either.Left(storage.read(childOffset)) else Either.Right(childOffset)
 
     override fun equals(other: Any?) =
         if (other is Entry) body == other.body else false

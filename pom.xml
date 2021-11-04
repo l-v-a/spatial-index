@@ -15,6 +15,7 @@
         <kotlin.version>1.5.31</kotlin.version>
         <kotlin.coroutines.version>1.5.2</kotlin.coroutines.version>
         <kotlin.code.style>official</kotlin.code.style>
+        <arrow.version>1.0.0</arrow.version>
     </properties>
 
     <modules>
@@ -115,12 +116,6 @@
             </dependency>
 
             <dependency>
-                <groupId>io.vavr</groupId>
-                <artifactId>vavr</artifactId>
-                <version>0.10.2</version>
-            </dependency>
-
-            <dependency>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-test-junit</artifactId>
                 <version>${kotlin.version}</version>
@@ -130,6 +125,14 @@
                 <groupId>org.mockito.kotlin</groupId>
                 <artifactId>mockito-kotlin</artifactId>
                 <version>4.0.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.arrow-kt</groupId>
+                <artifactId>arrow-stack</artifactId>
+                <version>${arrow.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
         </dependencies>
