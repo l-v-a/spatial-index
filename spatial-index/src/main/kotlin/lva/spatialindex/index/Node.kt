@@ -36,9 +36,9 @@ internal class Node(private val storage: Storage<Node>, var offset: Long) {
         check(!isFull) { "Entries overflow" }
         entries.add(entry)
         resetMbr()
-        entry.childNode?.let { childNode ->
-            childNode.parentOffset = offset
-            childNode.save()
+        entry.childNode?.let { child ->
+            child.parentOffset = offset
+            child.save()
         }
     }
 
