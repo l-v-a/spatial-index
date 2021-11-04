@@ -12,8 +12,8 @@ internal class Node(private val storage: Storage<Node>, var offset: Long) {
     val isLeaf get() = entries.firstOrNull()?.isLeaf ?: true
     val isFull get() = entries.size >= MAX_ENTRIES
     var mbr: Rectangle = NULL_RECTANGLE
-        get() = when(field) {
-            NULL_RECTANGLE -> entries.union().also { field = it }
+        get() = when {
+            field === NULL_RECTANGLE -> entries.union().also { field = it }
             else -> field
         }
         private set
