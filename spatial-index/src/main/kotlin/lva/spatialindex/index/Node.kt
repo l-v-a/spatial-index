@@ -13,6 +13,7 @@ internal class Node(private val storage: Storage<Node>, var offset: Long) {
     val isLeaf get() = entries.firstOrNull()?.isLeaf ?: true
     val isFull get() = entries.size >= MAX_ENTRIES
     var mbr: Rectangle by resettableWith(NULL_RECTANGLE) { entries.union() }
+        private set
 
     fun resetMbr(): Node = apply {
         mbr = NULL_RECTANGLE
