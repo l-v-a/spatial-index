@@ -10,32 +10,29 @@ import java.nio.file.Path
  * @author vlitvinenko
  */
 internal class Segment(private val filePath: Path, capacity: Int) {
-    private val dataTLS: ThreadLocal<ByteBuffer>
+    private val mappedBuffer: ThreadLocal<ByteBuffer>
     val capacity: Int = roundToPage(capacity)
     var size: Int = 0
         private set
 
     init {
         val data = mapBackingFile(filePath, this.capacity.toLong())
-        dataTLS = ThreadLocal.withInitial { data.duplicate() }
+        mappedBuffer = ThreadLocal.withInitial { data.duplicate() }
     }
 
     fun readBytes(pos: Int, bytes: ByteArray) {
-        dataTLS.get().position(pos).get(bytes)
+        mappedBuffer.get().position(pos).get(bytes)
     }
 
     fun writeBytes(pos: Int, bytes: ByteArray) {
-        dataTLS.get().position(pos).put(bytes)
+        mappedBuffer.get().position(pos).put(bytes)
     }
 
     fun allocate(sizeOf: Int): Int {
         check(size + sizeOf <= capacity) {
             "Out of segment space. capacity: $capacity, size: $size, sizeOf: $sizeOf"
         }
-
-        val offset = size
-        size += sizeOf
-        return offset
+        return size.also { size += sizeOf }
     }
 
     fun remove() =
