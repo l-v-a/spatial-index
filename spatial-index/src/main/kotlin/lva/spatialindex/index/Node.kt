@@ -1,6 +1,7 @@
 package lva.spatialindex.index
 
 import lva.spatialindex.storage.Storage
+import lva.spatialindex.utils.resettableWith
 import java.awt.Rectangle
 
 /**
@@ -11,14 +12,11 @@ internal class Node(private val storage: Storage<Node>, var offset: Long) {
     var parentOffset: Long = -1
     val isLeaf get() = entries.firstOrNull()?.isLeaf ?: true
     val isFull get() = entries.size >= MAX_ENTRIES
-    var mbr: Rectangle = NULL_RECTANGLE
-        get() = when {
-            field === NULL_RECTANGLE -> entries.union().also { field = it }
-            else -> field
-        }
-        private set
+    var mbr: Rectangle by resettableWith(NULL_RECTANGLE) { entries.union() }
 
-    fun resetMbr(): Node = apply { mbr = NULL_RECTANGLE }
+    fun resetMbr(): Node = apply {
+        mbr = NULL_RECTANGLE
+    }
 
     fun addNode(node: Node): Node =
         addEntry(Entry(storage, node.mbr, node.offset))
