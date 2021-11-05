@@ -12,9 +12,9 @@ internal class Entry(private val storage: Storage<Node>, mbr: Rectangle, childOf
     private data class Body(var mbr: Rectangle, val childOffset: Long)
     private val body = Body(mbr, childOffset)
 
-    var mbr: Rectangle by body::mbr
-    val childOffset: Long by body::childOffset
-    val childNode: Node? get() = data().swap().orNull()
+    var mbr by body::mbr
+    val childOffset by body::childOffset
+    val childNode get() = data().swap().orNull()
     val isLeaf get() = childOffset < 0
 
     fun data(): Either<Node, Long> = if (childOffset >= 0)

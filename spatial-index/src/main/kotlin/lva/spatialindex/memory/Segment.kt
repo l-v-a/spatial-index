@@ -11,8 +11,8 @@ import java.nio.file.Path
  */
 internal class Segment(private val filePath: Path, capacity: Int) {
     private val mappedBuffer: ThreadLocal<ByteBuffer>
-    val capacity: Int = roundToPage(capacity)
-    var size: Int = 0
+    val capacity = roundToPage(capacity)
+    var size = 0
         private set
 
     init {

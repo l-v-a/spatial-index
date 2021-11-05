@@ -2,7 +2,6 @@ package lva.spatialindex.index
 
 import arrow.core.getOrHandle
 import lva.spatialindex.index.Node.Companion.newNode
-import lva.spatialindex.storage.Storage
 import java.awt.Rectangle
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
@@ -12,7 +11,7 @@ import kotlin.concurrent.write
  * @author vlitvinenko
  */
 class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
-    private val storage: Storage<Node> = NodeStorage(storageFileName, SIZE_DEFAULT) // TODO: move out creation
+    private val storage = NodeStorage(storageFileName, SIZE_DEFAULT) // TODO: move out creation
     private val lock = ReentrantReadWriteLock()
     private var root: Node = newNode(storage)
 

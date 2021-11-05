@@ -8,11 +8,11 @@ import java.awt.Rectangle
  * @author vlitvinenko
  */
 internal class Node(private val storage: Storage<Node>, var offset: Long) {
-    val entries: MutableList<Entry> = mutableListOf()
-    var parentOffset: Long = -1
+    val entries = mutableListOf<Entry>()
+    var parentOffset = -1L
     val isLeaf get() = entries.firstOrNull()?.isLeaf ?: true
     val isFull get() = entries.size >= MAX_ENTRIES
-    var mbr: Rectangle by resettableWith(NULL_RECTANGLE) { entries.union() }
+    var mbr by resettableWith(NULL_RECTANGLE) { entries.union() }
         private set
 
     fun resetMbr(): Node = apply {
