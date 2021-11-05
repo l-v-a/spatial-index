@@ -27,7 +27,7 @@ class RStarTree(maxNumberOfElements: Int, storageFileName: String) : Index {
                 area.intersects(entry.mbr)
             }
             .flatMap { entry ->
-                entry.data()
+                entry.data
                     .map { value -> sequenceOf(-(value + 1)) }
                     .getOrHandle { childNode -> search(childNode, area) }
             }

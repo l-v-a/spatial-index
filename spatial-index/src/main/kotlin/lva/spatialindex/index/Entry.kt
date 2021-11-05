@@ -14,10 +14,9 @@ internal class Entry(private val storage: Storage<Node>, mbr: Rectangle, childOf
 
     var mbr by body::mbr
     val childOffset by body::childOffset
-    val childNode get() = data().swap().orNull()
+    val childNode get() = data.swap().orNull()
     val isLeaf get() = childOffset < 0
-
-    fun data(): Either<Node, Long> = if (childOffset >= 0)
+    val data: Either<Node, Long> get() = if (childOffset >= 0)
         Either.Left(storage.read(childOffset)) else Either.Right(childOffset)
 
     override fun equals(other: Any?) =
